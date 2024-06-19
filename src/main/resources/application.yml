@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: trip
+  profiles:
+    active: local
+    group:
+      local: local, common
+      blue: blue, common
+      green: green, common
+
+server:
+  env: blue
+
+
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+server:
+  port: 8080
+  serverAddress: localhost:8080
+
+
+serverName: local_server
+
+
+
+
+---
+#blue서버 실제 운영서버
+spring:
+  config:
+    activate:
+      on-profile: blue
+
+server:
+  port: 8080
+  serverAddress: 43.203.13.25 #탄력적 ip >> 소셜로그인 설정을 blue green 각각 넣어줘야함
+
+
+serverName: blue_server
+
+
+
+---
+#green서버 blue 서버 버전업 중에 무중단을 위해 대신 가동될 서버
+spring:
+  config:
+    activate:
+      on-profile: green
+
+server:
+  port: 8081
+  serverAddress: 43.203.13.25
+
+
+serverName: green_server
+---
+#local, blue, green 공통으로 사용하는 설정값
+spring:
+  config:
+    activate:
+      on-profile: common
