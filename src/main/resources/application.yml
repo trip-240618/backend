@@ -4,9 +4,9 @@ spring:
   profiles:
     active: local
     group:
-      local: local, secret
-      blue: blue, common_prod
-      green: green, common_prod
+      local: local, secret_dev, common
+      blue: blue, secret_prod, common
+      green: green, secret_prod, common
 
 server:
   env: blue
@@ -64,15 +64,10 @@ serverName: green_server
 spring:
   config:
     activate:
-      on-profile: common_prod
-  datasource:
-    url: jdbc:mysql://${DB_ENDPOINT}:3306/${DB_NAME}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+      on-profile: common
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
