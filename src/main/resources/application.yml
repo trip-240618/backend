@@ -80,6 +80,7 @@ spring:
             client-name: Kakao
             authorization-grant-type: authorization_code
             redirect-uri: 'http://${server.serverAddress}/{action}/oauth2/code/{registrationId}'
+            client-authentication-method: client_secret_post
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize

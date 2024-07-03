@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.dto.UserRegisterDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
@@ -31,6 +32,11 @@ public class UserService {
 
 		return userRepository.save(user);
 	}
+
+	public UserInfoDto findUserByUuid(String uuid) {
+		return userRepository.findByUuid(uuid);
+	}
+
 
 	public String generateUUID() {
 		return UUID.randomUUID().toString();
