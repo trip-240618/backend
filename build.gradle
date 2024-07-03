@@ -52,9 +52,13 @@ dependencies {
     //mysql
     runtimeOnly 'com.mysql:mysql-connector-j'
 
-    //spring security
+    //oauth2
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    //security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'
+    //implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
 }
 
