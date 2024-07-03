@@ -9,7 +9,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class SocialLoginDto {
 	private String providerTypeCode;
-	private String profileImageUrl;
 	private String providerId;
+	private String password;
 	private String nickname;
+	private String profileImageUrl;
 }

@@ -18,7 +18,5 @@ public class UserRegisterDto {
 
 	private String profileImg;
 
-	private String status;
-
 	private String provider;
 }

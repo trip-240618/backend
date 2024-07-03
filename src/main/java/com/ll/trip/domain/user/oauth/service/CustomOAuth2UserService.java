@@ -26,70 +26,71 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
-    private final UserRepository userRepository;
-    private final UserService userService;
+	private final UserRepository userRepository;
+	private final UserService userService;
 
-    // 카카오톡 로그인이 성공할 때 마다 이 함수가 실행된다.
-    @Override
-    @Transactional
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = super.loadUser(userRequest);
+	// 카카오톡 로그인이 성공할 때 마다 이 함수가 실행된다.
+	@Override
+	@Transactional
+	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+		OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        String providerTypeCode = userRequest.getClientRegistration().getRegistrationId().toUpperCase();
+		String providerTypeCode = userRequest.getClientRegistration().getRegistrationId().toUpperCase();
 
-        SocialLoginDto socialLoginDto = null;
+		SocialLoginDto socialLoginDto = null;
 
-        switch (providerTypeCode) {
-            case "KAKAO" :
-                socialLoginDto = extractKakaoData(providerTypeCode, oAuth2User);
-                break;
-        }
+		switch (providerTypeCode) {
+			case "KAKAO":
+				socialLoginDto = extractKakaoData(providerTypeCode, oAuth2User);
+				break;
+		}
 
-        UserEntity user = whenSocialLogin(socialLoginDto);
+		UserEntity user = whenSocialLogin(socialLoginDto);
 
-        return new com.ll.trip.global.security.SecurityUser(
-                user.getId(),
-                user.getName(),
-                user.getProfileImg(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRoles()))
-                );
-    }
+		return new com.ll.trip.global.security.SecurityUser(
+			user.getId(),
+			user.getName(),
+			user.getProviderId(),
+			user.getPassword(),
+			user.getProfileImg(),
+			Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRoles()))
+		);
+	}
 
-    //카카오 데이터 추출
-    public SocialLoginDto extractKakaoData(String providerTypeCode, OAuth2User oAuth2User) {
-        String oauthId = oAuth2User.getName();
-        Map<String, Object> attributes = oAuth2User.getAttributes();
-        Map attributesProperties = (Map) attributes.get("properties");
+	//카카오 데이터 추출
+	public SocialLoginDto extractKakaoData(String providerTypeCode, OAuth2User oAuth2User) {
+		String oauthId = oAuth2User.getName();
+		Map<String, Object> attributes = oAuth2User.getAttributes();
+		Map attributesProperties = (Map)attributes.get("properties");
 
-        String nickname = (String) attributesProperties.get("nickname");
-        String profileImageUrl = (String) attributesProperties.get("profile_image");
-        String providerId = providerTypeCode + "__" + oauthId;
+		String nickname = (String)attributesProperties.get("nickname");
+		String password = oauthId;
+		String profileImageUrl = (String)attributesProperties.get("profile_image");
+		String providerId = providerTypeCode + "__" + oauthId;
 
-        return new SocialLoginDto(providerTypeCode, profileImageUrl, providerId, nickname);
-    }
+		return new SocialLoginDto(providerTypeCode, providerId, password, nickname, profileImageUrl);
+	}
 
-    @Transactional
-    public UserEntity whenSocialLogin(SocialLoginDto socialLoginDto) {
-        Optional<UserEntity> optUser = findByProviderId(socialLoginDto.getProviderId());
+	@Transactional
+	public UserEntity whenSocialLogin(SocialLoginDto socialLoginDto) {
+		Optional<UserEntity> optUser = findByProviderId(socialLoginDto.getProviderId());
 
-        if (optUser.isPresent()) return optUser.get();
+		if (optUser.isPresent())
+			return optUser.get();
 
-        //SocialLoginDto to MemberRegisterDto
-        UserRegisterDto registerDto = new UserRegisterDto(
-            socialLoginDto.getNickname(),
-            socialLoginDto.getProviderId(),
+		UserRegisterDto registerDto = new UserRegisterDto(
+			socialLoginDto.getNickname(),
+			socialLoginDto.getProviderId(),
+			socialLoginDto.getPassword(),
+			socialLoginDto.getProfileImageUrl(),
+			socialLoginDto.getProviderTypeCode()
+		);
 
-            socialLoginDto.getProfileImageUrl(),
-            socialLoginDto.getProviderId(),
-            "incomplete",
-            socialLoginDto.getProviderTypeCode()
-        );
+		return userService.register(registerDto);
+	}
 
-        return userService.register(registerDto);
-    }
-
-    public Optional<UserEntity> findByProviderId(String providerId) {
-        return userRepository.findByProviderId(providerId);
-    }
+	public Optional<UserEntity> findByProviderId(String providerId) {
+		return userRepository.findByProviderId(providerId);
+	}
 }
 
