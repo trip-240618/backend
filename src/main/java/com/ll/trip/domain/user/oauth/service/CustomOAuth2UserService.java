@@ -17,6 +17,7 @@ import com.ll.trip.domain.user.user.dto.UserRegisterDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
 import com.ll.trip.domain.user.user.service.UserService;
+import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 		UserEntity user = whenSocialLogin(socialLoginDto);
 
-		return new com.ll.trip.global.security.SecurityUser(
+		return new SecurityUser(
 			user.getId(),
 			user.getName(),
 			user.getProviderId(),

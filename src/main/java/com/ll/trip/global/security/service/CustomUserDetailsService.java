@@ -1,4 +1,4 @@
-package com.ll.feelko.global.security;
+package com.ll.trip.global.security.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
+import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,7 +38,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 			authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
 		}
 
-		return new com.ll.trip.global.security.SecurityUser(
+		return new SecurityUser(
 			user.getId(),
 			user.getName(),
 			user.getProviderId(),

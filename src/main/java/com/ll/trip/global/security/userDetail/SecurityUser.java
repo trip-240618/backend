@@ -1,4 +1,4 @@
-package com.ll.trip.global.security;
+package com.ll.trip.global.security.userDetail;
 
 import java.util.Collection;
 import java.util.Map;
