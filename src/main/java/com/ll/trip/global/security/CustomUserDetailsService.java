@@ -21,29 +21,29 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CustomUserDetailsService implements UserDetailsService {
-    private final UserRepository userRepository;
+	private final UserRepository userRepository;
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<UserEntity> opUser = userRepository.findByProviderId(username);
-        if(opUser.isEmpty()){
-            throw new UsernameNotFoundException("사용자를 찾을 수 없습니다.");
-        }
-        UserEntity user = opUser.get();
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		Optional<UserEntity> opUser = userRepository.findByProviderId(username);
+		if (opUser.isEmpty()) {
+			throw new UsernameNotFoundException("사용자를 찾을 수 없습니다.");
+		}
+		UserEntity user = opUser.get();
 
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
-        if("admin".equals(username)){
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        }
+		List<GrantedAuthority> authorities = new ArrayList<>();
+		authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
+		if ("admin".equals(username)) {
+			authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+		}
 
-        return new com.ll.trip.global.security.SecurityUser(
-                user.getId(),
-                user.getName(),
-                user.getOauthId(),
-                user.getProfileImg(),
-                user.getPassword(),
-                user.getAuthorities()
-        );
-    }
+		return new com.ll.trip.global.security.SecurityUser(
+			user.getId(),
+			user.getName(),
+			user.getProviderId(),
+			user.getPassword(),
+			user.getProfileImg(),
+			user.getAuthorities()
+		);
+	}
 }

@@ -8,7 +8,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class SocialLoginDto {
-
 	private String providerTypeCode;
 	private String profileImageUrl;
 	private String providerId;

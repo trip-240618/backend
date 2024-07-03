@@ -16,6 +16,7 @@ import com.ll.trip.domain.user.oauth.dto.SocialLoginDto;
 import com.ll.trip.domain.user.user.dto.UserRegisterDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
+import com.ll.trip.domain.user.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
+    private final UserService userService;
 
     // 카카오톡 로그인이 성공할 때 마다 이 함수가 실행된다.
     @Override
@@ -74,17 +76,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         //SocialLoginDto to MemberRegisterDto
         UserRegisterDto registerDto = new UserRegisterDto(
-            socialLoginDto.getProviderId(), //비밀번호 수정예정
             socialLoginDto.getNickname(),
+            socialLoginDto.getProviderId(),
+
             socialLoginDto.getProfileImageUrl(),
-            null,
-            null,
             socialLoginDto.getProviderId(),
             "incomplete",
             socialLoginDto.getProviderTypeCode()
         );
 
-        return register(registerDto);
+        return userService.register(registerDto);
     }
 
     public Optional<UserEntity> findByProviderId(String providerId) {

@@ -46,8 +46,8 @@ public class UserEntity {
 	private LocalDateTime modifyDate;
 
 	private String name;
+	private String providerId;
 	private String password;
-	private String oauthId;
 	private String uuid;
 	private String profileImg;
 	private String roles;
