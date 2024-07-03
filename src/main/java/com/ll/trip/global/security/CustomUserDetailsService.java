@@ -1,8 +1,9 @@
 package com.ll.feelko.global.security;
 
-import com.ll.feelko.domain.member.dao.MemberRepository;
-import com.ll.feelko.domain.member.entity.Member;
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,23 +12,24 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.domain.user.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CustomUserDetailsService implements UserDetailsService {
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Member> opMember = memberRepository.findByEmail(username);
-        if(opMember.isEmpty()){
+        Optional<UserEntity> opUser = userRepository.findByProviderId(username);
+        if(opUser.isEmpty()){
             throw new UsernameNotFoundException("사용자를 찾을 수 없습니다.");
         }
-        Member member = opMember.get();
+        UserEntity user = opUser.get();
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
@@ -35,14 +37,13 @@ public class CustomUserDetailsService implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
 
-        return new SecurityUser(
-                member.getId(),
-                member.getName(),
-                member.getEmail(),
-                member.getPassword(),
-                member.getProfile(),
-                member.getAuthorities(),
-                member.getStatus()
+        return new com.ll.trip.global.security.SecurityUser(
+                user.getId(),
+                user.getName(),
+                user.getOauthId(),
+                user.getProfileImg(),
+                user.getPassword(),
+                user.getAuthorities()
         );
     }
 }

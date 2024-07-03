@@ -1,12 +1,13 @@
-package com.ll.feelko.global.security;
+package com.ll.trip.global.security;
 
-import lombok.Getter;
+import java.util.Collection;
+import java.util.Map;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.util.Collection;
-import java.util.Map;
+import lombok.Getter;
 
 @Getter
 public class SecurityUser extends User implements OAuth2User {
@@ -17,22 +18,18 @@ public class SecurityUser extends User implements OAuth2User {
 
     private String profileImage;
 
-    private String status;
-
-    public SecurityUser(long id, String name, String username, String password, String profileImage, Collection<? extends GrantedAuthority> authorities, String status) {
+    public SecurityUser(Long id, String name, String username, String password, String profileImage, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
         this.id = id;
         this.name = name;
         this.profileImage = profileImage;
-        this.status = status;
     }
 
-    public SecurityUser(long id, String name, String username, String password, String profileImage, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities, String status) {
+    public SecurityUser(long id, String name, String username, String password, String profileImage, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.id = id;
         this.name = name;
         this.profileImage = profileImage;
-        this.status = status;
     }
 
     @Override

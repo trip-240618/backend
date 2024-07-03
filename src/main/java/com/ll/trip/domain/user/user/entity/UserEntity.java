@@ -1,9 +1,14 @@
 package com.ll.trip.domain.user.user.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -41,6 +46,21 @@ public class UserEntity {
 	private LocalDateTime modifyDate;
 
 	private String name;
+	private String password;
 	private String oauthId;
 	private String uuid;
+	private String profileImg;
+	private String roles;
+
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		List<GrantedAuthority> authorities = new ArrayList<>();
+
+		authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
+
+		if (List.of("admin").contains(roles)) {
+			authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+		}
+
+		return authorities;
+	}
 }

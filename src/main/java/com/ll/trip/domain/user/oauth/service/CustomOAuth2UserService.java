@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.user.oauth.dto.SocialLoginDto;
+import com.ll.trip.domain.user.user.dto.UserRegisterDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.domain.user.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
-    private final MemberService memberService;
+    private final UserRepository userRepository;
 
     // 카카오톡 로그인이 성공할 때 마다 이 함수가 실행된다.
     @Override
@@ -41,16 +43,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 break;
         }
 
-        Member member = memberService.whenSocialLogin(socialLoginDto);
+        UserEntity user = whenSocialLogin(socialLoginDto);
 
-        return new com.ll.feelko.global.security.SecurityUser(
-                member.getId(),
-                member.getName(),
-                member.getEmail(),
-                member.getPassword(),
-                member.getProfile(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + member.getRoles())),
-                member.getStatus()
+        return new com.ll.trip.global.security.SecurityUser(
+                user.getId(),
+                user.getName(),
+                user.getProfileImg(),
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRoles()))
                 );
     }
 
@@ -71,11 +70,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public UserEntity whenSocialLogin(SocialLoginDto socialLoginDto) {
         Optional<UserEntity> optUser = findByProviderId(socialLoginDto.getProviderId());
 
-        if (optMember.isPresent()) return optMember.get();
+        if (optUser.isPresent()) return optUser.get();
 
         //SocialLoginDto to MemberRegisterDto
-        MemberRegisterDto registerDto = new MemberRegisterDto(
-            socialLoginDto.getEmail(),
+        UserRegisterDto registerDto = new UserRegisterDto(
             socialLoginDto.getProviderId(), //비밀번호 수정예정
             socialLoginDto.getNickname(),
             socialLoginDto.getProfileImageUrl(),
@@ -87,6 +85,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         );
 
         return register(registerDto);
+    }
+
+    public Optional<UserEntity> findByProviderId(String providerId) {
+        return userRepository.findByProviderId(providerId);
     }
 }
 

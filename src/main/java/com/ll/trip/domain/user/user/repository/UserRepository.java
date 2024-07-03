@@ -1,4 +1,12 @@
 package com.ll.trip.domain.user.user.repository;
 
-public interface UserRepository {
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.ll.trip.domain.user.user.entity.UserEntity;
+
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
+
+	Optional<UserEntity> findByProviderId(String providerId);
 }
