@@ -1,4 +1,4 @@
-package com.ll.trip.domain.user.entity;
+package com.ll.trip.domain.user.user.entity;
 
 import java.time.LocalDateTime;
 
