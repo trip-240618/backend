@@ -10,22 +10,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserInfoDto {
-	private Long id;
 	private String name;
 	private String profileImg;
 
-	public static UserInfoDto from(UserEntity user) {
-		return new UserInfoDto(
-			user.getId(),
-			user.getName(),
-			user.getProfileImg()
-		);
-	}
-
-	public UserEntity toEntity() {
-		return UserEntity.builder()
-			.name(this.name)
-			.profileImg(this.profileImg)
-			.build();
+	public UserInfoDto(UserEntity user) {
+		this.name = user.getName();
+		this.profileImg = user.getProfileImg();
 	}
 }

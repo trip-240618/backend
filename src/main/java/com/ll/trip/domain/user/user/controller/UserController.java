@@ -1,5 +1,7 @@
 package com.ll.trip.domain.user.user.controller;
 
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,9 +36,16 @@ public class UserController {
 	}
 
 	@GetMapping("/info")
-	public ResponseEntity<UserInfoDto> getUserInfo(@AuthenticationPrincipal SecurityUser securityUser) {
+	public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal SecurityUser securityUser) {
 		log.info(securityUser.getUsername());
-		UserInfoDto userInfoDto = userService.findUserByUuid(securityUser.getUuid());
+		Optional<UserEntity> user = userService.findUserByUuid(securityUser.getUuid());
+
+		if(user.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		UserInfoDto userInfoDto = new UserInfoDto(user.get());
+
 		return ResponseEntity.ok(userInfoDto);
 	}
 

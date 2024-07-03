@@ -1,11 +1,11 @@
 package com.ll.trip.domain.user.user.service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.dto.UserRegisterDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
@@ -33,7 +33,7 @@ public class UserService {
 		return userRepository.save(user);
 	}
 
-	public UserInfoDto findUserByUuid(String uuid) {
+	public Optional<UserEntity> findUserByUuid(String uuid) {
 		return userRepository.findByUuid(uuid);
 	}
 
