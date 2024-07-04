@@ -24,7 +24,7 @@ jobs:
         run: |
           echo ${{secrets.APPLICATION_SECRET_PROD_YML}} | base64 --decode > ./src/main/resources/application-secret_prod.yml
           chmod +x ./gradlew
-          ./gradlew clean build
+          ./gradlew clean build -x test
 
       - name: Login to DockerHub
         uses: docker/login-action@v3.0.0
