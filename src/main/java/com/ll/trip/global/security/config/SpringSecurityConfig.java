@@ -36,7 +36,8 @@ public class SpringSecurityConfig {
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.authorizeHttpRequests(a -> a
 				.requestMatchers(
-					"/user/oauth2/**"
+					"/user/oauth2/**",
+					"/env"
 				).permitAll()
 				.anyRequest().authenticated()
 			)
