@@ -1,4 +1,4 @@
-package com.ll.trip.domain.user.user.jwt;
+package com.ll.trip.domain.user.jwt;
 
 import java.util.Date;
 import java.util.List;
@@ -34,18 +34,18 @@ public class JwtTokenUtil {
 
     private final UserDetailsServiceImpl userDetailsService;
 
-    public String createRefreshToken(String email, List<String> roles) {
+    public String createRefreshToken(String uuid, List<String> roles) {
         //TODO claim 최신화
-        return getString(email, roles, refreshTokenValidityInMilliseconds);
+        return getString(uuid, roles, refreshTokenValidityInMilliseconds);
     }
 
-    public String createAccessToken(String email, List<String> roles) {
+    public String createAccessToken(String uuid, List<String> roles) {
 
-        return getString(email, roles, accessTokenValidityInMilliseconds);
+        return getString(uuid, roles, accessTokenValidityInMilliseconds);
     }
 
-    private String getString(String email, List<String> roles, long refreshTokenValidityInMilliseconds) {
-        Claims claims = Jwts.claims().setSubject(email);
+    private String getString(String uuid, List<String> roles, long refreshTokenValidityInMilliseconds) {
+        Claims claims = Jwts.claims().setSubject(uuid);
         claims.put("roles", roles);
 
         Date now = new Date();
@@ -62,11 +62,11 @@ public class JwtTokenUtil {
 
 
     public Authentication getAuthentication(String token, String secretKey) {
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(getEmail(token));
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUuid(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    public String getEmail(String token) {
+    public String getUuid(String token) {
         return Jwts.parser().setSigningKey(tokenSecret).parseClaimsJws(token).getBody().getSubject();
     }
 

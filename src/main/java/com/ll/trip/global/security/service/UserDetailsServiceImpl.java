@@ -26,7 +26,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			user.getUuid(),
 			user.getName(),
 			user.getProviderId(),
-			user.getPassword(),
 			user.getProfileImg(),
 			user.getAuthorities()
 		);

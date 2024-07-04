@@ -12,8 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.ll.trip.domain.user.user.jwt.JwtAuthenticationFilter;
-import com.ll.trip.domain.user.user.jwt.JwtTokenUtil;
+import com.ll.trip.domain.user.jwt.JwtAuthenticationFilter;
+import com.ll.trip.domain.user.jwt.JwtTokenUtil;
 import com.ll.trip.global.security.service.UserDetailsServiceImpl;
 
 import lombok.RequiredArgsConstructor;
@@ -36,15 +36,15 @@ public class SpringSecurityConfig {
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.authorizeHttpRequests(a -> a
 				.requestMatchers(
-					"/**"
+					"/user/oauth2/**"
 				).permitAll()
 				.anyRequest().authenticated()
 			)
 			// 아래는 테스트용 모바일에서 구동되면 지우기
 			.oauth2Login(oauth2Login ->
 				oauth2Login
-					.defaultSuccessUrl("api/user/loginSuccess")
-					.failureUrl("api/user/loginFailure")
+					.defaultSuccessUrl("/user/loginSuccess")
+					.failureUrl("/user/loginFailure")
 			);
 		return http.build();
 	}

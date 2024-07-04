@@ -1,4 +1,4 @@
-package com.ll.trip.domain.user.user.jwt;
+package com.ll.trip.domain.user.jwt;
 
 import java.io.IOException;
 import java.util.List;
@@ -42,11 +42,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (JwtException ex) {
             if (refreshToken != null && jwtTokenUtil.validateToken(refreshToken)) {
-                String email = jwtTokenUtil.getEmail(refreshToken);
-                String newAccessToken = jwtTokenUtil.createAccessToken(email, List.of("USER"));
+                String uuid = jwtTokenUtil.getUuid(refreshToken);
+                String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
                 ResponseCookie newAccessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)
                         .httpOnly(true)
-                        .domain(".lionshop.me")
                         .path("/")
                         .secure(true)
                         .build();
