@@ -43,12 +43,14 @@ public class UserService {
 			.httpOnly(true)
 			.path("/")
 			.secure(true)
+			.sameSite("None")
 			.build();
 
 		ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
 			.httpOnly(true)
 			.path("/")
 			.secure(true)
+			.sameSite("None")
 			.build();
 
 		response.addHeader("Set-Cookie", accessTokenCookie.toString());
