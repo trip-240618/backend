@@ -76,11 +76,15 @@ spring:
       client:
         registration:
           kakao:
-            scope: profile_nickname, profile_image
             client-name: Kakao
             authorization-grant-type: authorization_code
-            redirect-uri: 'http://${server.serverAddress}/{action}/oauth2/code/{registrationId}'
-            client-authentication-method: client_secret_post
+            #TODO 나중에 모바일앱 redirect-uri로 바꿔야함 (카카오에서 사용자에게 카카오로그인을 요청할 uri)
+            redirect-uri: 'http://${server.serverAddress}/login/oauth2/code/kakao'
+            client-authentication-method: POST
+            scope:
+              - profile_nickname
+              - profile_image
+
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize

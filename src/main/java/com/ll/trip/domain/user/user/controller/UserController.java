@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api/users")
+@RequestMapping("api/user")
 public class UserController {
 
 	private final UserService userService;
@@ -40,7 +40,7 @@ public class UserController {
 		log.info(securityUser.getUsername());
 		Optional<UserEntity> user = userService.findUserByUuid(securityUser.getUuid());
 
-		if(user.isEmpty()) {
+		if (user.isEmpty()) {
 			return ResponseEntity.notFound().build();
 		}
 
@@ -49,5 +49,16 @@ public class UserController {
 		return ResponseEntity.ok(userInfoDto);
 	}
 
+	@GetMapping("/loginSuccess")
+	public String loginSuccess() {
+		// 로그인 성공 후 처리 로직
+		return "loginSuccess";
+	}
+
+	@GetMapping("/loginFailure")
+	public String loginFailure() {
+		// 로그인 실패 후 처리 로직
+		return "loginFailure";
+	}
 
 }

@@ -35,6 +35,16 @@ public class JwtTokenUtil {
     private final UserDetailsServiceImpl userDetailsService;
 
     public String createRefreshToken(String email, List<String> roles) {
+        //TODO claim 최신화
+        return getString(email, roles, refreshTokenValidityInMilliseconds);
+    }
+
+    public String createAccessToken(String email, List<String> roles) {
+
+        return getString(email, roles, accessTokenValidityInMilliseconds);
+    }
+
+    private String getString(String email, List<String> roles, long refreshTokenValidityInMilliseconds) {
         Claims claims = Jwts.claims().setSubject(email);
         claims.put("roles", roles);
 
@@ -49,22 +59,6 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-
-    public String createAccessToken(String email, List<String> roles) {
-
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("roles", roles);
-
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + accessTokenValidityInMilliseconds);
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(validity)
-                .signWith(SignatureAlgorithm.HS256, tokenSecret)
-                .compact();
-    }
 
 
     public Authentication getAuthentication(String token, String secretKey) {
