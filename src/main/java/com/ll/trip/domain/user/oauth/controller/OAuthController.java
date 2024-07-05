@@ -27,13 +27,14 @@ public class OAuthController {
 	public Mono<ResponseEntity<?>> handleOAuth2Callback(@RequestParam String code, HttpServletResponse response) {
 		log.info("code = {}", code);
 
-		return kakaoOAuth2Service.getToken(code)
-			.flatMap(token -> {
-				String accessToken = token.getAccess_token();
-				log.info("accessToken : {}", accessToken);
-
-				return kakaoOAuth2Service.getUserInfo(accessToken);
-			})
+		return kakaoOAuth2Service.getUserInfo(code)
+			// return kakaoOAuth2Service.getToken(code)
+			// 	.flatMap(token -> {
+			// 		String accessToken = token.getAccess_token();
+			// 		log.info("accessToken : {}", accessToken);
+			//
+			// 		return kakaoOAuth2Service.getUserInfo(accessToken);
+			// 	})
 			.map(userInfo -> {
 				KakaoPropertiesDto properties = userInfo.getProperties();
 
