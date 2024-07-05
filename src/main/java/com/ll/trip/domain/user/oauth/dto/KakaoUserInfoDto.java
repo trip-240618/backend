@@ -13,5 +13,7 @@ public class KakaoUserInfoDto {
 
     private KakaoPropertiesDto properties;
 
+
+
     private Map<String, Object> kakao_account;
 }
