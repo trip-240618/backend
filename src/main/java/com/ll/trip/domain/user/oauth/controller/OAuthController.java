@@ -40,7 +40,7 @@ public class OAuthController {
 				String profileImageUrl = properties.getThumbnail_image();
 
 				kakaoOAuth2Service.registerUser(oauthId, properties, response);
-
+				log.info("name : {}", properties.getNickname());
 				log.info("oauthId : {}", oauthId);
 				log.info("profileImageUrl : {}", profileImageUrl);
 
