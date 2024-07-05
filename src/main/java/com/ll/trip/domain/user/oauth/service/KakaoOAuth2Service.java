@@ -60,7 +60,7 @@ public class KakaoOAuth2Service {
 			.next(); // Flux 스트림의 첫 번째 항목을 반환
 	}
 
-	public void registerUser(Long oauthId, KakaoPropertiesDto properties, HttpServletResponse response) {
+	public Mono<Void> registerUser(Long oauthId, KakaoPropertiesDto properties, HttpServletResponse response) {
 		String profileImageUrl = properties.getProfile_image();
 		String providerId = "KAKAO" + oauthId;
 		Optional<UserEntity> optUser = userRepository.findByProviderId(providerId);
@@ -98,5 +98,6 @@ public class KakaoOAuth2Service {
 
 		userService.setTokenInCookie(newAccessToken, refreshToken, response);
 
+		return Mono.empty();
 	}
 }
