@@ -44,10 +44,10 @@ jobs:
 
       - name: Set target IP
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "https://${{ secrets.TRIP_PROD_IP }}/env")
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "https://trip-story.site/env")
           echo $STATUS
           if [ $STATUS = 200 ]; then
-            CURRENT_UPSTREAM=$(curl -s "https://${{ secrets.TRIP_PROD_IP }}/env")
+            CURRENT_UPSTREAM=$(curl -s "https://trip-story.site/env")
           else
             CURRENT_UPSTREAM=green
           fi
