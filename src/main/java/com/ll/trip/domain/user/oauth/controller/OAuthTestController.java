@@ -1,10 +1,13 @@
 package com.ll.trip.domain.user.oauth.controller;
 
+import java.net.URI;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.ll.trip.domain.user.oauth.dto.KakaoPropertiesDto;
 import com.ll.trip.domain.user.oauth.service.KakaoOAuth2Service;
@@ -36,7 +39,7 @@ public class OAuthTestController {
 	}
 
 	@GetMapping("/callback/kakao")
-	public Mono<String> handleOAuth2Callback(@RequestParam String code, HttpServletResponse response) {
+	public Mono<ServerResponse> handleOAuth2Callback(@RequestParam String code, HttpServletResponse response) {
 		log.info("code = {}", code);
 
 		return kakaoOAuth2Service.getToken(code)
@@ -46,20 +49,23 @@ public class OAuthTestController {
 
 				return kakaoOAuth2Service.getUserInfo(accessToken);
 			})
-			.map(userInfo -> {
+			.flatMap(userInfo -> {
 				KakaoPropertiesDto properties = userInfo.getProperties();
 
 				Long oauthId = userInfo.getId();
 				String profileImageUrl = properties.getThumbnail_image();
 
-				kakaoOAuth2Service.registerUser(oauthId, properties, response);
-
 				log.info("oauthId : {}", oauthId);
 				log.info("profileImageUrl : {}", profileImageUrl);
 
+				return kakaoOAuth2Service.registerUser(oauthId, properties, response)
+					.then(Mono.just(userInfo));
+			}).flatMap(userInfo -> {
 				// 여기서 필요한 데이터를 포함하여 ResponseEntity를 구성합니다.
 				// 예: userInfo 또는 properties를 기반으로 응답 구성
-				return "redirect:webauthcallback://success?customToken=" + userInfo.getProperties().getNickname();
+				String redirectUrl =
+					"redirect:webauthcallback://success?customToken=" + userInfo.getProperties().getNickname();
+				return ServerResponse.permanentRedirect(URI.create(redirectUrl)).build();
 			});
 	}
 }
