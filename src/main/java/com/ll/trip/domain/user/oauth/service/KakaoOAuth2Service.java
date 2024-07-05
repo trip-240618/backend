@@ -60,18 +60,19 @@ public class KakaoOAuth2Service {
 			.next(); // Flux 스트림의 첫 번째 항목을 반환
 	}
 
-	public void registerUser(Long oauthId, KakaoPropertiesDto properties, HttpServletResponse response) {
+	public UserEntity registerUser(Long oauthId, KakaoPropertiesDto properties, HttpServletResponse response) {
 		String profileImageUrl = properties.getProfile_image();
 		String providerId = "KAKAO" + oauthId;
 		Optional<UserEntity> optUser = userRepository.findByProviderId(providerId);
 		String uuid;
 		String refreshToken;
+		UserEntity userEntity;
 
 		if (optUser.isPresent()) {
-			UserEntity user = optUser.get();
-			RefreshToken foundRefreshToken = userService.findRefreshTokenByUserId(user.getId());
+			userEntity = optUser.get();
+			RefreshToken foundRefreshToken = userService.findRefreshTokenByUserId(userEntity.getId());
 			refreshToken = foundRefreshToken.getKeyValue();
-			uuid = user.getUuid();
+			uuid = userEntity.getUuid();
 		} else {
 			uuid = userService.generateUUID();
 			String tokenKey = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
@@ -90,12 +91,14 @@ public class KakaoOAuth2Service {
 				.refreshToken(createdRefreshToken)
 				.build();
 
-			userRepository.save(user);
+			userEntity = userRepository.save(user);
 
 			refreshToken = createdRefreshToken.getKeyValue();
 		}
 		String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
 
 		userService.setTokenInCookie(newAccessToken, refreshToken, response);
+
+		return userEntity;
 	}
 }

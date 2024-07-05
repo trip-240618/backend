@@ -22,7 +22,7 @@ public class OAuthTestController {
 	@GetMapping("/login/kakao")
 	public String kakaoLogin() {
 		String redirectUrl = String.format(
-			"https://kauth.kakao.com/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code",
+			"https://kauth.kakao.com/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code", //&prompt=consent
 			kakaoClientId, kakaoRedirectUri);
 		return "redirect:" + redirectUrl;
 	}
