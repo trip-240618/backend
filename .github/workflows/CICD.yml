@@ -94,7 +94,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           username: ubuntu
-          host: trip-story.site
+          host: ${{ secrets.TRIP_PROD_IP }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
