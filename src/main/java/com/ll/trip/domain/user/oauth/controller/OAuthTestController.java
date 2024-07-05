@@ -5,8 +5,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.ll.trip.domain.user.oauth.service.KakaoOAuth2Service;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,8 +18,6 @@ public class OAuthTestController {
 
 	@Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
 	private String kakaoRedirectUri; // 리다이렉트 URI
-
-	private final KakaoOAuth2Service kakaoOAuth2Service;
 
 	@GetMapping("/login/kakao")
 	public String kakaoLogin() {

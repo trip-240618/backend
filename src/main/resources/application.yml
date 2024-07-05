@@ -23,7 +23,7 @@ spring:
 server:
   port: 8080
   serverAddress: localhost:8080
-
+  url: http://localhost:8080
 
 serverName: local_server
 
@@ -40,7 +40,7 @@ spring:
 server:
   port: 8080
   serverAddress: trip-story.site #탄력적 ip >> 소셜로그인 설정을 blue green 각각 넣어줘야함
-
+  url: https://trip-story.site
 
 serverName: blue_server
 
@@ -56,7 +56,7 @@ spring:
 server:
   port: 8081
   serverAddress: trip-story.site
-
+  url: https://trip-story.site
 
 serverName: green_server
 ---
@@ -79,7 +79,7 @@ spring:
             client-name: Kakao
             authorization-grant-type: authorization_code
             #TODO 나중에 모바일앱 redirect-uri로 바꿔야함 (카카오에서 사용자에게 카카오로그인을 요청할 uri)
-            redirect-uri: 'https://${server.serverAddress}/user/oauth2/callback/kakao'
+            redirect-uri: '${server.url}/user/oauth2/callback/kakao'
             client-authentication-method: POST
             scope:
               - profile_nickname
