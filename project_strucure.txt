@@ -1,0 +1,216 @@
+C:/Users/xogns/springProject/trip
+|-- Dockerfile
+|-- HELP.md
+|-- README.md
+|-- build
+|   |-- classes
+|   |   `-- java
+|   |       |-- main
+|   |       |   `-- com
+|   |       |       `-- ll
+|   |       |           `-- trip
+|   |       |               |-- TripApplication.class
+|   |       |               |-- domain
+|   |       |               |   `-- user
+|   |       |               |       |-- jwt
+|   |       |               |       |   |-- JwtAuthenticationFilter.class
+|   |       |               |       |   `-- JwtTokenUtil.class
+|   |       |               |       |-- oauth
+|   |       |               |       |   |-- controller
+|   |       |               |       |   |   |-- OAuthController.class
+|   |       |               |       |   |   `-- OAuthTestController.class
+|   |       |               |       |   |-- dto
+|   |       |               |       |   |   |-- KakaoPropertiesDto.class
+|   |       |               |       |   |   |-- KakaoTokenResponseDto.class
+|   |       |               |       |   |   `-- KakaoUserInfoDto.class
+|   |       |               |       |   `-- service
+|   |       |               |       |       `-- KakaoOAuth2Service.class
+|   |       |               |       `-- user
+|   |       |               |           |-- controller
+|   |       |               |           |   `-- UserController.class
+|   |       |               |           |-- dto
+|   |       |               |           |   |-- UserInfoDto.class
+|   |       |               |           |   `-- UserRegisterDto.class
+|   |       |               |           |-- entity
+|   |       |               |           |   |-- RefreshToken$RefreshTokenBuilder.class
+|   |       |               |           |   |-- RefreshToken.class
+|   |       |               |           |   |-- UserEntity$UserEntityBuilder.class
+|   |       |               |           |   `-- UserEntity.class
+|   |       |               |           |-- repository
+|   |       |               |           |   |-- RefreshTokenRepository.class
+|   |       |               |           |   `-- UserRepository.class
+|   |       |               |           `-- service
+|   |       |               |               `-- UserService.class
+|   |       |               |-- global
+|   |       |               |   |-- security
+|   |       |               |   |   |-- config
+|   |       |               |   |   |   `-- SpringSecurityConfig.class
+|   |       |               |   |   |-- service
+|   |       |               |   |   |   |-- CustomUserDetailsService.class
+|   |       |               |   |   |   `-- UserDetailsServiceImpl.class
+|   |       |               |   |   `-- userDetail
+|   |       |               |   |       `-- SecurityUser.class
+|   |       |               |   `-- web
+|   |       |               |       `-- config
+|   |       |               |           `-- WebClientConfig.class
+|   |       |               `-- healthCheck
+|   |       |                   |-- controller
+|   |       |                   |   `-- healthCheckController.class
+|   |       |                   |-- entity
+|   |       |                   |   `-- TestEntity.class
+|   |       |                   `-- repository
+|   |       |                       `-- TestRepository.class
+|   |       `-- test
+|   |           `-- com
+|   |               `-- ll
+|   |                   `-- trip
+|   |                       |-- TripApplicationTests.class
+|   |                       `-- test
+|   |                           `-- DatabaseConnectionTest.class
+|   |-- generated
+|   |   `-- sources
+|   |       |-- annotationProcessor
+|   |       |   `-- java
+|   |       |       |-- main
+|   |       |       `-- test
+|   |       `-- headers
+|   |           `-- java
+|   |               |-- main
+|   |               `-- test
+|   |-- generated-snippets
+|   |-- libs
+|   |   |-- trip-0.0.1-SNAPSHOT-plain.jar
+|   |   `-- trip-0.0.1-SNAPSHOT.jar
+|   |-- reports
+|   |   `-- tests
+|   |       `-- test
+|   |           |-- classes
+|   |           |   `-- com.ll.trip.test.DatabaseConnectionTest.html
+|   |           |-- css
+|   |           |   |-- base-style.css
+|   |           |   `-- style.css
+|   |           |-- index.html
+|   |           |-- js
+|   |           |   `-- report.js
+|   |           `-- packages
+|   |               `-- com.ll.trip.test.html
+|   |-- resolvedMainClassName
+|   |-- resources
+|   |   `-- main
+|   |       |-- application-secret_dev.yml
+|   |       |-- application-secret_prod.yml
+|   |       |-- application.yml
+|   |       |-- static
+|   |       `-- templates
+|   |-- test-results
+|   |   `-- test
+|   |       |-- TEST-com.ll.trip.test.DatabaseConnectionTest.xml
+|   |       `-- binary
+|   |           |-- output.bin
+|   |           |-- output.bin.idx
+|   |           `-- results.bin
+|   `-- tmp
+|       |-- bootJar
+|       |   `-- MANIFEST.MF
+|       |-- compileJava
+|       |   |-- compileTransaction
+|       |   |   |-- backup-dir
+|       |   |   `-- stash-dir
+|       |   |       |-- KakaoOAuth2Service.class.uniqueId6
+|       |   |       |-- KakaoUserInfoDto.class.uniqueId1
+|       |   |       |-- OAuthController.class.uniqueId3
+|       |   |       |-- OAuthTestController.class.uniqueId0
+|       |   |       |-- SpringSecurityConfig.class.uniqueId2
+|       |   |       |-- UserController.class.uniqueId4
+|       |   |       `-- UserService.class.uniqueId5
+|       |   `-- previous-compilation-data.bin
+|       |-- compileTestJava
+|       |   |-- compileTransaction
+|       |   |   |-- backup-dir
+|       |   |   `-- stash-dir
+|       |   |       `-- DatabaseConnectionTest.class.uniqueId0
+|       |   `-- previous-compilation-data.bin
+|       |-- jar
+|       |   `-- MANIFEST.MF
+|       `-- test
+|-- build.gradle
+|-- gradle
+|   `-- wrapper
+|       |-- gradle-wrapper.jar
+|       `-- gradle-wrapper.properties
+|-- gradlew
+|-- gradlew.bat
+|-- project_strucure.txt
+|-- settings.gradle
+`-- src
+    |-- main
+    |   |-- java
+    |   |   `-- com
+    |   |       `-- ll
+    |   |           `-- trip
+    |   |               |-- TripApplication.java
+    |   |               |-- domain
+    |   |               |   `-- user
+    |   |               |       |-- jwt
+    |   |               |       |   |-- JwtAuthenticationFilter.java
+    |   |               |       |   `-- JwtTokenUtil.java
+    |   |               |       |-- oauth
+    |   |               |       |   |-- controller
+    |   |               |       |   |   |-- OAuthController.java
+    |   |               |       |   |   `-- OAuthTestController.java
+    |   |               |       |   |-- dto
+    |   |               |       |   |   |-- KakaoPropertiesDto.java
+    |   |               |       |   |   |-- KakaoTokenResponseDto.java
+    |   |               |       |   |   `-- KakaoUserInfoDto.java
+    |   |               |       |   `-- service
+    |   |               |       |       `-- KakaoOAuth2Service.java
+    |   |               |       `-- user
+    |   |               |           |-- controller
+    |   |               |           |   `-- UserController.java
+    |   |               |           |-- dto
+    |   |               |           |   |-- UserInfoDto.java
+    |   |               |           |   `-- UserRegisterDto.java
+    |   |               |           |-- entity
+    |   |               |           |   |-- RefreshToken.java
+    |   |               |           |   `-- UserEntity.java
+    |   |               |           |-- repository
+    |   |               |           |   |-- RefreshTokenRepository.java
+    |   |               |           |   `-- UserRepository.java
+    |   |               |           `-- service
+    |   |               |               `-- UserService.java
+    |   |               |-- global
+    |   |               |   |-- security
+    |   |               |   |   |-- config
+    |   |               |   |   |   `-- SpringSecurityConfig.java
+    |   |               |   |   |-- filter
+    |   |               |   |   |-- handler
+    |   |               |   |   |-- service
+    |   |               |   |   |   |-- CustomUserDetailsService.java
+    |   |               |   |   |   `-- UserDetailsServiceImpl.java
+    |   |               |   |   `-- userDetail
+    |   |               |   |       `-- SecurityUser.java
+    |   |               |   `-- web
+    |   |               |       `-- config
+    |   |               |           `-- WebClientConfig.java
+    |   |               `-- healthCheck
+    |   |                   |-- controller
+    |   |                   |   `-- healthCheckController.java
+    |   |                   |-- entity
+    |   |                   |   `-- TestEntity.java
+    |   |                   `-- repository
+    |   |                       `-- TestRepository.java
+    |   `-- resources
+    |       |-- application-secret_dev.yml
+    |       |-- application-secret_prod.yml
+    |       |-- application.yml
+    |       |-- static
+    |       `-- templates
+    `-- test
+        `-- java
+            `-- com
+                `-- ll
+                    `-- trip
+                        |-- TripApplicationTests.java
+                        `-- test
+
+117 directories, 96 files
