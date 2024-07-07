@@ -40,12 +40,6 @@ public class SpringSecurityConfig {
 					"/env"
 				).permitAll()
 				.anyRequest().authenticated()
-			)
-			// 아래는 테스트용 모바일에서 구동되면 지우기
-			.oauth2Login(oauth2Login ->
-				oauth2Login
-					.defaultSuccessUrl("/user/loginSuccess")
-					.failureUrl("/user/loginFailure")
 			);
 		return http.build();
 	}
