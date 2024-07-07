@@ -40,7 +40,7 @@ public class KakaoOAuth2Service {
 
 	public Mono<KakaoTokenResponseDto> getToken(String code) {
 		String uri = TOKEN_URI + "?grant_type=" + GRANT_TYPE + "&client_id=" + clientId + "&redirect_uri=" + redirectUri
-					 + "&code=" + code;
+					 + "/test&code=" + code;
 
 		return webClient.get()
 			.uri(uri)
