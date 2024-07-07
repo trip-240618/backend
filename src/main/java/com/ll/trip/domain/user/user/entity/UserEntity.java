@@ -58,6 +58,7 @@ public class UserEntity {
 	private String uuid;
 	private String profileImg;
 	private String roles;
+	private String email;
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "refresh_token_id")
