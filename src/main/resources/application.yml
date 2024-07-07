@@ -4,9 +4,9 @@ spring:
   profiles:
     active: local
     group:
-      local: local, common
-      blue: blue, common
-      green: green, common
+      local: local, secret_dev, common
+      blue: blue, secret_prod, common
+      green: green, secret_prod, common
 
 server:
   env: blue
@@ -23,7 +23,7 @@ spring:
 server:
   port: 8080
   serverAddress: localhost:8080
-
+  url: http://localhost:8080
 
 serverName: local_server
 
@@ -39,8 +39,8 @@ spring:
 
 server:
   port: 8080
-  serverAddress: 43.203.13.25 #탄력적 ip >> 소셜로그인 설정을 blue green 각각 넣어줘야함
-
+  serverAddress: trip-story.site #탄력적 ip >> 소셜로그인 설정을 blue green 각각 넣어줘야함
+  url: https://trip-story.site
 
 serverName: blue_server
 
@@ -55,13 +55,39 @@ spring:
 
 server:
   port: 8081
-  serverAddress: 43.203.13.25
-
+  serverAddress: trip-story.site
+  url: https://trip-story.site
 
 serverName: green_server
 ---
-#local, blue, green 공통으로 사용하는 설정값
+#blue, green 공통으로 사용하는 설정값
 spring:
   config:
     activate:
       on-profile: common
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-name: Kakao
+            authorization-grant-type: authorization_code
+            #TODO 나중에 모바일앱 redirect-uri로 바꿔야함 (카카오에서 사용자에게 카카오로그인을 요청할 uri)
+            redirect-uri: '${server.url}/user/oauth2/callback/kakao'
+            client-authentication-method: POST
+            scope:
+              - profile_nickname
+              - profile_image
+
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
