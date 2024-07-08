@@ -72,7 +72,7 @@ public class OAuthController {
 	}
 
 	@PostMapping("/login/apple")
-	public ResponseEntity<?> googleLogin(@RequestBody final AppleLoginRequestBody requestBody,
+	public ResponseEntity<?> appleLogin(@RequestBody final AppleLoginRequestBody requestBody,
 		HttpServletResponse response) {
 		String oauthId = requestBody.getUserIdentifier();
 		String name = requestBody.getFamilyName() + requestBody.getGivenName();
@@ -80,7 +80,7 @@ public class OAuthController {
 		String email = requestBody.getEmail();
 
 		UserEntity user = oAuth2Service.registerUser(oauthId, name, email, profileImg, "APPLE", response);
-
+		if(user == null) return ResponseEntity.badRequest().body("userInfo is null");
 		return ResponseEntity.ok(user);
 	}
 

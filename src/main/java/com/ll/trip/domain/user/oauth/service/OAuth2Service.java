@@ -34,6 +34,8 @@ public class OAuth2Service {
 			refreshToken = foundRefreshToken.getKeyValue();
 			uuid = userEntity.getUuid();
 		} else {
+			if(oauthId == null || nickName == null || email == null) return null;
+
 			uuid = userService.generateUUID();
 			String tokenKey = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
 
