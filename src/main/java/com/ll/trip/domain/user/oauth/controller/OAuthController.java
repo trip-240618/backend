@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.user.oauth.dto.AppleLoginRequestBody;
 import com.ll.trip.domain.user.oauth.dto.GoogleLoginRequestBody;
 import com.ll.trip.domain.user.oauth.dto.KakaoPropertiesDto;
 import com.ll.trip.domain.user.oauth.service.KakaoOAuth2Service;
@@ -65,9 +66,23 @@ public class OAuthController {
 		String profileImg = requestBody.getPhotoUrl();
 		String email = requestBody.getEmail();
 
-		UserEntity user = oAuth2Service.registerUser(oauthId, name, email, profileImg, response);
+		UserEntity user = oAuth2Service.registerUser(oauthId, name, email, profileImg, "GOOGLE", response);
 
 		return ResponseEntity.ok(user);
 	}
+
+	@PostMapping("/login/apple")
+	public ResponseEntity<?> googleLogin(@RequestBody final AppleLoginRequestBody requestBody,
+		HttpServletResponse response) {
+		String oauthId = requestBody.getUserIdentifier();
+		String name = requestBody.getFamilyName() + requestBody.getGivenName();
+		String profileImg = null;
+		String email = requestBody.getEmail();
+
+		UserEntity user = oAuth2Service.registerUser(oauthId, name, email, profileImg, "APPLE", response);
+
+		return ResponseEntity.ok(user);
+	}
+
 
 }
