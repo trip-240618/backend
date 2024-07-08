@@ -21,8 +21,8 @@ public class OAuth2Service {
 	private final UserService userService;
 	private final JwtTokenUtil jwtTokenUtil;
 
-	public UserEntity registerUser(String oauthId, String nickName, String email, String profileImg, HttpServletResponse response) {
-		String providerId = "GOOGLE" + oauthId;
+	public UserEntity registerUser(String oauthId, String nickName, String email, String profileImg, String provider, HttpServletResponse response) {
+		String providerId = provider + oauthId;
 		Optional<UserEntity> optUser = userRepository.findByProviderId(providerId);
 		String uuid;
 		String refreshToken;
