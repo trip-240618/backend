@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 @RestController
-public class healthCheckController {
+public class HealthCheckController {
 	@Value("${server.env}")
 	private String env;
 	@Value("${server.port}")
@@ -25,7 +25,8 @@ public class healthCheckController {
 
 	@GetMapping("/hc")
 	@Operation(summary = "서버 정보")
-	@ApiResponse(responseCode = "200", description = "로그인시에 서버 정보 반환")
+	@ApiResponse(responseCode = "200", description = "로그인시에 서버 정보 반환", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = HealthCheckDto.class))})
 	public ResponseEntity<HealthCheckDto> healthCheck() {
 		//무중단 배포를 위해 해당 포트의 서버가 켜져있는지 확인
 		HealthCheckDto responseData = new HealthCheckDto(serverName, serverAddress, serverPort, env);
