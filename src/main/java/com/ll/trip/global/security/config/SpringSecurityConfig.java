@@ -37,7 +37,11 @@ public class SpringSecurityConfig {
 			.authorizeHttpRequests(a -> a
 				.requestMatchers(
 					"/user/oauth2/**",
-					"/env"
+					"/env",
+					"/swagger-ui/**",
+					"/swagger-ui.html",
+					"/api-docs/**",
+					"/api-docs.yaml"
 				).permitAll()
 				.anyRequest().authenticated()
 			);
