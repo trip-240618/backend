@@ -13,6 +13,10 @@ import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.service.UserService;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +29,9 @@ public class UserController {
 	private final UserService userService;
 
 	@GetMapping("/info")
+	@Operation(summary = "유저 정보 반환")
+	@ApiResponse(responseCode = "200", description = "유저정보 반환", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
 	public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal SecurityUser securityUser) {
 		log.info(securityUser.getUsername());
 		Optional<UserEntity> user = userService.findUserByUuid(securityUser.getUuid());
@@ -36,18 +43,6 @@ public class UserController {
 		UserInfoDto userInfoDto = new UserInfoDto(user.get());
 
 		return ResponseEntity.ok(userInfoDto);
-	}
-
-	@GetMapping("/loginSuccess")
-	public String loginSuccess() {
-		// 로그인 성공 후 처리 로직
-		return "loginSuccess";
-	}
-
-	@GetMapping("/loginFailure")
-	public String loginFailure() {
-		// 로그인 실패 후 처리 로직
-		return "loginFailure";
 	}
 
 }
