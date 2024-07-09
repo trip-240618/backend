@@ -2,12 +2,17 @@ package com.ll.trip.domain.user.oauth.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.user.oauth.dto.AppleLoginRequestBody;
+import com.ll.trip.domain.user.oauth.dto.GoogleLoginRequestBody;
 import com.ll.trip.domain.user.oauth.dto.KakaoPropertiesDto;
 import com.ll.trip.domain.user.oauth.service.KakaoOAuth2Service;
+import com.ll.trip.domain.user.oauth.service.OAuth2Service;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,6 +27,7 @@ import reactor.core.publisher.Mono;
 public class OAuthController {
 
 	private final KakaoOAuth2Service kakaoOAuth2Service;
+	private final OAuth2Service oAuth2Service;
 
 	@GetMapping("/callback/kakao")
 	public Mono<ResponseEntity<?>> handleOAuth2Callback(@RequestParam String code, HttpServletResponse response) {
@@ -51,5 +57,32 @@ public class OAuthController {
 				return ResponseEntity.ok(user);
 			});
 	}
+
+	@PostMapping("/login/google")
+	public ResponseEntity<?> googleLogin(@RequestBody final GoogleLoginRequestBody requestBody,
+		HttpServletResponse response) {
+		String oauthId = requestBody.getId();
+		String name = requestBody.getDisplayName();
+		String profileImg = requestBody.getPhotoUrl();
+		String email = requestBody.getEmail();
+
+		UserEntity user = oAuth2Service.registerUser(oauthId, name, email, profileImg, "GOOGLE", response);
+
+		return ResponseEntity.ok(user);
+	}
+
+	@PostMapping("/login/apple")
+	public ResponseEntity<?> googleLogin(@RequestBody final AppleLoginRequestBody requestBody,
+		HttpServletResponse response) {
+		String oauthId = requestBody.getUserIdentifier();
+		String name = requestBody.getFamilyName() + requestBody.getGivenName();
+		String profileImg = null;
+		String email = requestBody.getEmail();
+
+		UserEntity user = oAuth2Service.registerUser(oauthId, name, email, profileImg, "APPLE", response);
+
+		return ResponseEntity.ok(user);
+	}
+
 
 }

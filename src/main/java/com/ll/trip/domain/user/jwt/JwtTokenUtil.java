@@ -26,8 +26,8 @@ public class JwtTokenUtil {
     @Value(value = "${jwt.token-secret}")
     private String tokenSecret;
 
-    //@Value(value = "${jwt.access-token-time}")
-    private long accessTokenValidityInMilliseconds = 6000L;
+    @Value(value = "${jwt.access-token-time}")
+    private long accessTokenValidityInMilliseconds;
 
     @Value(value = "${jwt.refresh-token-time}")
     private long refreshTokenValidityInMilliseconds;
