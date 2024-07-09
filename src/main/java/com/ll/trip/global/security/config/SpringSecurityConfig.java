@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 
 import com.ll.trip.domain.user.jwt.JwtAuthenticationFilter;
 import com.ll.trip.domain.user.jwt.JwtTokenUtil;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableMethodSecurity
+@EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class SpringSecurityConfig {
 
@@ -37,7 +39,12 @@ public class SpringSecurityConfig {
 			.authorizeHttpRequests(a -> a
 				.requestMatchers(
 					"/user/oauth2/**",
-					"/env"
+					"/env",
+					"/swagger-ui/**",
+					"/swagger-ui.html",
+					"/api-docs/**",
+					"/api-docs.yaml",
+					"/chat/**"
 				).permitAll()
 				.anyRequest().authenticated()
 			);
