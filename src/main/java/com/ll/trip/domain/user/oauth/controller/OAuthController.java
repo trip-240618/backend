@@ -37,17 +37,10 @@ public class OAuthController {
 	@Operation(summary = "카카오 로그인")
 	@ApiResponse(responseCode = "200", description = "카카오 로그인 & 유저정보 반환", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class))})
-	public Mono<ResponseEntity<?>> handleOAuth2Callback(@RequestParam String code, HttpServletResponse response) {
-		log.info("code = {}", code);
+	public Mono<ResponseEntity<?>> handleOAuth2Callback(@RequestParam String token, HttpServletResponse response) {
+		log.info("code = {}", token);
 		//TODO code가 아니라 token을 사용하기 때문에 프론트와 함께 파라미터명을 수정해야함
-		return kakaoOAuth2Service.getUserInfo(code)
-			// return kakaoOAuth2Service.getToken(code)
-			// 	.flatMap(token -> {
-			// 		String accessToken = token.getAccess_token();
-			// 		log.info("accessToken : {}", accessToken);
-			//
-			// 		return kakaoOAuth2Service.getUserInfo(accessToken);
-			// 	})
+		return kakaoOAuth2Service.getUserInfo(token)
 			.map(userInfo -> {
 				KakaoPropertiesDto properties = userInfo.getProperties();
 
