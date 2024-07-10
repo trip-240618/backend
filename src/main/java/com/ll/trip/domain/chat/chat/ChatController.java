@@ -18,6 +18,6 @@ public class ChatController {
 	public ResponseEntity<?> write(
 		@RequestBody final String content) {
 		messagingTemplate.convertAndSend("/topic/chat", content);
-		return ResponseEntity.ok("전송 성공");
+		return ResponseEntity.ok("{\"message\":\"전송 성공\"}");
 	}
 }

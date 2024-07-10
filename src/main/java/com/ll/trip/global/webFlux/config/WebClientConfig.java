@@ -1,4 +1,4 @@
-package com.ll.trip.global.web.config;
+package com.ll.trip.global.webFlux.config;
 
 import java.time.Duration;
 import java.util.function.Function;
