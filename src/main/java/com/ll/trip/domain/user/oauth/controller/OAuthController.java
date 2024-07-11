@@ -13,7 +13,7 @@ import com.ll.trip.domain.user.oauth.dto.GoogleLoginRequestBody;
 import com.ll.trip.domain.user.oauth.dto.KakaoPropertiesDto;
 import com.ll.trip.domain.user.oauth.service.KakaoOAuth2Service;
 import com.ll.trip.domain.user.oauth.service.OAuth2Service;
-import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.domain.user.user.dto.UserInfoDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,7 +36,7 @@ public class OAuthController {
 	@GetMapping("/callback/kakao")
 	@Operation(summary = "카카오 로그인")
 	@ApiResponse(responseCode = "200", description = "카카오 로그인 & 유저정보 반환", content = {
-		@Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class))})
+		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
 	public Mono<ResponseEntity<?>> handleOAuth2Callback(@RequestParam String token, HttpServletResponse response) {
 		log.info("code = {}", token);
 		//TODO code가 아니라 token을 사용하기 때문에 프론트와 함께 파라미터명을 수정해야함
@@ -47,21 +47,21 @@ public class OAuthController {
 				Long oauthId = userInfo.getId();
 				String profileImageUrl = properties.getThumbnail_image();
 
-				UserEntity user = kakaoOAuth2Service.registerUser(oauthId, properties, response);
+				UserInfoDto userInfoDto = kakaoOAuth2Service.registerUser(oauthId, properties, response);
 				log.info("name : {}", properties.getNickname());
 				log.info("oauthId : {}", oauthId);
 				log.info("profileImageUrl : {}", profileImageUrl);
 
 				// 여기서 필요한 데이터를 포함하여 ResponseEntity를 구성합니다.
 				// 예: userInfo 또는 properties를 기반으로 응답 구성
-				return ResponseEntity.ok(user);
+				return ResponseEntity.ok(userInfoDto);
 			});
 	}
 
 	@PostMapping("/login/google")
 	@Operation(summary = "구글 로그인")
 	@ApiResponse(responseCode = "200", description = "구글 로그인 & 유저정보 반환", content = {
-		@Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class))})
+		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
 	public ResponseEntity<?> googleLogin(@RequestBody final GoogleLoginRequestBody requestBody,
 		HttpServletResponse response) {
 		String oauthId = requestBody.getId();
@@ -69,15 +69,15 @@ public class OAuthController {
 		String profileImg = requestBody.getPhotoUrl();
 		String email = requestBody.getEmail();
 
-		UserEntity user = oAuth2Service.registerUser(oauthId, name, email, profileImg, "GOOGLE", response);
+		UserInfoDto userInfoDto = oAuth2Service.registerUser(oauthId, name, email, profileImg, "GOOGLE", response);
 
-		return ResponseEntity.ok(user);
+		return ResponseEntity.ok(userInfoDto);
 	}
 
 	@PostMapping("/login/apple")
 	@Operation(summary = "애플 로그인")
 	@ApiResponse(responseCode = "200", description = "애플 로그인 & 유저정보 반환", content = {
-		@Content(mediaType = "application/json", schema = @Schema(implementation = UserEntity.class))})
+		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
 	public ResponseEntity<?> appleLogin(@RequestBody final AppleLoginRequestBody requestBody,
 		HttpServletResponse response) {
 		String oauthId = requestBody.getUserIdentifier();
@@ -85,10 +85,10 @@ public class OAuthController {
 		String profileImg = null;
 		String email = requestBody.getEmail();
 
-		UserEntity user = oAuth2Service.registerUser(oauthId, name, email, profileImg, "APPLE", response);
-		if (user == null)
+		UserInfoDto userInfoDto = oAuth2Service.registerUser(oauthId, name, email, profileImg, "APPLE", response);
+		if (userInfoDto == null)
 			return ResponseEntity.badRequest().body("userInfo is null");
-		return ResponseEntity.ok(user);
+		return ResponseEntity.ok(userInfoDto);
 	}
 
 }

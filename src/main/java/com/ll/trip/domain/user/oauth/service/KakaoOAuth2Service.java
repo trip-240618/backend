@@ -11,6 +11,7 @@ import com.ll.trip.domain.user.jwt.JwtTokenUtil;
 import com.ll.trip.domain.user.oauth.dto.KakaoPropertiesDto;
 import com.ll.trip.domain.user.oauth.dto.KakaoTokenResponseDto;
 import com.ll.trip.domain.user.oauth.dto.KakaoUserInfoDto;
+import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.entity.RefreshToken;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
@@ -60,19 +61,20 @@ public class KakaoOAuth2Service {
 			.next(); // Flux 스트림의 첫 번째 항목을 반환
 	}
 
-	public UserEntity registerUser(Long oauthId, KakaoPropertiesDto properties, HttpServletResponse response) {
+	public UserInfoDto registerUser(Long oauthId, KakaoPropertiesDto properties, HttpServletResponse response) {
 		String profileImageUrl = properties.getProfile_image();
 		String providerId = "KAKAO" + oauthId;
 		Optional<UserEntity> optUser = userRepository.findByProviderId(providerId);
 		String uuid;
 		String refreshToken;
-		UserEntity userEntity;
+		UserInfoDto userInfoDto;
 
 		if (optUser.isPresent()) {
-			userEntity = optUser.get();
+			UserEntity userEntity = optUser.get();
 			RefreshToken foundRefreshToken = userService.findRefreshTokenByUserId(userEntity.getId());
 			refreshToken = foundRefreshToken.getKeyValue();
 			uuid = userEntity.getUuid();
+			userInfoDto = new UserInfoDto(userEntity, "login");
 		} else {
 			uuid = userService.generateUUID();
 			String tokenKey = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
@@ -91,14 +93,14 @@ public class KakaoOAuth2Service {
 				.refreshToken(createdRefreshToken)
 				.build();
 
-			userEntity = userRepository.save(user);
-
+			UserEntity userEntity = userRepository.save(user);
+			userInfoDto = new UserInfoDto(userEntity, "register");
 			refreshToken = createdRefreshToken.getKeyValue();
 		}
 		String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
 
 		userService.setTokenInCookie(newAccessToken, refreshToken, response);
 
-		return userEntity;
+		return userInfoDto;
 	}
 }
