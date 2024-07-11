@@ -12,9 +12,11 @@ import lombok.NoArgsConstructor;
 public class UserInfoDto {
 	private String name;
 	private String profileImg;
+	private String type;
 
-	public UserInfoDto(UserEntity user) {
+	public UserInfoDto(UserEntity user, String type) {
 		this.name = user.getName();
 		this.profileImg = user.getProfileImg();
+		this.type = type;
 	}
 }
