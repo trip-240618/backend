@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ll.trip.domain.user.oauth.dto.KakaoPropertiesDto;
 import com.ll.trip.domain.user.oauth.service.KakaoOAuth2Service;
-import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.domain.user.user.dto.UserInfoDto;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -54,14 +54,14 @@ public class OAuthTestController {
 				Long oauthId = userInfo.getId();
 				String profileImageUrl = properties.getThumbnail_image();
 
-				UserEntity user = kakaoOAuth2Service.registerUser(oauthId, properties, response);
+				UserInfoDto userInfoDto = kakaoOAuth2Service.registerUser(oauthId, properties, response);
 				log.info("name : {}", properties.getNickname());
 				log.info("oauthId : {}", oauthId);
 				log.info("profileImageUrl : {}", profileImageUrl);
 
 				// 여기서 필요한 데이터를 포함하여 ResponseEntity를 구성합니다.
 				// 예: userInfo 또는 properties를 기반으로 응답 구성
-				return ResponseEntity.ok(user);
+				return ResponseEntity.ok(userInfoDto);
 			});
 	}
 

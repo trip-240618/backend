@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.ll.trip.domain.user.jwt.JwtTokenUtil;
+import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.entity.RefreshToken;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
@@ -21,18 +22,19 @@ public class OAuth2Service {
 	private final UserService userService;
 	private final JwtTokenUtil jwtTokenUtil;
 
-	public UserEntity registerUser(String oauthId, String nickName, String email, String profileImg, String provider, HttpServletResponse response) {
+	public UserInfoDto registerUser(String oauthId, String nickName, String email, String profileImg, String provider, HttpServletResponse response) {
 		String providerId = provider + oauthId;
 		Optional<UserEntity> optUser = userRepository.findByProviderId(providerId);
 		String uuid;
 		String refreshToken;
-		UserEntity userEntity;
+		UserInfoDto userInfoDto;
 
 		if (optUser.isPresent()) {
-			userEntity = optUser.get();
+			UserEntity userEntity = optUser.get();
 			RefreshToken foundRefreshToken = userService.findRefreshTokenByUserId(userEntity.getId());
 			refreshToken = foundRefreshToken.getKeyValue();
 			uuid = userEntity.getUuid();
+			userInfoDto = new UserInfoDto(userEntity, "login");
 		} else {
 			if(oauthId == null || nickName == null || email == null) return null;
 
@@ -54,14 +56,14 @@ public class OAuth2Service {
 				.refreshToken(createdRefreshToken)
 				.build();
 
-			userEntity = userRepository.save(user);
-
+			UserEntity userEntity = userRepository.save(user);
+			userInfoDto = new UserInfoDto(userEntity, "register");
 			refreshToken = createdRefreshToken.getKeyValue();
 		}
 		String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
 
 		userService.setTokenInCookie(newAccessToken, refreshToken, response);
 
-		return userEntity;
+		return userInfoDto;
 	}
 }

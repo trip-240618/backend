@@ -40,7 +40,7 @@ public class UserController {
 			return ResponseEntity.notFound().build();
 		}
 
-		UserInfoDto userInfoDto = new UserInfoDto(user.get());
+		UserInfoDto userInfoDto = new UserInfoDto(user.get(),"login");
 
 		return ResponseEntity.ok(userInfoDto);
 	}
