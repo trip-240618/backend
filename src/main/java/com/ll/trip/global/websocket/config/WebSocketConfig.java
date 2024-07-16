@@ -1,4 +1,4 @@
-package com.ll.trip.global.websocket;
+package com.ll.trip.global.websocket.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -20,6 +20,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.enableSimpleBroker("/topic");
-		registry.setApplicationDestinationPrefixes("/chat");
+		registry.setApplicationDestinationPrefixes("/api");
 	}
 }
