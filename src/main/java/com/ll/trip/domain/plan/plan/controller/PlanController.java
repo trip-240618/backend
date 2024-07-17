@@ -10,7 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.ll.trip.domain.plan.plan.dto.PlanDto;
+import com.ll.trip.domain.plan.plan.dto.PlanCreateRequestDto;
+import com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto;
 import com.ll.trip.domain.plan.plan.response.PlanResponseBody;
 import com.ll.trip.domain.plan.plan.service.PlanService;
 
@@ -34,9 +35,9 @@ public class PlanController {
 	@GetMapping("/plan/{roomId}/history")
 	@Operation(summary = "기존 plan 요청")
 	@ApiResponse(responseCode = "200", description = "db에 저장되어 있는 plan 반환", content = {
-		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanDto.class)))})
+		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanCreateRequestDto.class)))})
 	public ResponseEntity<?> sendPreviousMessages(@PathVariable Long roomId) {
-		List<PlanDto> plans = planService.getPreviousMessages(roomId);
+		List<PlanCreateResponseDto> plans = planService.getPreviousMessages(roomId);
 		return ResponseEntity.ok(plans);
 	}
 
@@ -47,15 +48,15 @@ public class PlanController {
 				content = @Content(mediaType = "application/json", schema = @Schema(implementation = PlanResponseBody.class)))
 		}
 	)
-	public void handlePlanMessage(
-		PlanDto requestDto,
+	public void handlePlanCreate(
+		PlanCreateRequestDto requestDto,
 		@DestinationVariable Long roomId
 	) {
 		log.info("title: " + requestDto.getTitle());
-		planService.saveMessage(roomId, requestDto);
+		PlanCreateResponseDto response = planService.saveMessage(roomId, requestDto);
 		template.convertAndSend(
 			"/topic/api/plan/" + roomId,
-			new PlanResponseBody<>("create", requestDto)
+			new PlanResponseBody<>("create", response)
 		);
 	}
 
@@ -70,12 +71,19 @@ public class PlanController {
 		@DestinationVariable Long roomId,
 		List<Long> orders
 	) {
+		if (planService.swapByIndex(roomId, orders) != 2) {
+			template.convertAndSend(
+				"/topic/api/plan/" + roomId,
+				new PlanResponseBody<>("swap", "Failed")
+			);
+			return;
+		}
+
 		template.convertAndSend(
 			"/topic/api/plan/" + roomId,
 			new PlanResponseBody<>("swap", orders)
 		);
 
-		planService.swapByIndex(roomId, orders);
 	}
 
 }
