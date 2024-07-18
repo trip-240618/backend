@@ -43,6 +43,11 @@ public class PlanService {
 		return new PlanCreateResponseDto(plan);
 	}
 
+	public Long getNextIdx() {
+		Long maxIdx = planRepository.findMaxIdx();
+		return maxIdx == null ? 0 : maxIdx + 1;
+	}
+
 	public int swapByIndex(Long roomId, List<Long> orders) {
 		if (!swapUsers.containsKey(roomId))
 			return 0;
@@ -50,11 +55,6 @@ public class PlanService {
 		int swapped = planRepository.swapIndexes(roomId, orders.get(0), orders.get(1));
 		swapUsers.remove(roomId);
 		return swapped;
-	}
-
-	public Long getNextIdx() {
-		Long maxIdx = planRepository.findMaxIdx();
-		return (maxIdx != null) ? maxIdx + 1 : 0;
 	}
 
 	public boolean addSwapUserIfPossible(Long roomId) {
