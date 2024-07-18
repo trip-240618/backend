@@ -2,7 +2,6 @@ package com.ll.trip.domain.version.entity;
 
 import org.springframework.data.annotation.CreatedDate;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,14 +23,11 @@ public class Version {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "androidVersion", nullable = true)
 	private String androidVersion;
 
-	@Column(name = "iosVersion", nullable = true)
 	private String iosVersion;
 
-	@Column(name = "force", nullable = true)
-	private String force;
+	private String forceUpdate;
 
 	@CreatedDate
 	private String createDate;
