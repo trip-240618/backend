@@ -1,6 +1,7 @@
 package com.ll.trip.domain.plan.plan.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -53,13 +54,23 @@ public class PlanController {
 	}
 
 	@GetMapping("/plan/{roomId}/update/order/cancel")
-	@Operation(summary = "plan swap 가능 여부 요청")
-	@ApiResponse(responseCode = "200", description = "현재 방에 swap중인 유저가 있는지 확인 후 swap중인 유저로 등록", content = {
-		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanCreateRequestDto.class)))})
+	@Operation(summary = "plan swap 취소")
+	@ApiResponse(responseCode = "200", description = "메모리에서 roomId에 해당하는 swapUser 삭제", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})
 	public ResponseEntity<?> sendSwapCancle(@PathVariable Long roomId) {
 		//TODO 유저정보로 해당 유저가 교환하는게 맞는지 확인하고 교환해주기
 		planService.deleteSwapUser(roomId);
 		return ResponseEntity.ok("canceled");
+	}
+
+	@GetMapping("/plan/check/swapUser")
+	@Operation(summary = "swapUser 메모리 확인")
+	@ApiResponse(responseCode = "200", description = "메모리에 등록되어 있는 swapUser 확인", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))})
+	public ResponseEntity<?> checkSwapUser() {
+		//TODO 유저정보로 해당 유저가 교환하는게 맞는지 확인하고 교환해주기
+		Map<Long,String> swapUser = planService.showSwapUser();
+		return ResponseEntity.ok(swapUser);
 	}
 
 	@MessageMapping("/plan/{roomId}")

@@ -1,6 +1,7 @@
 package com.ll.trip.domain.plan.plan.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -67,5 +68,9 @@ public class PlanService {
 
 	public void deleteSwapUser(Long roomId) {
 		swapUsers.remove(roomId);
+	}
+
+	public Map<Long, String> showSwapUser(){
+		return swapUsers;
 	}
 }
