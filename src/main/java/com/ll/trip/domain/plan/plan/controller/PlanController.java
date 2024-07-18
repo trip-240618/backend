@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.ll.trip.domain.plan.plan.dto.PlanCreateRequestDto;
 import com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto;
+import com.ll.trip.domain.plan.plan.dto.PlanDeleteRequestDto;
 import com.ll.trip.domain.plan.plan.response.PlanResponseBody;
 import com.ll.trip.domain.plan.plan.service.PlanService;
 
@@ -73,7 +74,7 @@ public class PlanController {
 		return ResponseEntity.ok(swapUser);
 	}
 
-	@MessageMapping("/plan/{roomId}")
+	@MessageMapping("/plan/{roomId}/create")
 	@Operation(summary = "plan 생성", description = "command: create , roomId에 plan을 생성",
 		responses = {
 			@ApiResponse(responseCode = "200", description = "Order updated successfully",
@@ -89,6 +90,23 @@ public class PlanController {
 		template.convertAndSend(
 			"/topic/api/plan/" + roomId,
 			new PlanResponseBody<>("create", response)
+		);
+	}
+
+	@MessageMapping("/plan/{roomId}/delete")
+	public void handlePlanDelete(
+		PlanDeleteRequestDto requestDto,
+		@DestinationVariable Long roomId
+	) {
+		log.info("title: " + requestDto.getIdx());
+		long idx = planService.deletePlan(roomId, requestDto);
+		if( idx == -1) {
+			return;
+		}
+
+		template.convertAndSend(
+			"/topic/api/plan/" + roomId,
+			new PlanResponseBody<>("delete", idx)
 		);
 	}
 

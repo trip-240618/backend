@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.plan.plan.dto.PlanCreateRequestDto;
 import com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto;
+import com.ll.trip.domain.plan.plan.dto.PlanDeleteRequestDto;
 import com.ll.trip.domain.plan.plan.entity.Plan;
 import com.ll.trip.domain.plan.plan.repository.PlanRepository;
 
@@ -72,5 +73,10 @@ public class PlanService {
 
 	public Map<Long, String> showSwapUser(){
 		return swapUsers;
+	}
+
+	public long deletePlan(Long roomId, PlanDeleteRequestDto requestDto) {
+		Long idx = requestDto.getIdx();
+		return planRepository.deleteByIdx(idx)==1? idx : -1;
 	}
 }
