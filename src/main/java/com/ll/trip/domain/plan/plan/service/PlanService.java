@@ -3,6 +3,7 @@ package com.ll.trip.domain.plan.plan.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.plan.plan.dto.PlanCreateRequestDto;
 import com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto;
@@ -20,12 +21,15 @@ public class PlanService {
 		return planRepository.findByRoomIdOrderByIndex(roomId);
 	}
 
-	public synchronized PlanCreateResponseDto saveMessage(Long roomId, PlanCreateRequestDto requestDto) {
+	@Transactional
+	public synchronized PlanCreateResponseDto savePlan(Long roomId, PlanCreateRequestDto requestDto) {
+		long idx = getNextIdx();
 
 		Plan plan = Plan.builder()
 			.roomId(roomId)
 			.title(requestDto.getTitle())
 			.content(requestDto.getContent())
+			.idx(idx)
 			.build();
 
 		plan = planRepository.save(plan);
@@ -35,5 +39,10 @@ public class PlanService {
 
 	public int swapByIndex(Long roomId, List<Long> orders) {
 		return planRepository.swapIndexes(roomId, orders.get(0), orders.get(1));
+	}
+
+	public Long getNextIdx() {
+		Long maxIdx = planRepository.findMaxIdx();
+		return (maxIdx != null) ? maxIdx + 1 : 0;
 	}
 }

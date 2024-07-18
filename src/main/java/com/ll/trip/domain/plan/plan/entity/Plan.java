@@ -33,15 +33,12 @@ public class Plan {
 	private Long roomId;
 
 	@CreatedDate
-	@Getter
 	private LocalDateTime createDate;
 
 	@LastModifiedDate
-	@Getter
 	private LocalDateTime modifyDate;
 
 	//index는 mySql에서 사용해서 사용불가
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long idx;
 
 	private String title;

@@ -53,7 +53,7 @@ public class PlanController {
 		@DestinationVariable Long roomId
 	) {
 		log.info("title: " + requestDto.getTitle());
-		PlanCreateResponseDto response = planService.saveMessage(roomId, requestDto);
+		PlanCreateResponseDto response = planService.savePlan(roomId, requestDto);
 		template.convertAndSend(
 			"/topic/api/plan/" + roomId,
 			new PlanResponseBody<>("create", response)
