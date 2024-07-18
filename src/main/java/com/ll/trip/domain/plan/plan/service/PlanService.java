@@ -1,6 +1,8 @@
 package com.ll.trip.domain.plan.plan.service;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PlanService {
 	private final PlanRepository planRepository;
+
+	private final ConcurrentMap<Long, String> swapUsers = new ConcurrentHashMap<>();
 
 	public synchronized List<PlanCreateResponseDto> getPreviousMessages(Long roomId) {
 		return planRepository.findByRoomIdOrderByIndex(roomId);
@@ -38,11 +42,26 @@ public class PlanService {
 	}
 
 	public int swapByIndex(Long roomId, List<Long> orders) {
-		return planRepository.swapIndexes(roomId, orders.get(0), orders.get(1));
+		if (!swapUsers.containsKey(roomId))
+			return 0;
+
+		int swapped = planRepository.swapIndexes(roomId, orders.get(0), orders.get(1));
+		swapUsers.remove(roomId);
+		return swapped;
 	}
 
 	public Long getNextIdx() {
 		Long maxIdx = planRepository.findMaxIdx();
 		return (maxIdx != null) ? maxIdx + 1 : 0;
+	}
+
+	public boolean addSwapUserIfPossible(Long roomId) {
+		String user = swapUsers.get(roomId);
+
+		if (user != null)
+			return false;
+
+		swapUsers.put(roomId, "User");
+		return true;
 	}
 }
