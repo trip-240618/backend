@@ -29,5 +29,7 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
 
 	@Query("SELECT COALESCE(MAX(p.idx), 0) FROM Plan p")
 	Long findMaxIdx();
+
+	int deleteByIdx(Long idx);
 }
 
