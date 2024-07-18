@@ -1,6 +1,7 @@
 package com.ll.trip.domain.plan.plan.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.ll.trip.domain.plan.plan.dto.PlanCreateRequestDto;
 import com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto;
+import com.ll.trip.domain.plan.plan.dto.PlanDeleteRequestDto;
 import com.ll.trip.domain.plan.plan.response.PlanResponseBody;
 import com.ll.trip.domain.plan.plan.service.PlanService;
 
@@ -53,16 +55,26 @@ public class PlanController {
 	}
 
 	@GetMapping("/plan/{roomId}/update/order/cancel")
-	@Operation(summary = "plan swap 가능 여부 요청")
-	@ApiResponse(responseCode = "200", description = "현재 방에 swap중인 유저가 있는지 확인 후 swap중인 유저로 등록", content = {
-		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanCreateRequestDto.class)))})
+	@Operation(summary = "plan swap 취소")
+	@ApiResponse(responseCode = "200", description = "메모리에서 roomId에 해당하는 swapUser 삭제", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})
 	public ResponseEntity<?> sendSwapCancle(@PathVariable Long roomId) {
 		//TODO 유저정보로 해당 유저가 교환하는게 맞는지 확인하고 교환해주기
 		planService.deleteSwapUser(roomId);
 		return ResponseEntity.ok("canceled");
 	}
 
-	@MessageMapping("/plan/{roomId}")
+	@GetMapping("/plan/check/swapUser")
+	@Operation(summary = "swapUser 메모리 확인")
+	@ApiResponse(responseCode = "200", description = "메모리에 등록되어 있는 swapUser 확인", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))})
+	public ResponseEntity<?> checkSwapUser() {
+		//TODO 유저정보로 해당 유저가 교환하는게 맞는지 확인하고 교환해주기
+		Map<Long,String> swapUser = planService.showSwapUser();
+		return ResponseEntity.ok(swapUser);
+	}
+
+	@MessageMapping("/plan/{roomId}/create")
 	@Operation(summary = "plan 생성", description = "command: create , roomId에 plan을 생성",
 		responses = {
 			@ApiResponse(responseCode = "200", description = "Order updated successfully",
@@ -78,6 +90,23 @@ public class PlanController {
 		template.convertAndSend(
 			"/topic/api/plan/" + roomId,
 			new PlanResponseBody<>("create", response)
+		);
+	}
+
+	@MessageMapping("/plan/{roomId}/delete")
+	public void handlePlanDelete(
+		PlanDeleteRequestDto requestDto,
+		@DestinationVariable Long roomId
+	) {
+		log.info("title: " + requestDto.getIdx());
+		long idx = planService.deletePlan(roomId, requestDto);
+		if( idx == -1) {
+			return;
+		}
+
+		template.convertAndSend(
+			"/topic/api/plan/" + roomId,
+			new PlanResponseBody<>("delete", idx)
 		);
 	}
 

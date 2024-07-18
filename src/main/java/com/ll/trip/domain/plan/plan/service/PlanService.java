@@ -1,6 +1,7 @@
 package com.ll.trip.domain.plan.plan.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.plan.plan.dto.PlanCreateRequestDto;
 import com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto;
+import com.ll.trip.domain.plan.plan.dto.PlanDeleteRequestDto;
 import com.ll.trip.domain.plan.plan.entity.Plan;
 import com.ll.trip.domain.plan.plan.repository.PlanRepository;
 
@@ -41,6 +43,11 @@ public class PlanService {
 		return new PlanCreateResponseDto(plan);
 	}
 
+	public Long getNextIdx() {
+		Long maxIdx = planRepository.findMaxIdx();
+		return maxIdx == null ? 0 : maxIdx + 1;
+	}
+
 	public int swapByIndex(Long roomId, List<Long> orders) {
 		if (!swapUsers.containsKey(roomId))
 			return 0;
@@ -48,11 +55,6 @@ public class PlanService {
 		int swapped = planRepository.swapIndexes(roomId, orders.get(0), orders.get(1));
 		swapUsers.remove(roomId);
 		return swapped;
-	}
-
-	public Long getNextIdx() {
-		Long maxIdx = planRepository.findMaxIdx();
-		return (maxIdx != null) ? maxIdx + 1 : 0;
 	}
 
 	public boolean addSwapUserIfPossible(Long roomId) {
@@ -67,5 +69,14 @@ public class PlanService {
 
 	public void deleteSwapUser(Long roomId) {
 		swapUsers.remove(roomId);
+	}
+
+	public Map<Long, String> showSwapUser(){
+		return swapUsers;
+	}
+
+	public long deletePlan(Long roomId, PlanDeleteRequestDto requestDto) {
+		Long idx = requestDto.getIdx();
+		return planRepository.deleteByIdx(idx)==1? idx : -1;
 	}
 }

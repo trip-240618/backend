@@ -27,7 +27,9 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
                    """, nativeQuery = true)
 	int swapIndexes(@Param("roomId") Long roomId, @Param("idx1") Long idx1, @Param("idx2") Long idx2);
 
-	@Query("SELECT COALESCE(MAX(p.idx), 0) FROM Plan p")
+	@Query("SELECT Max(p.idx) FROM Plan p")
 	Long findMaxIdx();
+
+	int deleteByIdx(Long idx);
 }
 
