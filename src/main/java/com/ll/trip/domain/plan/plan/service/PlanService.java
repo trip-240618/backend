@@ -64,4 +64,8 @@ public class PlanService {
 		swapUsers.put(roomId, "User");
 		return true;
 	}
+
+	public void deleteSwapUser(Long roomId) {
+		swapUsers.remove(roomId);
+	}
 }
