@@ -98,7 +98,7 @@ public class PlanController {
 		PlanDeleteRequestDto requestDto,
 		@DestinationVariable Long roomId
 	) {
-		log.info("title: " + requestDto.getIdx());
+		log.info("idx: " + requestDto.getIdx());
 		long idx = planService.deletePlan(roomId, requestDto);
 		if( idx == -1) {
 			return;
@@ -134,6 +134,12 @@ public class PlanController {
 			new PlanResponseBody<>("swap", orders)
 		);
 
+	}
+
+	@GetMapping("/plan/test/create")
+	public ResponseEntity<?> testCreate(){
+		PlanCreateResponseDto response = planService.savePlan(1L, new PlanCreateRequestDto("test","test"));
+		return ResponseEntity.ok(response);
 	}
 
 }
