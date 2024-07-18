@@ -8,14 +8,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.plan.plan.dto.PlanDto;
+import com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto;
 import com.ll.trip.domain.plan.plan.entity.Plan;
 
 public interface PlanRepository extends JpaRepository<Plan, Long> {
 	// roomId로 검색하고 index로 정렬하는 커스텀 쿼리
-	@Query("SELECT new com.ll.trip.domain.plan.plan.dto.PlanDto(p.idx, p.title, p.content) " +
+	@Query("SELECT new com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto(p.idx, p.title, p.content) " +
 		   "FROM Plan p WHERE p.roomId = :roomId ORDER BY p.idx")
-	List<PlanDto> findByRoomIdOrderByIndex(@Param("roomId") Long roomId);
+	List<PlanCreateResponseDto> findByRoomIdOrderByIndex(@Param("roomId") Long roomId);
 
 	@Modifying
 	@Transactional
@@ -25,6 +25,9 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
                    SET p1.idx = :idx2, p2.idx = :idx1
                    WHERE p1.room_id = :roomId AND p1.idx = :idx1 AND p2.idx = :idx2
                    """, nativeQuery = true)
-	void swapIndexes(@Param("roomId") Long roomId, @Param("idx1") Long idx1, @Param("idx2") Long idx2);
+	int swapIndexes(@Param("roomId") Long roomId, @Param("idx1") Long idx1, @Param("idx2") Long idx2);
+
+	@Query("SELECT COALESCE(MAX(p.idx), 0) FROM Plan p")
+	Long findMaxIdx();
 }
 
