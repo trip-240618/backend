@@ -52,6 +52,16 @@ public class PlanController {
 		return ResponseEntity.ok("possible");
 	}
 
+	@GetMapping("/plan/{roomId}/update/order/cancel")
+	@Operation(summary = "plan swap 가능 여부 요청")
+	@ApiResponse(responseCode = "200", description = "현재 방에 swap중인 유저가 있는지 확인 후 swap중인 유저로 등록", content = {
+		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanCreateRequestDto.class)))})
+	public ResponseEntity<?> sendSwapCancle(@PathVariable Long roomId) {
+		//TODO 유저정보로 해당 유저가 교환하는게 맞는지 확인하고 교환해주기
+		planService.deleteSwapUser(roomId);
+		return ResponseEntity.ok("canceled");
+	}
+
 	@MessageMapping("/plan/{roomId}")
 	@Operation(summary = "plan 생성", description = "command: create , roomId에 plan을 생성",
 		responses = {
