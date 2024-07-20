@@ -38,3 +38,4 @@ out/
 ### secret ###
 /src/main/resources/application-secret_dev.yml
 /src/main/resources/application-secret_prod.yml
+/src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json

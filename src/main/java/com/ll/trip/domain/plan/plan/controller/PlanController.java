@@ -44,7 +44,7 @@ public class PlanController {
 	}
 
 	@GetMapping("/plan/{roomId}/update/order/possible")
-	@Operation(summary = "plan swap 가능 여부 요청")
+	@Operation(summary = "plan swap 가능 여부 요청 (swap 요청하기 전 필수)")
 	@ApiResponse(responseCode = "200", description = "현재 방에 swap중인 유저가 있는지 확인 후 swap중인 유저로 등록", content = {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanCreateRequestDto.class)))})
 	public ResponseEntity<?> sendSwapPossible(@PathVariable Long roomId) {
@@ -98,7 +98,7 @@ public class PlanController {
 		PlanDeleteRequestDto requestDto,
 		@DestinationVariable Long roomId
 	) {
-		log.info("title: " + requestDto.getIdx());
+		log.info("idx: " + requestDto.getIdx());
 		long idx = planService.deletePlan(roomId, requestDto);
 		if( idx == -1) {
 			return;

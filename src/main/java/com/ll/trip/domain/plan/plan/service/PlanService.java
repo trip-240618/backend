@@ -75,6 +75,7 @@ public class PlanService {
 		return swapUsers;
 	}
 
+	@Transactional
 	public long deletePlan(Long roomId, PlanDeleteRequestDto requestDto) {
 		Long idx = requestDto.getIdx();
 		return planRepository.deleteByIdx(idx)==1? idx : -1;
