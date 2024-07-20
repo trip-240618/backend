@@ -27,7 +27,8 @@ server:
 
 serverName: local_server
 
-
+firebase:
+  secret-path: /src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
 
 
 ---
@@ -44,7 +45,8 @@ server:
 
 serverName: blue_server
 
-
+firebase:
+  secret-path: /src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
 
 ---
 #green서버 blue 서버 버전업 중에 무중단을 위해 대신 가동될 서버
