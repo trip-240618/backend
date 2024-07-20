@@ -27,9 +27,6 @@ server:
 
 serverName: local_server
 
-firebase:
-  secret-path: /src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
-
 
 ---
 #blue서버 실제 운영서버
@@ -93,6 +90,10 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+
+firebase:
+  secret-path: /src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
+
 springdoc:
   swagger-ui:
     # swagger-ui 접근 경로. default 값은 /swagger-ui.html이다.

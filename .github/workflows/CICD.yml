@@ -23,6 +23,7 @@ jobs:
       - name: Build with Gradle
         run: |
           echo ${{secrets.APPLICATION_SECRET_PROD_YML}} | base64 --decode > ./src/main/resources/application-secret_prod.yml
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" > $GITHUB_WORKSPACE/src/main/resources/serviceAccountKey.json
           chmod +x ./gradlew
           ./gradlew clean build -x test
 
