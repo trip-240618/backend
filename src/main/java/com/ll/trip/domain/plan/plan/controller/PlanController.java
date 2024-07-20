@@ -44,7 +44,7 @@ public class PlanController {
 	}
 
 	@GetMapping("/plan/{roomId}/update/order/possible")
-	@Operation(summary = "plan swap 가능 여부 요청")
+	@Operation(summary = "plan swap 가능 여부 요청 (swap 요청하기 전 필수)")
 	@ApiResponse(responseCode = "200", description = "현재 방에 swap중인 유저가 있는지 확인 후 swap중인 유저로 등록", content = {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanCreateRequestDto.class)))})
 	public ResponseEntity<?> sendSwapPossible(@PathVariable Long roomId) {
@@ -134,12 +134,6 @@ public class PlanController {
 			new PlanResponseBody<>("swap", orders)
 		);
 
-	}
-
-	@GetMapping("/plan/test/create")
-	public ResponseEntity<?> testCreate(){
-		PlanCreateResponseDto response = planService.savePlan(1L, new PlanCreateRequestDto("test","test"));
-		return ResponseEntity.ok(response);
 	}
 
 }
