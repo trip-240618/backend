@@ -29,7 +29,6 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RequestMapping("/user/oauth2")
 public class OAuthController {
-
 	private final KakaoOAuth2Service kakaoOAuth2Service;
 	private final OAuth2Service oAuth2Service;
 

@@ -4,17 +4,14 @@ spring:
   profiles:
     active: local
     group:
-      local: local, secret_dev, common
-      blue: blue, secret_prod, common
-      green: green, secret_prod, common
+      local: secret_dev, local, common
+      blue: blue, secret_prod, prod, common
+      green: green, secret_prod, prod, common
 
 server:
   env: blue
 
-
-
 ---
-
 spring:
   config:
     activate:
@@ -27,10 +24,18 @@ server:
 
 serverName: local_server
 
-firebase:
-  secret-path: /src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
+jpa:
+  hibernate:
+    ddl-auto: update
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
 
-
+jpa:
+  hibernate:
+    ddl-auto: update #실제 운영시엔 validate로 변경(db를 수정하지 않고 예외발생 ,why? 추가된 컬럼이 notnull일 경우 문제가 생김 등등)
 ---
 #blue서버 실제 운영서버
 spring:
@@ -44,10 +49,6 @@ server:
   url: https://trip-story.site
 
 serverName: blue_server
-
-firebase:
-  secret-path: /src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
-
 ---
 #green서버 blue 서버 버전업 중에 무중단을 위해 대신 가동될 서버
 spring:
@@ -68,8 +69,6 @@ spring:
     activate:
       on-profile: common
   jpa:
-    hibernate:
-      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -93,6 +92,10 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+
+firebase:
+  secret-path: /src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
+
 springdoc:
   swagger-ui:
     # swagger-ui 접근 경로. default 값은 /swagger-ui.html이다.
