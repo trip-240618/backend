@@ -1,6 +1,7 @@
 package com.ll.trip.domain.plan.plan.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -48,5 +49,10 @@ public class Plan {
 	private String content;
 
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<PlanImage> imgageUris;
+	private List<PlanImage> imgUris = new ArrayList<>();
+
+	public void addImg(PlanImage img) {
+		imgUris.add(img);
+		img.setPlan(this);
+	}
 }

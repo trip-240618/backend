@@ -37,8 +37,8 @@ public class PlanController {
 	@GetMapping("/plan/{roomId}/history")
 	@Operation(summary = "기존 plan 요청")
 	@ApiResponse(responseCode = "200", description = "db에 저장되어 있는 plan 반환", content = {
-		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanCreateRequestDto.class)))})
-	public ResponseEntity<?> sendPreviousMessages(@PathVariable Long roomId) {
+		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanCreateResponseDto.class)))})
+	public ResponseEntity<?> sendPreviousPlans(@PathVariable Long roomId) {
 		List<PlanCreateResponseDto> plans = planService.getPreviousMessages(roomId);
 		return ResponseEntity.ok(plans);
 	}
@@ -46,7 +46,7 @@ public class PlanController {
 	@GetMapping("/plan/{roomId}/update/order/possible")
 	@Operation(summary = "plan swap 가능 여부 요청 (swap 요청하기 전 필수)")
 	@ApiResponse(responseCode = "200", description = "현재 방에 swap중인 유저가 있는지 확인 후 swap중인 유저로 등록", content = {
-		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanCreateRequestDto.class)))})
+		@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})
 	public ResponseEntity<?> sendSwapPossible(@PathVariable Long roomId) {
 		//TODO 유저정보로 해당 유저가 교환하는게 맞는지 확인하고 교환해주기
 		if (!planService.addSwapUserIfPossible(roomId))

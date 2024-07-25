@@ -14,5 +14,6 @@ import lombok.Setter;
 public class PlanCreateRequestDto {
 	private String title;
 	private String content;
-	private List<String> ImageUris;
+	private List<String> imgUrls;
+	//TODO img 개수 제한
 }

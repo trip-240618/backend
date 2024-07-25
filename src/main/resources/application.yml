@@ -93,6 +93,11 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
 firebase:
   secret-path: /src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
 

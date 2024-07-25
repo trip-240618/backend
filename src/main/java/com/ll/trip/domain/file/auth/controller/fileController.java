@@ -2,11 +2,14 @@ package com.ll.trip.domain.file.auth.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ll.trip.domain.file.auth.dto.PreSignedUrlDto;
+import com.ll.trip.domain.file.auth.dto.UploadPlanImageRequest;
 import com.ll.trip.domain.file.auth.service.AwsAuthService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,7 +25,7 @@ public class fileController {
 
 	private final AwsAuthService awsAuthService;
 
-	@GetMapping("/upload/url")
+	@GetMapping("/request/url")
 	public ResponseEntity<PreSignedUrlDto> getPreSignedUrl(
 		@RequestParam String prefix,
 		@RequestParam(required = false) String fileName
@@ -30,6 +33,16 @@ public class fileController {
 		String preSignedUrl = awsAuthService.getPreSignedUrl(prefix, fileName);
 
 		return ResponseEntity.ok(new PreSignedUrlDto(preSignedUrl));
+	}
+
+	@PostMapping("/upload/url")
+	public ResponseEntity<?> uploadUrl(
+		@RequestBody final UploadPlanImageRequest request
+	) {
+
+
+
+		return ResponseEntity.ok("uploaded");
 	}
 
 }

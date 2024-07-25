@@ -1,9 +1,11 @@
 package com.ll.trip.domain.plan.plan.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,7 @@ import com.ll.trip.domain.plan.plan.dto.PlanCreateRequestDto;
 import com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto;
 import com.ll.trip.domain.plan.plan.dto.PlanDeleteRequestDto;
 import com.ll.trip.domain.plan.plan.entity.Plan;
+import com.ll.trip.domain.plan.plan.entity.PlanImage;
 import com.ll.trip.domain.plan.plan.repository.PlanRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -24,12 +27,28 @@ public class PlanService {
 	private final ConcurrentMap<Long, String> swapUsers = new ConcurrentHashMap<>();
 
 	public synchronized List<PlanCreateResponseDto> getPreviousMessages(Long roomId) {
-		return planRepository.findByRoomIdOrderByIndex(roomId);
+		//fetch join
+		List<Plan> plans = planRepository.findByRoomIdOrderByIndex(roomId);
+
+		List<PlanCreateResponseDto> responseDtos = new ArrayList<>();
+		for (Plan plan : plans) {
+			PlanCreateResponseDto responseDto = new PlanCreateResponseDto(plan);
+			responseDtos.add(responseDto);
+		}
+
+		return responseDtos;
 	}
 
 	@Transactional
 	public synchronized PlanCreateResponseDto savePlan(Long roomId, PlanCreateRequestDto requestDto) {
 		long idx = getNextIdx();
+
+		List<PlanImage> imgUrls = requestDto.getImgUrls().stream()
+			.map(url -> PlanImage.builder()
+				.uri(url)
+				.build()
+			)
+			.collect(Collectors.toList());
 
 		Plan plan = Plan.builder()
 			.roomId(roomId)
@@ -38,9 +57,13 @@ public class PlanService {
 			.idx(idx)
 			.build();
 
-		plan = planRepository.save(plan);
+		for (PlanImage img : imgUrls) {
+			plan.addImg(img);
+		}
 
-		return new PlanCreateResponseDto(plan);
+		planRepository.save(plan);
+
+		return new PlanCreateResponseDto(idx, requestDto);
 	}
 
 	public Long getNextIdx() {
@@ -71,13 +94,14 @@ public class PlanService {
 		swapUsers.remove(roomId);
 	}
 
-	public Map<Long, String> showSwapUser(){
+	public Map<Long, String> showSwapUser() {
 		return swapUsers;
 	}
 
 	@Transactional
 	public long deletePlan(Long roomId, PlanDeleteRequestDto requestDto) {
 		Long idx = requestDto.getIdx();
-		return planRepository.deleteByIdx(idx)==1? idx : -1;
+		return planRepository.deleteByIdx(idx) == 1 ? idx : -1;
 	}
+
 }
