@@ -79,7 +79,7 @@ public class PlanController {
 
 	@PostMapping("/plan/{roomId}/upload/{idx}")
 	@Operation(summary = "plan에 이미지 업로드")
-	@ApiResponse(responseCode = "200", description = "roomId, idx로 plan을 특정해 이미지를 업로드", content = {
+	@ApiResponse(responseCode = "200", description = "roomId, idx로 plan을 특정해 이미지를 업로드 (*presignedUrl을 받고 파일을 업로드 한 이후에 url만 등록하는 요청)", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})
 	public ResponseEntity<?> uploadImage(
 		@PathVariable final Long roomId,

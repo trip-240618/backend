@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class PreSignedUrlDto {
+public class PreSignedUrlResponseDto {
 	private List<String> preSignedUrls;
 
 }
