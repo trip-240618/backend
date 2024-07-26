@@ -59,6 +59,7 @@ public class UserEntity {
 	private String profileImg;
 	private String roles;
 	private String email;
+	private String fcmToken;
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "refresh_token_id")

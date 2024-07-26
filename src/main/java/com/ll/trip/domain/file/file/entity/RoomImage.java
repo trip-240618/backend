@@ -1,16 +1,16 @@
-package com.ll.trip.domain.plan.room.entity;
+package com.ll.trip.domain.file.file.entity;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.ll.trip.domain.file.file.entity.RoomImage;
+import com.ll.trip.domain.plan.room.entity.PlanRoom;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,20 +23,22 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class PlanRoom {
-
+@EntityListeners(AuditingEntityListener.class)
+public class RoomImage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@EqualsAndHashCode.Include
 	private Long id;
 
-	private String name;
+	private String title;
 
-	@OneToMany(mappedBy = "planRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<RoomImage> roomImages = new ArrayList<>();
+	private String uri;
 
-	public void addImg(RoomImage img) {
-		roomImages.add(img);
-		img.setPlan(this);
+	@ManyToOne
+	@JoinColumn(name = "plan_room_id")
+	private PlanRoom planRoom;
+
+	public void setPlan(PlanRoom planRoom) {
+		this.planRoom = planRoom;
 	}
 }

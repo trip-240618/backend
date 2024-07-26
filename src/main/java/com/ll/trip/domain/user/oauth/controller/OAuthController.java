@@ -29,7 +29,6 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RequestMapping("/user/oauth2")
 public class OAuthController {
-
 	private final KakaoOAuth2Service kakaoOAuth2Service;
 	private final OAuth2Service oAuth2Service;
 
@@ -62,7 +61,8 @@ public class OAuthController {
 	@Operation(summary = "구글 로그인")
 	@ApiResponse(responseCode = "200", description = "구글 로그인 & 유저정보 반환", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
-	public ResponseEntity<?> googleLogin(@RequestBody final GoogleLoginRequestBody requestBody,
+	public ResponseEntity<?> googleLogin(
+		@RequestBody final GoogleLoginRequestBody requestBody,
 		HttpServletResponse response) {
 		String oauthId = requestBody.getId();
 		String name = requestBody.getDisplayName();
