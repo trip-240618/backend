@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class PreSignedUrlRequestBody {
 	private String prefix;
-	private String fileName;
+	private Integer photoCount;
 }

@@ -1,7 +1,9 @@
 package com.ll.trip.domain.file.file.service;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +15,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.ll.trip.domain.file.file.dto.PreSignedUrlDto;
+import com.ll.trip.domain.file.file.dto.PreSignedUrlRequestBody;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,11 +29,17 @@ public class AwsAuthService {
 
 	private final AmazonS3 amazonS3;
 
-	public String getPreSignedUrl(String prefix, String fileName) {
-		fileName = createPath(prefix, fileName);
-		GeneratePresignedUrlRequest generatePresignedUrlRequest = getGeneratePreSignedUrlRequest(bucket, fileName);
-		URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-		return url.toString();
+	public PreSignedUrlDto getPreSignedUrl(PreSignedUrlRequestBody requestBody) {
+		List<String> preSignedUrls = new ArrayList<>();
+
+		for (int i = 0; i < requestBody.getPhotoCount(); i++) {
+			String fileName = createPath(requestBody.getPrefix(), null);
+			GeneratePresignedUrlRequest generatePresignedUrlRequest = getGeneratePreSignedUrlRequest(bucket, fileName);
+			URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
+			preSignedUrls.add(url.toString());
+		}
+
+		return new PreSignedUrlDto(preSignedUrls);
 	}
 
 	private GeneratePresignedUrlRequest getGeneratePreSignedUrlRequest(String bucket, String fileName) {

@@ -121,7 +121,5 @@ public class PlanService {
 			throw new NullPointerException("plan이 존재하지 않거나 이미지가 없습니다.");
 
 		savePlanImg(optPlan.get(), requestBody.getImgUrls());
-
-		//TODO return
 	}
 }
