@@ -1,6 +1,7 @@
 package com.ll.trip.domain.plan.plan.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -30,5 +31,7 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
 	Long findMaxIdx();
 
 	int deleteByIdx(Long idx);
+
+	Optional<Plan> findByIdx(Long idx);
 }
 

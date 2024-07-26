@@ -46,9 +46,10 @@ public class Plan {
 	private Long idx;
 
 	private String title;
+
 	private String content;
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<PlanImage> imgUris = new ArrayList<>();
 
 	public void addImg(PlanImage img) {

@@ -1,4 +1,4 @@
-package com.ll.trip.domain.file.auth.config;
+package com.ll.trip.domain.file.file.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

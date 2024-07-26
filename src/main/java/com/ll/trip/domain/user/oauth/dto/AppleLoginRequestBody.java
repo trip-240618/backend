@@ -1,13 +1,13 @@
 package com.ll.trip.domain.user.oauth.dto;
 
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class AppleLoginRequestBody {
-	String email;
-	String familyName;
-	String givenName;
-	String identityToken;
-	String state;
-	String userIdentifier;
+	private String email;
+	private String familyName;
+	private String givenName;
+	private String identityToken;
+	private String state;
+	private String userIdentifier;
 }

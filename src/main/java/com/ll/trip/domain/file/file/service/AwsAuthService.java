@@ -1,4 +1,4 @@
-package com.ll.trip.domain.file.auth.service;
+package com.ll.trip.domain.file.file.service;
 
 import java.net.URL;
 import java.util.Date;

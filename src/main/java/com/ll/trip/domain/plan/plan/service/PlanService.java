@@ -1,15 +1,17 @@
 package com.ll.trip.domain.plan.plan.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.file.file.dto.UploadImageRequestBody;
 import com.ll.trip.domain.plan.plan.dto.PlanCreateRequestDto;
 import com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto;
 import com.ll.trip.domain.plan.plan.dto.PlanDeleteRequestDto;
@@ -43,13 +45,6 @@ public class PlanService {
 	public synchronized PlanCreateResponseDto savePlan(Long roomId, PlanCreateRequestDto requestDto) {
 		long idx = getNextIdx();
 
-		List<PlanImage> imgUrls = requestDto.getImgUrls().stream()
-			.map(url -> PlanImage.builder()
-				.uri(url)
-				.build()
-			)
-			.collect(Collectors.toList());
-
 		Plan plan = Plan.builder()
 			.roomId(roomId)
 			.title(requestDto.getTitle())
@@ -57,13 +52,9 @@ public class PlanService {
 			.idx(idx)
 			.build();
 
-		for (PlanImage img : imgUrls) {
-			plan.addImg(img);
-		}
+		savePlanImg(plan, requestDto.getImgUrls());
 
-		planRepository.save(plan);
-
-		return new PlanCreateResponseDto(idx, requestDto);
+		return new PlanCreateResponseDto(plan);
 	}
 
 	public Long getNextIdx() {
@@ -104,4 +95,33 @@ public class PlanService {
 		return planRepository.deleteByIdx(idx) == 1 ? idx : -1;
 	}
 
+	@Transactional
+	public void savePlanImg(Plan plan, List<String> urls) {
+		List<PlanImage> imgUrls = (urls == null ?
+			Collections.<String>emptyList() : urls)
+			.stream()
+			.map(url -> PlanImage.builder()
+				.uri(url)
+				.build()
+			)
+			.toList();
+
+		for (PlanImage img : imgUrls) {
+			plan.addImg(img);
+		}
+
+		planRepository.save(plan);
+	}
+
+	@Transactional
+	public void addPlanImg(Long idx, UploadImageRequestBody requestBody) throws NullPointerException {
+		Optional<Plan> optPlan = planRepository.findByIdx(idx);
+
+		if (optPlan.isEmpty() || requestBody.getImgUrls() == null)
+			throw new NullPointerException("plan이 존재하지 않거나 이미지가 없습니다.");
+
+		savePlanImg(optPlan.get(), requestBody.getImgUrls());
+
+		//TODO return
+	}
 }

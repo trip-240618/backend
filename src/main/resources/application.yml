@@ -16,6 +16,9 @@ spring:
   config:
     activate:
       on-profile: local
+  jpa:
+    hibernate:
+      ddl-auto: update
 
 server:
   port: 8080
@@ -24,18 +27,15 @@ server:
 
 serverName: local_server
 
-jpa:
-  hibernate:
-    ddl-auto: update
 ---
 spring:
   config:
     activate:
       on-profile: prod
+  jpa:
+    hibernate:
+      ddl-auto: update #실제 운영시엔 validate로 변경(db를 수정하지 않고 예외발생 ,why? 추가된 컬럼이 notnull일 경우 문제가 생김 등등)
 
-jpa:
-  hibernate:
-    ddl-auto: update #실제 운영시엔 validate로 변경(db를 수정하지 않고 예외발생 ,why? 추가된 컬럼이 notnull일 경우 문제가 생김 등등)
 ---
 #blue서버 실제 운영서버
 spring:
@@ -69,6 +69,7 @@ spring:
     activate:
       on-profile: common
   jpa:
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -92,11 +93,6 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
-
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 firebase:
   secret-path: /src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json

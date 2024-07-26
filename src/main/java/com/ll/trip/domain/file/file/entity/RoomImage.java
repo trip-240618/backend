@@ -1,6 +1,8 @@
-package com.ll.trip.domain.plan.plan.entity;
+package com.ll.trip.domain.file.file.entity;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.ll.trip.domain.plan.room.entity.PlanRoom;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -22,19 +24,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class PlanImage {
+public class RoomImage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@EqualsAndHashCode.Include
 	private Long id;
 
+	private String title;
+
 	private String uri;
 
 	@ManyToOne
-	@JoinColumn(name = "plan_id")
-	private Plan plan;
+	@JoinColumn(name = "plan_room_id")
+	private PlanRoom planRoom;
 
-	public void setPlan(Plan plan){
-		this.plan = plan;
+	public void setPlan(PlanRoom planRoom) {
+		this.planRoom = planRoom;
 	}
 }

@@ -2,15 +2,9 @@ package com.ll.trip.domain.plan.plan.dto;
 
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 public class PlanCreateRequestDto {
 	private String title;
 	private String content;

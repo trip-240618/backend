@@ -10,7 +10,10 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import com.ll.trip.domain.file.file.dto.UploadImageRequestBody;
 import com.ll.trip.domain.plan.plan.dto.PlanCreateRequestDto;
 import com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto;
 import com.ll.trip.domain.plan.plan.dto.PlanDeleteRequestDto;
@@ -72,6 +75,28 @@ public class PlanController {
 		//TODO 유저정보로 해당 유저가 교환하는게 맞는지 확인하고 교환해주기
 		Map<Long,String> swapUser = planService.showSwapUser();
 		return ResponseEntity.ok(swapUser);
+	}
+
+	@PostMapping("/plan/{roomId}/upload/{idx}")
+	@Operation(summary = "plan에 이미지 업로드")
+	@ApiResponse(responseCode = "200", description = "roomId, idx로 plan을 특정해 이미지를 업로드", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})
+	public ResponseEntity<?> uploadImage(
+		@PathVariable final Long roomId,
+		@PathVariable final Long idx,
+		@RequestBody UploadImageRequestBody requestBody
+	) {
+		try {
+			planService.addPlanImg(idx, requestBody);
+		} catch (NullPointerException npe) {
+			return ResponseEntity.badRequest().body("plan이 존재하지 않거나 이미지가 없습니다.");
+		}
+
+		template.convertAndSend(
+			"/topic/api/plan/" + roomId,
+			new PlanResponseBody<>("addImg", requestBody)
+		);
+		return ResponseEntity.ok("uploaded");
 	}
 
 	@MessageMapping("/plan/{roomId}/create")

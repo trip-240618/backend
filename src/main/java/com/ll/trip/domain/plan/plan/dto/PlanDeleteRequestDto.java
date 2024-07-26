@@ -1,14 +1,8 @@
 package com.ll.trip.domain.plan.plan.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 public class PlanDeleteRequestDto {
 	private Long idx;
 }

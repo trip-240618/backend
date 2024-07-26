@@ -1,12 +1,12 @@
 package com.ll.trip.domain.user.oauth.dto;
 
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class GoogleLoginRequestBody {
-	String displayName;
-	String email;
-	String id;
-	String photoUrl;
-	String serverAuthCode;
+	private String displayName;
+	private String email;
+	private String id;
+	private String photoUrl;
+	private String serverAuthCode;
 }
