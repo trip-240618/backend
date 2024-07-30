@@ -17,6 +17,7 @@ import com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto;
 import com.ll.trip.domain.plan.plan.dto.PlanDeleteRequestDto;
 import com.ll.trip.domain.plan.plan.entity.Plan;
 import com.ll.trip.domain.plan.plan.entity.PlanImage;
+import com.ll.trip.domain.plan.plan.repository.PlanImgRepository;
 import com.ll.trip.domain.plan.plan.repository.PlanRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PlanService {
 	private final PlanRepository planRepository;
-
+	private final PlanImgRepository planImgRepository;
 	private final ConcurrentMap<Long, String> swapUsers = new ConcurrentHashMap<>();
 
 	public synchronized List<PlanCreateResponseDto> getPreviousMessages(Long roomId) {
@@ -121,5 +122,12 @@ public class PlanService {
 			throw new NullPointerException("plan이 존재하지 않거나 이미지가 없습니다.");
 
 		savePlanImg(optPlan.get(), requestBody.getImgUrls());
+	}
+
+	@Transactional
+	public void deletePlanImg(List<String> urls) {
+		for (String url : urls) {
+			planImgRepository.deleteByUri(url);
+		}
 	}
 }
