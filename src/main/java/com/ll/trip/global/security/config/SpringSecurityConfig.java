@@ -53,7 +53,8 @@ public class SpringSecurityConfig {
 					"/api-docs.yaml",
 					"/chat/**",
 					"/ws/**",
-					"/plan/**"
+					"/plan/**",
+					"/file/**"
 				).permitAll()
 				.anyRequest().authenticated()
 			);

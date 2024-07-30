@@ -9,6 +9,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class PreSignedUrlResponseDto {
 	private List<String> preSignedUrls;
-
 }
 
