@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.ll.trip.domain.file.file.dto.DeleteObjectByUrlRequestBody;
 import com.ll.trip.domain.file.file.dto.UploadImageRequestBody;
+import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.plan.plan.dto.PlanCreateRequestDto;
 import com.ll.trip.domain.plan.plan.dto.PlanCreateResponseDto;
 import com.ll.trip.domain.plan.plan.dto.PlanDeleteRequestDto;
@@ -34,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PlanController {
 
 	private final PlanService planService;
-
+	private final AwsAuthService awsAuthService;
 	private final SimpMessagingTemplate template;
 
 	@GetMapping("/plan/{roomId}/history")
@@ -44,6 +46,36 @@ public class PlanController {
 	public ResponseEntity<?> sendPreviousPlans(@PathVariable Long roomId) {
 		List<PlanCreateResponseDto> plans = planService.getPreviousMessages(roomId);
 		return ResponseEntity.ok(plans);
+	}
+
+	@PostMapping("/plan/{roomId}/delete/img/{idx}")
+	@Operation(summary = "s3 버킷 오브젝트 삭제 요청 + db에 저장된 url 삭제 요청")
+	@ApiResponse(responseCode = "200", description = "PresignedUrl을 전송해 해당 url로 s3에 업로드된 파일을 삭제하고 db에서 url을 제거하는 요청", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})
+	public ResponseEntity<?> deleteObject(
+		@RequestBody DeleteObjectByUrlRequestBody requestBody,
+		@PathVariable Long roomId,
+		@PathVariable Long idx
+	) {
+		log.info(requestBody.getIsUploaded() ? "true" : "false");
+
+		if (requestBody.getUrls() == null || requestBody.getUrls().isEmpty())
+			return ResponseEntity.badRequest().body("empty");
+
+		List<String> urls = awsAuthService.abstractUrlFromPresignedUrl(requestBody.getUrls());
+		List<String> keys = awsAuthService.abstractKeyFromUrl(urls);
+
+		awsAuthService.deleteObjectByKey(keys);
+
+		if(requestBody.getIsUploaded()) {
+			planService.deletePlanImg(urls);
+			template.convertAndSend(
+				"/topic/api/plan/" + roomId,
+				new PlanResponseBody<>("deleteImg", requestBody)
+			);
+		}
+
+		return ResponseEntity.ok("deleted");
 	}
 
 	@GetMapping("/plan/{roomId}/update/order/possible")
@@ -73,13 +105,13 @@ public class PlanController {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))})
 	public ResponseEntity<?> checkSwapUser() {
 		//TODO 유저정보로 해당 유저가 교환하는게 맞는지 확인하고 교환해주기
-		Map<Long,String> swapUser = planService.showSwapUser();
+		Map<Long, String> swapUser = planService.showSwapUser();
 		return ResponseEntity.ok(swapUser);
 	}
 
 	@PostMapping("/plan/{roomId}/upload/{idx}")
 	@Operation(summary = "plan에 이미지 업로드")
-	@ApiResponse(responseCode = "200", description = "roomId, idx로 plan을 특정해 이미지를 업로드", content = {
+	@ApiResponse(responseCode = "200", description = "roomId, idx로 plan을 특정해 이미지를 업로드 (*presignedUrl을 받고 파일을 업로드 한 이후에 url만 등록하는 요청)", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})
 	public ResponseEntity<?> uploadImage(
 		@PathVariable final Long roomId,
@@ -125,7 +157,7 @@ public class PlanController {
 	) {
 		log.info("idx: " + requestDto.getIdx());
 		long idx = planService.deletePlan(roomId, requestDto);
-		if( idx == -1) {
+		if (idx == -1) {
 			return;
 		}
 

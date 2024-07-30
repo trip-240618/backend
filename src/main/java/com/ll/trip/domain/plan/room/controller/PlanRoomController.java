@@ -30,13 +30,14 @@ public class PlanRoomController {
 
 	@PostMapping("/plan/room/{roomId}/upload")
 	@Operation(summary = "임시 이미지 업로드")
-	@ApiResponse(responseCode = "200", description = "플랜룸에 임시로 이미지를 업로드", content = {
+	@ApiResponse(responseCode = "200", description = "플랜룸에 임시로 이미지를 업로드(*presignedUrl을 받고 파일을 업로드 한 이후에 url만 등록하는 요청)", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})
 	public ResponseEntity<?> uploadToRoom(
 		@PathVariable final Long roomId,
 		@RequestBody final UploadImageRequestBody request
 	) {
-		if(request.getImgUrls() == null) return ResponseEntity.badRequest().body("요청바디가 비어있습니다.");
+		if (request.getImgUrls() == null)
+			return ResponseEntity.badRequest().body("요청바디가 비어있습니다.");
 
 		try {
 			planRoomService.uploadImgUrlByRoomId(roomId, request);
