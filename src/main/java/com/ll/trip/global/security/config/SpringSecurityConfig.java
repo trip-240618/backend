@@ -45,16 +45,17 @@ public class SpringSecurityConfig {
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.authorizeHttpRequests(a -> a
 				.requestMatchers(
-					"/user/oauth2/**",
-					"/env",
-					"/swagger-ui/**",
-					"/swagger-ui.html",
-					"/api-docs/**",
-					"/api-docs.yaml",
-					"/chat/**",
-					"/ws/**",
-					"/plan/**",
-					"/file/**"
+					"/**"
+					// "/user/oauth2/**",
+					// "/env",
+					// "/swagger-ui/**",
+					// "/swagger-ui.html",
+					// "/api-docs/**",
+					// "/api-docs.yaml",
+					// "/chat/**",
+					// "/ws/**",
+					// "/plan/**",
+					// "/file/**"
 				).permitAll()
 				.anyRequest().authenticated()
 			);
