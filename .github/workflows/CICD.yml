@@ -63,16 +63,26 @@ jobs:
             echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
           fi
 
-      - name: Docker compose
+      - name: Docker pull
         uses: appleboy/ssh-action@master
         with:
           username: ubuntu
           host: ${{ secrets.TRIP_PROD_IP }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
           script: |
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/trip_prod:latest
+
+      - name: Docker compose up
+        uses: appleboy/ssh-action@master
+        with:
+          username: ubuntu
+          host: ${{ secrets.TRIP_PROD_IP }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
             sudo docker-compose -f docker-compose-${{env.TARGET_UPSTREAM}}.yml up -d
+
+      - name: Wait for 20 seconds for application started
+        run: sleep 20
 
       - name: Check deploy server URL
         uses: jtalk/url-health-check-action@v3
