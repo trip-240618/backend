@@ -84,6 +84,9 @@ dependencies {
 
     //aws-sdk
     implementation 'com.amazonaws:aws-java-sdk-s3:1.11.238'
+
+    //amadeus
+    implementation 'com.amadeus:amadeus-java:7.0.0'
 }
 
 tasks.named('test') {

@@ -3,7 +3,7 @@ package com.ll.trip.domain.plan.room.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ll.trip.domain.file.file.entity.RoomImage;
+import com.ll.trip.domain.file.file.entity.TripImage;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class PlanRoom {
+public class Trip {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,11 +32,11 @@ public class PlanRoom {
 
 	private String name;
 
-	@OneToMany(mappedBy = "planRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<RoomImage> roomImages = new ArrayList<>();
+	@OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<TripImage> TripImages = new ArrayList<>();
 
-	public void addImg(RoomImage img) {
-		roomImages.add(img);
-		img.setPlan(this);
+	public void addImg(TripImage img) {
+		TripImages.add(img);
+		img.setTrip(this);
 	}
 }
