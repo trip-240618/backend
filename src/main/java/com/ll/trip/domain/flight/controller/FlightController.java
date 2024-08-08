@@ -11,6 +11,11 @@ import com.amadeus.resources.DatedFlight;
 import com.ll.trip.domain.flight.dto.ScheduleResponseDto;
 import com.ll.trip.domain.flight.service.FlightService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,6 +28,9 @@ public class FlightController {
 	private final FlightService flightService;
 
 	@GetMapping("/schedule")
+	@Operation(summary = "항공편 조회")
+	@ApiResponse(responseCode = "200", description = "항공편으로 항공기 출발,도착 정보 조회", content = {
+		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ScheduleResponseDto.class)))})
 	public ResponseEntity<?> showFlightSchedule(
 		@RequestParam Integer flightNumber,
 		@RequestParam String carrierCode,
