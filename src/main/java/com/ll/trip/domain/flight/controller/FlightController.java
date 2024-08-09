@@ -12,6 +12,7 @@ import com.ll.trip.domain.flight.dto.ScheduleResponseDto;
 import com.ll.trip.domain.flight.service.FlightService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -32,9 +33,9 @@ public class FlightController {
 	@ApiResponse(responseCode = "200", description = "항공편으로 항공기 출발,도착 정보 조회", content = {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ScheduleResponseDto.class)))})
 	public ResponseEntity<?> showFlightSchedule(
-		@RequestParam Integer flightNumber,
-		@RequestParam String carrierCode,
-		@RequestParam String departureDate
+		@Parameter(description = "항공편 번호", example = "319") @RequestParam Integer flightNumber,
+		@Parameter(description = "항공사 코드", example = "AZ") @RequestParam String carrierCode,
+		@Parameter(description = "출발 날짜(과거x)", example = "2024-08-15") @RequestParam String departureDate
 	) {
 		log.info(carrierCode + flightNumber + " " + departureDate);
 
