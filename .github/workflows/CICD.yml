@@ -71,23 +71,15 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
-            CONTAINER_ID=$(sudo docker ps -q -f name=${{env.CURRENT_UPSTREAM}})
+            CURRENT_UPSTREAM=${{env.CURRENT_UPSTREAM}}
+            CONTAINER_ID=$(sudo docker ps -q -f name=$CURRENT_UPSTREAM)
             if [ -n "$CONTAINER_ID" ]; then
-              echo "Stopping and removing container ${{env.CURRENT_UPSTREAM}}..."
-              sudo docker stop $CURRENT_UPSTREAM
-              sudo docker rm $CURRENT_UPSTREAM
+              echo "Stopping and removing container $CURRENT_UPSTREAM..."
+              sudo docker stop $CURRENT_UPSTREAM || true
+              sudo docker rm $CURRENT_UPSTREAM || true
             else
               echo "No running container found with name $CURRENT_UPSTREAM"
-            fi        
-
-      - name: Docker pull
-        uses: appleboy/ssh-action@master
-        with:
-          username: ubuntu
-          host: ${{ secrets.TRIP_PROD_IP }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/trip_prod:latest
+            fi     
 
       - name: Docker compose up
         uses: appleboy/ssh-action@master
@@ -96,6 +88,7 @@ jobs:
           host: ${{ secrets.TRIP_PROD_IP }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/trip_prod:latest
             sudo docker-compose -f docker-compose-${{env.TARGET_UPSTREAM}}.yml up -d
 
       - name: Wait for 20 seconds for application started
