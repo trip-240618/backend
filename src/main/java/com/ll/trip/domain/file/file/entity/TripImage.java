@@ -2,14 +2,13 @@ package com.ll.trip.domain.file.file.entity;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.ll.trip.domain.plan.room.entity.PlanRoom;
+import com.ll.trip.domain.plan.room.entity.Trip;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -24,7 +23,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class RoomImage {
+public class TripImage {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@EqualsAndHashCode.Include
@@ -35,10 +34,9 @@ public class RoomImage {
 	private String uri;
 
 	@ManyToOne
-	@JoinColumn(name = "plan_room_id")
-	private PlanRoom planRoom;
+	private Trip trip;
 
-	public void setPlan(PlanRoom planRoom) {
-		this.planRoom = planRoom;
+	public void setTrip(Trip trip) {
+		this.trip = trip;
 	}
 }

@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.file.file.dto.UploadImageRequestBody;
-import com.ll.trip.domain.file.file.entity.RoomImage;
-import com.ll.trip.domain.plan.room.entity.PlanRoom;
+import com.ll.trip.domain.file.file.entity.TripImage;
+import com.ll.trip.domain.plan.room.entity.Trip;
 import com.ll.trip.domain.plan.room.repository.PlanRoomRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,19 +20,19 @@ public class PlanRoomService {
 	private final PlanRoomRepository planRoomRepository;
 
 	public Long createRoom() {
-		PlanRoom planRoom = PlanRoom.builder().name("testRoom").build();
-		planRoom = planRoomRepository.save(planRoom);
-		return planRoom.getId();
+		Trip trip = Trip.builder().name("testRoom").build();
+		trip = planRoomRepository.save(trip);
+		return trip.getId();
 	}
 
 	@Transactional
 	public void uploadImgUrlByRoomId(Long roomId, UploadImageRequestBody request) throws NullPointerException{
 		log.info("roomId : " + roomId);
-		Optional<PlanRoom> optRoom = planRoomRepository.findById(roomId);
+		Optional<Trip> optRoom = planRoomRepository.findById(roomId);
 
-		PlanRoom room = optRoom.get();
+		Trip room = optRoom.get();
 		for(String url : request.getImgUrls()) {
-			RoomImage img = RoomImage.builder()
+			TripImage img = TripImage.builder()
 				.uri(url)
 				.build();
 
