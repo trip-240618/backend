@@ -63,23 +63,23 @@ jobs:
             echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
           fi
 
-#      - name: Stop current server
-#        uses: appleboy/ssh-action@master
-#        with:
-#          username: ubuntu
-#          host: ${{ secrets.TRIP_PROD_IP }}
-#          key: ${{ secrets.EC2_SSH_KEY }}
-#          script_stop: true
-#          script: |
-#            CURRENT_UPSTREAM=${{env.CURRENT_UPSTREAM}}
-#            CONTAINER_ID=$(sudo docker ps -q -f name=$CURRENT_UPSTREAM)
-#            if [ -n "$CONTAINER_ID" ]; then
-#              echo "Stopping and removing container $CURRENT_UPSTREAM..."
-#              sudo docker stop $CURRENT_UPSTREAM || true
-#              sudo docker rm $CURRENT_UPSTREAM || true
-#            else
-#              echo "No running container found with name $CURRENT_UPSTREAM"
-#            fi
+      - name: Stop current server
+        uses: appleboy/ssh-action@master
+        with:
+          username: ubuntu
+          host: ${{ secrets.TRIP_PROD_IP }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            CURRENT_UPSTREAM=${{env.CURRENT_UPSTREAM}}
+            CONTAINER_ID=$(sudo docker ps -q -f name=$CURRENT_UPSTREAM)
+            if [ -n "$CONTAINER_ID" ]; then
+              echo "Stopping and removing container $CURRENT_UPSTREAM..."
+              sudo docker stop $CURRENT_UPSTREAM || true
+              sudo docker rm $CURRENT_UPSTREAM || true
+            else
+              echo "No running container found with name $CURRENT_UPSTREAM"
+            fi
 
       - name: Docker compose up
         uses: appleboy/ssh-action@master
