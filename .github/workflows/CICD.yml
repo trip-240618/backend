@@ -73,12 +73,12 @@ jobs:
           script: |
             CONTAINER_ID=$(sudo docker ps -q -f name=${{env.CURRENT_UPSTREAM}})
             if [ -n "$CONTAINER_ID" ]; then
-            echo "Stopping and removing container ${{env.CURRENT_UPSTREAM}}..."
-            sudo docker stop ${{env.CURRENT_UPSTREAM}}
-            sudo docker rm ${{env.CURRENT_UPSTREAM}}
+              echo "Stopping and removing container ${{env.CURRENT_UPSTREAM}}..."
+              sudo docker stop $CURRENT_UPSTREAM
+              sudo docker rm $CURRENT_UPSTREAM
             else
-            echo "No running container found with name ${{env.CURRENT_UPSTREAM}}"
-            fi
+              echo "No running container found with name $CURRENT_UPSTREAM"
+            fi        
 
       - name: Docker pull
         uses: appleboy/ssh-action@master
