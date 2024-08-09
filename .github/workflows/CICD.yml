@@ -71,6 +71,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           script: |
+            set -x
             CURRENT_UPSTREAM=${{env.CURRENT_UPSTREAM}}
             CONTAINER_ID=$(sudo docker ps -q -f name=$CURRENT_UPSTREAM)
             if [ -n "$CONTAINER_ID" ]; then
@@ -79,6 +80,7 @@ jobs:
               sudo docker rm $CURRENT_UPSTREAM || true
             else
               echo "No running container found with name $CURRENT_UPSTREAM"
+              exit 0
             fi
 
       - name: Docker compose up
