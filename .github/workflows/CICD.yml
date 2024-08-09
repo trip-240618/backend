@@ -63,6 +63,23 @@ jobs:
             echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
           fi
 
+      - name: Stop current server
+        uses: appleboy/ssh-action@master
+        with:
+          username: ubuntu
+          host: ${{ secrets.TRIP_PROD_IP }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            CONTAINER_ID=$(sudo docker ps -q -f name=${{env.CURRENT_UPSTREAM}})
+            if [ -n "$CONTAINER_ID" ]; then
+            echo "Stopping and removing container ${{env.CURRENT_UPSTREAM}}..."
+            sudo docker stop ${{env.CURRENT_UPSTREAM}}
+            sudo docker rm ${{env.CURRENT_UPSTREAM}}
+            else
+            echo "No running container found with name ${{env.CURRENT_UPSTREAM}}"
+            fi
+
       - name: Docker pull
         uses: appleboy/ssh-action@master
         with:
@@ -100,14 +117,3 @@ jobs:
           script_stop: true
           script: |
             sudo docker exec -i nginxserver bash -c 'echo "set \$service_url ${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc && nginx -s reload' 
-
-      - name: Stop current server
-        uses: appleboy/ssh-action@master
-        with:
-          username: ubuntu
-          host: ${{ secrets.TRIP_PROD_IP }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
-          script: |
-            sudo docker stop ${{env.CURRENT_UPSTREAM}}
-            sudo docker rm ${{env.CURRENT_UPSTREAM}}
