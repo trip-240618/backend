@@ -27,9 +27,9 @@ import lombok.NoArgsConstructor;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class Bookmark {
+public class TripMember {
 	@EmbeddedId
-	private BookmarkId id;
+	private TripMemberId id;
 
 	@ManyToOne
 	@MapsId("userId") // BookmarkId에 정의된 필드명과 일치해야 함
@@ -49,5 +49,5 @@ public class Bookmark {
 	@LastModifiedDate
 	private LocalDateTime modifyDate;
 
-	private boolean toggle;
+	private boolean isLeader;
 }

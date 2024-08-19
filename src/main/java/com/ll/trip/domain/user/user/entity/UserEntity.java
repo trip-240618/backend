@@ -9,6 +9,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.ll.trip.domain.alarm.alarm.entity.Notification;
+import com.ll.trip.domain.plan.room.entity.Bookmark;
+import com.ll.trip.domain.plan.room.entity.TripMember;
 import com.ll.trip.domain.user.mypage.entity.UserProfile;
 import com.ll.trip.global.base.entity.BaseEntity;
 
@@ -57,6 +59,12 @@ public class UserEntity extends BaseEntity {
 
 	@OneToMany(cascade = CascadeType.ALL)
 	private List<Notification> notifications;
+
+	@OneToMany(cascade = CascadeType.ALL)
+	private List<Bookmark> bookmarks;
+
+	@OneToMany(cascade = CascadeType.ALL)
+	private List<TripMember> tripMembers;
 
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authorities = new ArrayList<>();
