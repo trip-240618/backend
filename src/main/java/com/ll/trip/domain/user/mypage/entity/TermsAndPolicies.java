@@ -19,9 +19,8 @@ import lombok.NoArgsConstructor;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class Notice extends BaseEntity {
+public class TermsAndPolicies extends BaseEntity {
+
 	@NotBlank
-	private String title;
-	@NotBlank
-	private String content;
+	private String url;
 }
