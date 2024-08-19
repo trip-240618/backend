@@ -12,16 +12,15 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 
 @Entity
+@Getter
 public class BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@CreatedDate
-	@Getter
 	private LocalDateTime createDate;
 
 	@LastModifiedDate
-	@Getter
 	private LocalDateTime modifyDate;
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import com.ll.trip.domain.alarm.alarm.entity.Notification;
 import com.ll.trip.domain.user.mypage.entity.UserProfile;
 import com.ll.trip.global.base.entity.BaseEntity;
 
@@ -53,6 +54,9 @@ public class UserEntity extends BaseEntity {
 
 	@OneToMany(cascade = CascadeType.ALL)
 	private List<UserProfile> userProfiles;
+
+	@OneToMany(cascade = CascadeType.ALL)
+	private List<Notification> notifications;
 
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authorities = new ArrayList<>();

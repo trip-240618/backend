@@ -23,6 +23,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			.orElseThrow(() -> new UsernameNotFoundException("유저의 정보가 없습니다: " + uuid));
 
 		return new SecurityUser(
+			user.getId(),
 			user.getUuid(),
 			user.getName(),
 			user.getProviderId(),
