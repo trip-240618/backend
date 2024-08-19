@@ -1,32 +1,26 @@
 package com.ll.trip.domain.user.user.entity;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ll.trip.domain.user.mypage.entity.UserProfile;
+import com.ll.trip.global.base.entity.BaseEntity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -36,35 +30,29 @@ import lombok.NoArgsConstructor;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "users", indexes = {
+@Table(name = "user", indexes = {
 	@Index(name = "idx_uuid", columnList = "uuid")
 })
-public class UserEntity {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@EqualsAndHashCode.Include
-	private Long id;
+public class UserEntity extends BaseEntity {
 
-	@CreatedDate
-	@Getter
-	private LocalDateTime createDate;
-
-	@LastModifiedDate
-	@Getter
-	private LocalDateTime modifyDate;
-
+	@NotBlank
 	private String name;
+	@NotBlank
 	private String providerId;
+	@NotBlank
 	private String uuid;
+	@NotBlank
 	private String profileImg;
+	@NotBlank
 	private String roles;
 	private String email;
 	private String fcmToken;
 
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "refresh_token_id")
-	@JsonIgnore
-	private RefreshToken refreshToken;
+	@OneToMany(cascade = CascadeType.ALL)
+	private List<RefreshToken> refreshTokens;
+
+	@OneToMany(cascade = CascadeType.ALL)
+	private List<UserProfile> userProfiles;
 
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authorities = new ArrayList<>();
