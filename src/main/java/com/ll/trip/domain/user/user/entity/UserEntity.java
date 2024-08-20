@@ -9,9 +9,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.ll.trip.domain.alarm.alarm.entity.Notification;
-import com.ll.trip.domain.plan.room.entity.Bookmark;
-import com.ll.trip.domain.plan.room.entity.TripMember;
-import com.ll.trip.domain.user.mypage.entity.UserProfile;
+import com.ll.trip.domain.trip.history.entity.History;
+import com.ll.trip.domain.trip.history.entity.HistoryReply;
+import com.ll.trip.domain.trip.scrap.entity.Scrap;
+import com.ll.trip.domain.trip.trip.entity.Bookmark;
+import com.ll.trip.domain.trip.trip.entity.TripMember;
+import com.ll.trip.domain.user.mypage.entity.NotificationConfig;
 import com.ll.trip.global.base.entity.BaseEntity;
 
 import jakarta.persistence.CascadeType;
@@ -55,7 +58,7 @@ public class UserEntity extends BaseEntity {
 	private List<RefreshToken> refreshTokens;
 
 	@OneToMany(cascade = CascadeType.ALL)
-	private List<UserProfile> userProfiles;
+	private List<NotificationConfig> notificationConfigs;
 
 	@OneToMany(cascade = CascadeType.ALL)
 	private List<Notification> notifications;
@@ -65,6 +68,15 @@ public class UserEntity extends BaseEntity {
 
 	@OneToMany(cascade = CascadeType.ALL)
 	private List<TripMember> tripMembers;
+
+	@OneToMany(cascade = CascadeType.ALL)
+	private List<Scrap> scraps;
+
+	@OneToMany(cascade = CascadeType.ALL)
+	private List<History> histories;
+
+	@OneToMany(cascade = CascadeType.ALL)
+	private List<HistoryReply> historyReplies;
 
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authorities = new ArrayList<>();

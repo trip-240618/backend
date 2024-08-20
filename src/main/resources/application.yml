@@ -18,7 +18,7 @@ spring:
       on-profile: local
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
 
 server:
   port: 8080
@@ -34,7 +34,7 @@ spring:
       on-profile: prod
   jpa:
     hibernate:
-      ddl-auto: update #실제 운영시엔 validate로 변경(db를 수정하지 않고 예외발생 ,why? 추가된 컬럼이 notnull일 경우 문제가 생김 등등)
+      ddl-auto: create #실제 운영시엔 validate로 변경(db를 수정하지 않고 예외발생 ,why? 추가된 컬럼이 notnull일 경우 문제가 생김 등등)
 
 ---
 #blue서버 실제 운영서버
