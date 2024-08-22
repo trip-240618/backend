@@ -32,12 +32,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 		}
 		UserEntity user = opUser.get();
 
-		List<GrantedAuthority> authorities = new ArrayList<>();
-		authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
-		if ("admin".equals(user.getName())) {
-			authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-		}
-
 		return new SecurityUser(
 			user.getId(),
 			user.getUuid(),

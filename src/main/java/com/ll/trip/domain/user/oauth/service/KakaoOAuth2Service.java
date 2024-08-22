@@ -1,23 +1,15 @@
 package com.ll.trip.domain.user.oauth.service;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.ll.trip.domain.user.jwt.JwtTokenUtil;
-import com.ll.trip.domain.user.oauth.dto.KakaoPropertiesDto;
 import com.ll.trip.domain.user.oauth.dto.KakaoTokenResponseDto;
 import com.ll.trip.domain.user.oauth.dto.KakaoUserInfoDto;
-import com.ll.trip.domain.user.user.dto.UserInfoDto;
-import com.ll.trip.domain.user.user.entity.RefreshToken;
-import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
 import com.ll.trip.domain.user.user.service.UserService;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -61,46 +53,4 @@ public class KakaoOAuth2Service {
 			.next(); // Flux 스트림의 첫 번째 항목을 반환
 	}
 
-	public UserInfoDto registerUser(Long oauthId, KakaoPropertiesDto properties, HttpServletResponse response) {
-		String profileImageUrl = properties.getProfile_image();
-		String providerId = "KAKAO" + oauthId;
-		Optional<UserEntity> optUser = userRepository.findByProviderId(providerId);
-		String uuid;
-		String refreshToken;
-		UserInfoDto userInfoDto;
-
-		if (optUser.isPresent()) {
-			UserEntity userEntity = optUser.get();
-			RefreshToken foundRefreshToken = userService.findRefreshTokenByUserId(userEntity.getId());
-			refreshToken = foundRefreshToken.getKeyValue();
-			uuid = userEntity.getUuid();
-			userInfoDto = new UserInfoDto(userEntity, "login");
-		} else {
-			uuid = userService.generateUUID();
-			String tokenKey = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
-
-			RefreshToken createdRefreshToken = RefreshToken.builder()
-				.keyValue(tokenKey)
-				.build();
-
-			UserEntity user = UserEntity
-				.builder()
-				.name(properties.getNickname())
-				.roles("USER")
-				.profileImg(profileImageUrl)
-				.providerId(providerId)
-				.uuid(uuid)
-				.refreshToken(createdRefreshToken)
-				.build();
-
-			UserEntity userEntity = userRepository.save(user);
-			userInfoDto = new UserInfoDto(userEntity, "register");
-			refreshToken = createdRefreshToken.getKeyValue();
-		}
-		String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
-
-		userService.setTokenInCookie(newAccessToken, refreshToken, response);
-
-		return userInfoDto;
-	}
 }

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Builder
@@ -16,7 +17,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 public class RefreshToken {
-
     @Id
     private Long id;
 
@@ -25,5 +25,6 @@ public class RefreshToken {
     @ManyToOne
     @MapsId
     @JoinColumn(name = "user_id")
+    @Setter
     private UserEntity user;
 }

@@ -35,7 +35,7 @@ public class Notification {
 	@NotBlank
 	private String content;
 
-	private boolean read;
+	private boolean isRead;
 
 	@NotBlank
 	@CreatedDate

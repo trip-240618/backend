@@ -1,6 +1,7 @@
 package com.ll.trip.domain.trip.trip.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -15,6 +16,9 @@ import com.ll.trip.global.base.entity.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
@@ -22,14 +26,19 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@Builder
+@SuperBuilder(toBuilder = true)
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Trip extends BaseEntity {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
 	@NotBlank
 	private String name;
 
@@ -50,24 +59,31 @@ public class Trip extends BaseEntity {
 	@NotBlank
 	private String thumbnail;
 
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<Bookmark> bookmarks;
+	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Bookmark> bookmarks = new ArrayList<>();
 
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<TripMember> tripMembers;
+	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<TripMember> tripMembers = new ArrayList<>();
 
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<PlanJ> planJs;
+	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<PlanJ> planJs  = new ArrayList<>();
 
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<PlanP> planPs;
+	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<PlanP> planPs = new ArrayList<>();
 
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<Scrap> scraps;
+	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Scrap> scraps = new ArrayList<>();
 
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<History> histories;
+	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<History> histories = new ArrayList<>();
 
-	@OneToMany(cascade = CascadeType.ALL)
-	private List<HistoryTag> historyTags;
+	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<HistoryTag> historyTags = new ArrayList<>();
 }

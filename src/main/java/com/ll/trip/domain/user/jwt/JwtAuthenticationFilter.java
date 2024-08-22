@@ -35,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             if (accessToken != null && jwtTokenUtil.validateToken(accessToken)) {
-                Authentication auth = jwtTokenUtil.getAuthentication(accessToken, tokenSecret);
+                Authentication auth = jwtTokenUtil.getAuthentication(accessToken);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } else {
                 throw new JwtException("로그인을 안한 유저의 요청");
@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.addHeader("Set-Cookie", newAccessTokenCookie.toString());
 
 
-                Authentication auth = jwtTokenUtil.getAuthentication(newAccessToken, tokenSecret);
+                Authentication auth = jwtTokenUtil.getAuthentication(newAccessToken);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } else {
                 // Here you can add some response to the client about no token

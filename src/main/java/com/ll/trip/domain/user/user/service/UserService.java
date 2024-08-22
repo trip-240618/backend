@@ -8,6 +8,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ll.trip.domain.user.user.dto.UserInfoDto;
+import com.ll.trip.domain.user.user.dto.UserModifyDto;
 import com.ll.trip.domain.user.user.entity.RefreshToken;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.RefreshTokenRepository;
@@ -27,14 +29,12 @@ public class UserService {
 		return userRepository.findByUuid(uuid);
 	}
 
-
 	public String generateUUID() {
 		return UUID.randomUUID().toString();
 	}
 
 	public RefreshToken findRefreshTokenByUserId(Long userId) {
-		return userRepository.findById(userId)
-			.map(UserEntity::getRefreshToken)
+		return refreshTokenRepository.findById(userId)
 			.orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
 	}
 
@@ -55,5 +55,20 @@ public class UserService {
 
 		response.addHeader("Set-Cookie", accessTokenCookie.toString());
 		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+	}
+
+	public UserInfoDto modifyUserInfo(UserEntity user, UserModifyDto modifyDto) {
+		String nickname = modifyDto.getNickname();
+		String profileImageUrl = modifyDto.getProfileImg();
+
+		if (nickname != null)
+			user.setNickname(nickname);
+
+		if (profileImageUrl != null)
+			user.setProfileImg(profileImageUrl);
+
+		user = userRepository.save(user);
+
+		return new UserInfoDto(user, "modify");
 	}
 }
