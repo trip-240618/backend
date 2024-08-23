@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class TripMemberDto {
 	@Schema(
 		description = "닉네임",
-		example = "닉네임")
+		example = "master Choi")
 	private String nickname;
 
 	@Schema(

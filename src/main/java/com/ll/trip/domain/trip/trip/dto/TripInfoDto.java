@@ -1,7 +1,10 @@
 package com.ll.trip.domain.trip.trip.dto;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+
+import com.ll.trip.domain.trip.trip.entity.Trip;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -20,7 +23,7 @@ public class TripInfoDto {
 	@Schema(
 		description = "여행방 타입",
 		example = "J or P")
-	private String type;
+	private char type;
 
 	@Schema(
 		description = "여행 시작일",
@@ -48,7 +51,16 @@ public class TripInfoDto {
 	private String invitationCode;
 
 	@Schema(
-		description = "참가자 리스트",
-		example = "[\n\t{\n\t\t\"nickname\" : \"최순자\",\n\t\t \"profileImg\" : \"https://...]\",\n\t\t \"isLeader\" : \"true\"\n\t},\n\t {...}\n]")
-	private List<TripMemberDto> tripMemberDtoList;
+		description = "참가자 리스트")
+	private List<TripMemberDto> tripMemberDtoList = new ArrayList<>();
+
+	public TripInfoDto(Trip trip) {
+		this.name = trip.getName();
+		this.type = trip.getType();
+		this.invitationCode = trip.getInvitationCode();
+		this.country = trip.getCountry();
+		this.startDate = trip.getStartDate();
+		this.endDate = trip.getEndDate();
+		this.thumbnail = trip.getThumbnail();
+	}
 }

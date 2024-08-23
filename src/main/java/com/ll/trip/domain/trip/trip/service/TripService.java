@@ -1,8 +1,11 @@
 package com.ll.trip.domain.trip.trip.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
+import com.ll.trip.domain.trip.trip.dto.TripMemberDto;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.entity.TripMember;
 import com.ll.trip.domain.trip.trip.entity.TripMemberId;
@@ -45,7 +48,7 @@ public class TripService {
 			.userId(userId)
 			.build();
 
-		if(tripMemberRepository.existsById(tripMemberId)) {
+		if (tripMemberRepository.existsById(tripMemberId)) {
 			return;
 		}
 
@@ -55,5 +58,17 @@ public class TripService {
 			.build();
 
 		tripMemberRepository.save(tripMember);
+	}
+
+	public Trip findByInvitationCode(String invitationCode) {
+		return tripRepository.findByInvitationCode(invitationCode).orElseThrow(NullPointerException::new);
+	}
+
+	public List<TripMemberDto> findTripMemberUserByTripId(Long tripId) {
+		return tripMemberRepository.findTripMemberUserByTripId(tripId);
+	}
+
+	public boolean existTripMemberByTripIdAndUserId(long tripId, long userId) {
+		return tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId);
 	}
 }
