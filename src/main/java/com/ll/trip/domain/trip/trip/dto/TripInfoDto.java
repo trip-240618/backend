@@ -16,6 +16,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TripInfoDto {
 	@Schema(
+		description = "여행방의 pk",
+		example = "12")
+	private long id;
+
+	@Schema(
 		description = "여행방 이름",
 		example = "일주일 도쿄 투어")
 	private String name;
@@ -55,6 +60,7 @@ public class TripInfoDto {
 	private List<TripMemberDto> tripMemberDtoList = new ArrayList<>();
 
 	public TripInfoDto(Trip trip) {
+		this.id = trip.getId();
 		this.name = trip.getName();
 		this.type = trip.getType();
 		this.invitationCode = trip.getInvitationCode();
@@ -62,5 +68,17 @@ public class TripInfoDto {
 		this.startDate = trip.getStartDate();
 		this.endDate = trip.getEndDate();
 		this.thumbnail = trip.getThumbnail();
+	}
+
+	public TripInfoDto(long id, String name, char type, LocalDate startDate, LocalDate endDate, String country, String thumbnail,
+		String invitationCode) {
+		this.id = id;
+		this.name = name;
+		this.type = type;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.country = country;
+		this.thumbnail = thumbnail;
+		this.invitationCode = invitationCode;
 	}
 }

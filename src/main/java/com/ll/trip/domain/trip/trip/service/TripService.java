@@ -1,11 +1,17 @@
 package com.ll.trip.domain.trip.trip.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
+import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
 import com.ll.trip.domain.trip.trip.dto.TripMemberDto;
+import com.ll.trip.domain.trip.trip.dto.TripMemberServiceDto;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.entity.TripMember;
 import com.ll.trip.domain.trip.trip.entity.TripMemberId;
@@ -70,5 +76,40 @@ public class TripService {
 
 	public boolean existTripMemberByTripIdAndUserId(long tripId, long userId) {
 		return tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId);
+	}
+
+	public List<TripInfoDto> findAllByUserId(Long userId, String sortDirection, String sortField) {
+		Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortField);
+		List<TripInfoDto> tripInfoDtoList = tripRepository.findAllTripInfoDtosByUserId(userId, sort);
+
+		fillTripMemberToTripInfo(tripInfoDtoList);
+
+		return tripInfoDtoList;
+	}
+
+	private void fillTripMemberToTripInfo(List<TripInfoDto> tripInfoDtoList) {
+		Map<Long, TripInfoDto> tripMap = new HashMap<>();
+		List<Long> idList = new ArrayList<>();
+
+		for (TripInfoDto tripInfoDto : tripInfoDtoList) {
+			long tripId = tripInfoDto.getId();
+			idList.add(tripId);
+			tripMap.put(tripId, tripInfoDto);
+		}
+
+		List<TripMemberServiceDto> tripMemberServiceDtoList = tripMemberRepository
+			.findAllTripMemberDtosByTripIds(idList);
+
+		for (TripMemberServiceDto tripMemberServiceDto : tripMemberServiceDtoList) {
+			long id = tripMemberServiceDto.getId();
+
+			TripMemberDto tripMemberDto = new TripMemberDto(
+				tripMemberServiceDto.getNickname(),
+				tripMemberServiceDto.getProfileImg(),
+				tripMemberServiceDto.isLeader()
+			);
+
+			tripMap.get(id).getTripMemberDtoList().add(tripMemberDto);
+		}
 	}
 }

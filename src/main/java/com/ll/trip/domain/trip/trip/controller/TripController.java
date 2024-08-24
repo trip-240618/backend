@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -84,6 +86,21 @@ public class TripController {
 		TripInfoDto response = new TripInfoDto(trip);
 		List<TripMemberDto> tripMemberDtoList = tripService.findTripMemberUserByTripId(trip.getId());
 		response.setTripMemberDtoList(tripMemberDtoList);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/list")
+	@Operation(summary = "Trip리스트 요청")
+	@ApiResponse(responseCode = "200", description = "Trip리스트 요청", content = {
+		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TripInfoDto.class)))})
+	public ResponseEntity<?> showTripListByUserId(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "순서", example = "ASC : 오름차순, DESC : 내림차순") String sortDirection,
+		@RequestParam @Parameter(description = "정렬기준이 될 필드명", example = "startDate") String sortField
+	) {
+		//TODO 트립 리스트 정렬방식
+		List<TripInfoDto> response = tripService.findAllByUserId(securityUser.getId(), sortDirection, sortField);
 
 		return ResponseEntity.ok(response);
 	}
