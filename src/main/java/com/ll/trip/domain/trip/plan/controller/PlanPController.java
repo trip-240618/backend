@@ -88,7 +88,12 @@ public class PlanPController {
 		PlanP plan = planPService.updatePlanPByPlanId(planId, requestBody);
 		PlanPInfoDto response = planPService.convertPlanPToDto(plan);
 
-		return ResponseEntity.ok(response);
+		template.convertAndSend(
+			"/topic/api/trip/" + invitationCode,
+			new PlanResponseBody<>("modify", response)
+		);
+
+		return ResponseEntity.ok("modified");
 	}
 
 
