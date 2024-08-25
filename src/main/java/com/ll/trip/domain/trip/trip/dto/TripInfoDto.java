@@ -56,6 +56,11 @@ public class TripInfoDto {
 	private String invitationCode;
 
 	@Schema(
+		description = "여행방 라벨 색상",
+		example = "#FFEFF3")
+	private String labelColor;
+
+	@Schema(
 		description = "참가자 리스트")
 	private List<TripMemberDto> tripMemberDtoList = new ArrayList<>();
 
@@ -68,10 +73,11 @@ public class TripInfoDto {
 		this.startDate = trip.getStartDate();
 		this.endDate = trip.getEndDate();
 		this.thumbnail = trip.getThumbnail();
+		this.labelColor = trip.getLabelColor();
 	}
 
 	public TripInfoDto(long id, String name, char type, LocalDate startDate, LocalDate endDate, String country, String thumbnail,
-		String invitationCode) {
+		String invitationCode, String labelColor) {
 		this.id = id;
 		this.name = name;
 		this.type = type;
@@ -80,5 +86,6 @@ public class TripInfoDto {
 		this.country = country;
 		this.thumbnail = thumbnail;
 		this.invitationCode = invitationCode;
+		this.labelColor = labelColor;
 	}
 }

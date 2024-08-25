@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,11 +42,11 @@ public class Bookmark {
 	@JoinColumn(name = "trip_id")
 	private Trip trip;
 
-	@NotBlank
+	@NotNull
 	@CreatedDate
 	private LocalDateTime createDate;
 
-	@NotBlank
+	@NotNull
 	@LastModifiedDate
 	private LocalDateTime modifyDate;
 

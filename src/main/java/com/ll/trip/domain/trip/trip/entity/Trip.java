@@ -21,6 +21,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,10 +48,10 @@ public class Trip extends BaseEntity {
 
 	private char type;
 
-	@NotBlank
+	@NotNull
 	private LocalDate startDate;
 
-	@NotBlank
+	@NotNull
 	private LocalDate endDate;
 
 	@NotBlank
@@ -58,6 +59,9 @@ public class Trip extends BaseEntity {
 
 	@NotBlank
 	private String thumbnail;
+
+	@NotBlank
+	private String labelColor;
 
 	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default

@@ -1,5 +1,6 @@
 package com.ll.trip.domain.trip.trip.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,8 @@ import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
 import com.ll.trip.domain.trip.trip.dto.TripMemberDto;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.service.TripService;
+import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.domain.user.user.service.UserService;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TripController {
 
 	private final TripService tripService;
+	private final UserService userService;
 
 	@PostMapping("/create")
 	@Operation(summary = "여행방 생성")
@@ -47,9 +51,10 @@ public class TripController {
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
 		String invitationCode = tripService.generateInvitationCode();
-		Long tripId = tripService.createTrip(tripCreateDto, invitationCode);
+		Trip trip = tripService.createTrip(tripCreateDto, invitationCode);
+		UserEntity user = userService.findUserByUserId(securityUser.getId());
 
-		tripService.joinTripById(tripId, securityUser.getId(), true);
+		tripService.joinTripById(trip, user, true);
 
 		return ResponseEntity.ok(invitationCode);
 	}
@@ -63,7 +68,9 @@ public class TripController {
 		@RequestParam @NotBlank @Parameter(description = "초대 코드", example = "1A2B3C4D") String invitationCode
 	) {
 		Trip trip = tripService.findByInvitationCode(invitationCode);
-		tripService.joinTripById(trip.getId(), securityUser.getId(), false);
+		UserEntity user = userService.findUserByUserId(securityUser.getId());
+
+		tripService.joinTripById(trip, user, false);
 
 		TripInfoDto response = new TripInfoDto(trip);
 		List<TripMemberDto> tripMemberDtoList = tripService.findTripMemberUserByTripId(trip.getId());
@@ -81,7 +88,8 @@ public class TripController {
 		@RequestParam @NotBlank @Parameter(description = "초대 코드", example = "1A2B3C4D") String invitationCode
 	) {
 		Trip trip = tripService.findByInvitationCode(invitationCode);
-		if(!tripService.existTripMemberByTripIdAndUserId(trip.getId(), securityUser.getId())) return ResponseEntity.badRequest().body("입장 권한이 없습니다.");
+		if (!tripService.existTripMemberByTripIdAndUserId(trip.getId(), securityUser.getId()))
+			return ResponseEntity.badRequest().body("입장 권한이 없습니다.");
 
 		TripInfoDto response = new TripInfoDto(trip);
 		List<TripMemberDto> tripMemberDtoList = tripService.findTripMemberUserByTripId(trip.getId());
@@ -90,21 +98,51 @@ public class TripController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/list")
-	@Operation(summary = "Trip리스트 요청")
-	@ApiResponse(responseCode = "200", description = "Trip리스트 요청", content = {
+	@GetMapping("/list/incoming")
+	@Operation(summary = "다가오는 Trip리스트 요청")
+	@ApiResponse(responseCode = "200", description = "다가오는 Trip리스트 요청", content = {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TripInfoDto.class)))})
-	public ResponseEntity<?> showTripListByUserId(
+	public ResponseEntity<?> showIncomingTripListByUserId(
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@RequestParam @Parameter(description = "순서", example = "ASC : 오름차순, DESC : 내림차순") String sortDirection,
-		@RequestParam @Parameter(description = "정렬기준이 될 필드명", example = "startDate") String sortField
+		@RequestParam @Parameter(description = "정렬기준 필드", example = "startDate : 시작 날짜 순, endDate : 끝나는 날짜 순") String sortField,
+		@RequestParam @Parameter(description = "정렬순서", example = "ASC : 오름차순&오래된순, DESC : 내림차순&최신순") String sortDirection
 	) {
-		//TODO 트립 리스트 정렬방식
-		List<TripInfoDto> response = tripService.findAllByUserId(securityUser.getId(), sortDirection, sortField);
-
+		//TODO 북마크, 다가오는, 지난 + queryDSL로 동적 쿼리 생성
+		List<TripInfoDto> response = tripService.findAllByUserId(securityUser.getId(), LocalDate.now(), "incoming",
+			sortDirection, sortField);
+		tripService.fillTripMemberToTripInfo(response);
 		return ResponseEntity.ok(response);
 	}
 
+	@GetMapping("/list/last")
+	@Operation(summary = "지난 Trip리스트 요청")
+	@ApiResponse(responseCode = "200", description = "지난 Trip리스트 요청", content = {
+		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TripInfoDto.class)))})
+	public ResponseEntity<?> showLastTripListByUserId(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "정렬기준 필드", example = "startDate : 시작 날짜 순, endDate : 끝나는 날짜 순") String sortField,
+		@RequestParam @Parameter(description = "정렬순서", example = "ASC : 오름차순&오래된순, DESC : 내림차순&최신순") String sortDirection
+	) {
+		//TODO 북마크, 다가오는, 지난 + queryDSL로 동적 쿼리 생성
+		List<TripInfoDto> response = tripService.findAllByUserId(securityUser.getId(), LocalDate.now(), "last",
+			sortDirection, sortField);
+		tripService.fillTripMemberToTripInfo(response);
+		return ResponseEntity.ok(response);
+	}
 
+	@GetMapping("/list/bookmark")
+	@Operation(summary = "지난 Trip리스트 요청")
+	@ApiResponse(responseCode = "200", description = "지난 Trip리스트 요청", content = {
+		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TripInfoDto.class)))})
+	public ResponseEntity<?> showBookmarkTripListByUserId(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "정렬기준 필드", example = "startDate : 시작 날짜 순, endDate : 끝나는 날짜 순") String sortField,
+		@RequestParam @Parameter(description = "정렬순서", example = "ASC : 오름차순&오래된순, DESC : 내림차순&최신순") String sortDirection
+	) {
+		//TODO 북마크, 다가오는, 지난 + queryDSL로 동적 쿼리 생성
+		List<TripInfoDto> response = tripService.findBookmarkByUserId(securityUser.getId(), sortDirection, sortField);
+		tripService.fillTripMemberToTripInfo(response);
+		return ResponseEntity.ok(response);
+	}
 
 }
