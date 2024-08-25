@@ -1,7 +1,10 @@
 package com.ll.trip.domain.trip.trip.dto;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+
+import com.ll.trip.domain.trip.trip.entity.Trip;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -13,6 +16,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TripInfoDto {
 	@Schema(
+		description = "여행방의 pk",
+		example = "12")
+	private long id;
+
+	@Schema(
 		description = "여행방 이름",
 		example = "일주일 도쿄 투어")
 	private String name;
@@ -20,7 +28,7 @@ public class TripInfoDto {
 	@Schema(
 		description = "여행방 타입",
 		example = "J or P")
-	private String type;
+	private char type;
 
 	@Schema(
 		description = "여행 시작일",
@@ -48,7 +56,36 @@ public class TripInfoDto {
 	private String invitationCode;
 
 	@Schema(
-		description = "참가자 리스트",
-		example = "[\n\t{\n\t\t\"nickname\" : \"최순자\",\n\t\t \"profileImg\" : \"https://...]\",\n\t\t \"isLeader\" : \"true\"\n\t},\n\t {...}\n]")
-	private List<TripMemberDto> tripMemberDtoList;
+		description = "여행방 라벨 색상",
+		example = "#FFEFF3")
+	private String labelColor;
+
+	@Schema(
+		description = "참가자 리스트")
+	private List<TripMemberDto> tripMemberDtoList = new ArrayList<>();
+
+	public TripInfoDto(Trip trip) {
+		this.id = trip.getId();
+		this.name = trip.getName();
+		this.type = trip.getType();
+		this.invitationCode = trip.getInvitationCode();
+		this.country = trip.getCountry();
+		this.startDate = trip.getStartDate();
+		this.endDate = trip.getEndDate();
+		this.thumbnail = trip.getThumbnail();
+		this.labelColor = trip.getLabelColor();
+	}
+
+	public TripInfoDto(long id, String name, char type, LocalDate startDate, LocalDate endDate, String country, String thumbnail,
+		String invitationCode, String labelColor) {
+		this.id = id;
+		this.name = name;
+		this.type = type;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.country = country;
+		this.thumbnail = thumbnail;
+		this.invitationCode = invitationCode;
+		this.labelColor = labelColor;
+	}
 }

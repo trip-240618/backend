@@ -71,4 +71,8 @@ public class UserService {
 
 		return new UserInfoDto(user, "modify");
 	}
+
+	public UserEntity findUserByUserId(long userId) {
+		return userRepository.findById(userId).orElseThrow(NullPointerException::new);
+	}
 }

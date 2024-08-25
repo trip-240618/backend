@@ -36,8 +36,7 @@ public class InvitationCodeGenerator {
 	}
 
 	private boolean isCodeExist(String code) {
-		int count = tripRepository.countByInvitationCode(code);
-		return count > 0;
+		return tripRepository.existsByInvitationCode(code);
 	}
 
 }
