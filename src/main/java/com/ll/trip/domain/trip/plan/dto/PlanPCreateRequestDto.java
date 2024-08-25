@@ -1,10 +1,7 @@
 package com.ll.trip.domain.trip.plan.dto;
 
-import java.time.LocalDate;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,8 +17,7 @@ public class PlanPCreateRequestDto {
 	private String content;
 
 	@Schema(
-		description = "예정일",
-		example = "2024-08-22")
-	@NotNull
-	private LocalDate startDate;
+		description = "시작일 기준 몇일째인지",
+		example = "0")
+	private int dayAfterStart;
 }

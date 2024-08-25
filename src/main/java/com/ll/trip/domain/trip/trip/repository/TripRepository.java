@@ -34,7 +34,7 @@ public interface TripRepository extends JpaRepository<Trip, Long>, TripRepositor
 		left join  Trip t
 		WHERE b.user.id = :userId
 		""")
-	List<TripInfoDto> findAllBookmarkTripInfoDtosByUserId(@Param("userId") Long userId);
+	List<TripInfoDto> findAllBookmarkTripInfoDtosByUserId(Long userId);
 
 	Optional<Trip> findByInvitationCode(String invitationCode);
 }
