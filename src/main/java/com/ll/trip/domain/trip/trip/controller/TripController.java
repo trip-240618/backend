@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
 import com.ll.trip.domain.trip.trip.dto.TripMemberDto;
@@ -40,6 +41,7 @@ public class TripController {
 
 	private final TripService tripService;
 	private final UserService userService;
+	private final AwsAuthService awsAuthService;
 
 	@PostMapping("/create")
 	@Operation(summary = "여행방 생성")
@@ -144,5 +146,52 @@ public class TripController {
 		tripService.fillTripMemberToTripInfo(response);
 		return ResponseEntity.ok(response);
 	}
+	@GetMapping("/delete")
+	@Operation(summary = "Trip 삭제")
+	@ApiResponse(responseCode = "200", description = "Trip 삭제")
+	public ResponseEntity<?> deleteTripByInvitationCode(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "초대코드", example = "1A2B3C4D") String invitationCode
+	) {
+		Trip trip = tripService.findByInvitationCode(invitationCode);
 
+		List<String> urls = awsAuthService.abstractUrlFromPresignedUrl(List.of(trip.getThumbnail()));
+		List<String> keys = awsAuthService.abstractKeyFromUrl(urls);
+
+		awsAuthService.deleteObjectByKey(keys);
+
+		tripService.deleteTripById(trip.getId());
+
+		return ResponseEntity.ok("deleted");
+	}
+
+	@PostMapping("/modify")
+	@Operation(summary = "Trip 삭제")
+	@ApiResponse(responseCode = "200", description = "Trip 삭제")
+	public ResponseEntity<?> modifyTripByInvitationCode(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestBody TripInfoDto requestBody
+	) {
+		Trip trip = tripService.findByInvitationCode(requestBody.getInvitationCode());
+
+		TripInfoDto response = tripService.modifyTripByDto(trip, requestBody);
+
+		return ResponseEntity.ok(response);
+	}
+
+
+	//북마크
+	@PostMapping("/bookmark/toggle")
+	@Operation(summary = "Trip 북마크 토글")
+	@ApiResponse(responseCode = "200", description = "Trip 북마크 토글")
+	public ResponseEntity<?> toggleTripBookmarkByInvitationCode(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "초대코드", example = "1A2B3C4D") String invitationCode
+	) {
+		Trip trip = tripService.findByInvitationCode(invitationCode);
+		//날짜 수정시 기존 플랜변경은 미정
+		boolean response = tripService.toggleBookmarkByTripAndUserId(trip, securityUser.getId());
+
+		return ResponseEntity.ok(response);
+	}
 }

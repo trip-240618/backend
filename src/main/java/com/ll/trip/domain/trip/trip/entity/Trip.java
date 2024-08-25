@@ -27,6 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -41,6 +42,7 @@ public class Trip extends BaseEntity {
 	private Long id;
 
 	@NotBlank
+	@Setter
 	private String name;
 
 	@NotBlank
@@ -49,18 +51,22 @@ public class Trip extends BaseEntity {
 	private char type;
 
 	@NotNull
+	@Setter
 	private LocalDate startDate;
 
 	@NotNull
+	@Setter
 	private LocalDate endDate;
 
 	@NotBlank
 	private String country;
 
 	@NotBlank
+	@Setter
 	private String thumbnail;
 
 	@NotBlank
+	@Setter
 	private String labelColor;
 
 	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)

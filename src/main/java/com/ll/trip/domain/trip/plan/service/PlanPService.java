@@ -1,7 +1,5 @@
 package com.ll.trip.domain.trip.plan.service;
 
-import java.time.LocalDate;
-
 import org.springframework.stereotype.Service;
 
 import com.ll.trip.domain.trip.plan.dto.PlanPCreateRequestDto;
@@ -22,10 +20,10 @@ public class PlanPService {
 
 		PlanP plan = PlanP.builder()
 			.trip(trip)
-			.startDate(requestDto.getStartDate())
+			.dayAfterStart(requestDto.getDayAfterStart())
 			.content(requestDto.getContent())
 			.orderByDate(
-				getNextIdx(trip.getId(), requestDto.getStartDate())
+				getNextIdx(trip.getId(), requestDto.getDayAfterStart())
 			)
 			.writerUuid(uuid)
 			.checkbox(false)
@@ -34,14 +32,14 @@ public class PlanPService {
 		return planPRepository.save(plan);
 	}
 
-	public int getNextIdx(long tripId, LocalDate startDate) {
-		Integer maxIdx = planPRepository.findMaxIdx(tripId, startDate);
+	public int getNextIdx(long tripId, int dayAfterStart) {
+		Integer maxIdx = planPRepository.findMaxIdx(tripId, dayAfterStart);
 		return maxIdx == null ? 0 : maxIdx + 1;
 	}
 
 	public PlanPInfoDto convertPlanPToDto(PlanP plan) {
 		return new PlanPInfoDto(
-			plan.getStartDate(),
+			plan.getDayAfterStart(),
 			plan.getOrderByDate(),
 			plan.getWriterUuid(),
 			plan.getContent(),

@@ -1,6 +1,5 @@
 package com.ll.trip.domain.trip.plan.entity;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,7 @@ public class PlanJ extends BaseEntity {
 	@JoinColumn(name = "trip_id")
 	private Trip trip;
 
-	private LocalDate startDate;
+	private int dayAfterStart;
 
 	private LocalTime startTime;
 

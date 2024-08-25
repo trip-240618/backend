@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import com.ll.trip.domain.trip.trip.dto.TripMemberDto;
 import com.ll.trip.domain.trip.trip.dto.TripMemberServiceDto;
@@ -31,6 +30,6 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 		   "tm.isLeader) " +
 		   "FROM TripMember tm " +
 		   "WHERE tm.trip.id IN :tripIds")
-	List<TripMemberServiceDto> findAllTripMemberDtosByTripIds(@Param("tripIds") List<Long> tripIds);
+	List<TripMemberServiceDto> findAllTripMemberDtosByTripIds(List<Long> tripIds);
 
 }
