@@ -44,11 +44,11 @@ public class PlanJ extends BaseEntity {
 	@JoinColumn(name = "trip_id")
 	private Trip trip;
 
-	private int dayAfterStart;
+	private Integer dayAfterStart;
 
 	private LocalTime startTime;
 
-	private long orderByDate;
+	private Long orderByDate;
 
 	private boolean locker;
 

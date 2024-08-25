@@ -41,6 +41,7 @@ public class PlanPService {
 
 	public PlanPInfoDto convertPlanPToDto(PlanP plan) {
 		return new PlanPInfoDto(
+			plan.getId(),
 			plan.getDayAfterStart(),
 			plan.getOrderByDate(),
 			plan.getWriterUuid(),
@@ -51,5 +52,14 @@ public class PlanPService {
 
 	public List<PlanP> findAllByTripId(Long tripId) {
 		return planPRepository.findAllByTripIdOrderByDayAfterStartAndOrderByDate(tripId);
+	}
+
+	public PlanP updatePlanPByPlanId(Long planId, PlanPInfoDto requestBody) {
+		PlanP plan = planPRepository.findPlanPById(planId).orElseThrow(NullPointerException::new);
+
+		plan.setContent(requestBody.getContent());
+		plan.setCheckbox(requestBody.isCheckbox());
+
+		return planPRepository.save(plan);
 	}
 }

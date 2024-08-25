@@ -1,6 +1,7 @@
 package com.ll.trip.domain.trip.plan.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +14,7 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 
 	@Query("""
 		SELECT new com.ll.trip.domain.trip.plan.dto.PlanPInfoDto(
+			p.id,
 			p.dayAfterStart,
 			p.orderByDate,
 			p.writerUuid,
@@ -23,5 +25,7 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		WHERE p.trip.id = :tripId
 		order by p.dayAfterStart asc, p.orderByDate asc
 		""")
-	List<PlanP> findAllByTripIdOrderByDayAfterStartAndOrderByDate(Long tripId);
+	List<PlanP> findAllByTripIdOrderByDayAfterStartAndOrderByDate(long tripId);
+
+	Optional<PlanP> findPlanPById(long planId);
 }

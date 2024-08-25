@@ -11,14 +11,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PlanPInfoDto {
 	@Schema(
+		description = "plan pk",
+		example = "1")
+	private Long planId;
+
+	@Schema(
 		description = "시작일 기준 몇일째인지",
 		example = "0")
-	private int dayAfterStart;
+	private Integer dayAfterStart;
 
 	@Schema(
 		description = "예정일 별 순서",
 		example = "2")
-	private int orderByDate;
+	private Integer orderByDate;
 
 	@Schema(
 		description = "작성자 uuid",

@@ -25,6 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -39,22 +40,23 @@ public class PlanP extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-
 	@ManyToOne
 	@JoinColumn(name = "trip_id")
 	private Trip trip;
 
-	private int dayAfterStart;
+	private Integer dayAfterStart;
 
-	private int orderByDate;
+	private Integer orderByDate;
 
 	private boolean locker;
 
 	private String writerUuid;
 
 	@NotBlank
+	@Setter
 	private String content;
 
+	@Setter
 	private boolean checkbox;
 
 	@OneToMany(mappedBy = "planP",cascade = CascadeType.ALL, orphanRemoval = true)
