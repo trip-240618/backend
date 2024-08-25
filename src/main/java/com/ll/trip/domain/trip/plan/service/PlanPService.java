@@ -1,5 +1,7 @@
 package com.ll.trip.domain.trip.plan.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.ll.trip.domain.trip.plan.dto.PlanPCreateRequestDto;
@@ -45,5 +47,9 @@ public class PlanPService {
 			plan.getContent(),
 			plan.isCheckbox()
 		);
+	}
+
+	public List<PlanP> findAllByTripId(Long tripId) {
+		return planPRepository.findAllByTripIdOrderByDayAfterStartAndOrderByDate(tripId);
 	}
 }

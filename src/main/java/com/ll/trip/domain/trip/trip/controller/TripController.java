@@ -166,8 +166,9 @@ public class TripController {
 	}
 
 	@PostMapping("/modify")
-	@Operation(summary = "Trip 삭제")
-	@ApiResponse(responseCode = "200", description = "Trip 삭제")
+	@Operation(summary = "Trip 수정 (개발중)")
+	@ApiResponse(responseCode = "200", description = "Trip 수정 (날짜 수정 시 변경사항 미적용)", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = TripInfoDto.class))})
 	public ResponseEntity<?> modifyTripByInvitationCode(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestBody TripInfoDto requestBody
@@ -183,7 +184,8 @@ public class TripController {
 	//북마크
 	@PostMapping("/bookmark/toggle")
 	@Operation(summary = "Trip 북마크 토글")
-	@ApiResponse(responseCode = "200", description = "Trip 북마크 토글")
+	@ApiResponse(responseCode = "200", description = "Trip 북마크 토글", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = Boolean.class))})
 	public ResponseEntity<?> toggleTripBookmarkByInvitationCode(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "초대코드", example = "1A2B3C4D") String invitationCode
