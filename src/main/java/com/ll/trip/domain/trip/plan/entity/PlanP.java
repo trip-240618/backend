@@ -47,14 +47,14 @@ public class PlanP extends BaseEntity {
 
 	private LocalDate startDate;
 
-	private long orderByDate;
+	private int orderByDate;
 
 	private boolean locker;
 
 	private String writerUuid;
 
 	@NotBlank
-	private String title;
+	private String content;
 
 	private boolean checkbox;
 
