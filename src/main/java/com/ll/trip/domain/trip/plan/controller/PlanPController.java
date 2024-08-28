@@ -5,9 +5,11 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,6 +29,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +46,9 @@ public class PlanPController {
 	@PostMapping("/{invitationCode}/plan/create")
 	@Operation(summary = "P형 Plan 생성")
 	@ApiResponse(responseCode = "200", description = "P형 Plan생성, 응답데이터는 websocket으로 전송", content = {
-		@Content(mediaType = "application/json", schema = @Schema(implementation = PlanPInfoDto.class))})
+		@Content(mediaType = "application/json",
+			examples = @ExampleObject(value = "웹소켓 : PlanInfoDto, http : \"created\""),
+			schema = @Schema(implementation = PlanPInfoDto.class))})
 	public ResponseEntity<?> createPlanP(
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D" ,in = ParameterIn.PATH) String invitationCode,
 		@AuthenticationPrincipal SecurityUser securityUser,
@@ -75,10 +80,14 @@ public class PlanPController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/{invitationCode}/plan/modify")
-	@Operation(summary = "지난 Trip 리스트 요청")
-	@ApiResponse(responseCode = "200", description = "지난 Trip 리스트 요청", content = {
-		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanPInfoDto.class)))})
+	@PutMapping("/{invitationCode}/plan/modify")
+	@Operation(summary = "planP 수정")
+	@ApiResponse(responseCode = "200", description = "planP 수정", content = {
+		@Content(
+			mediaType = "application/json",
+			examples = @ExampleObject(value = "웹소켓 : PlanInfoDto, http : \"modified\""),
+			schema = @Schema(implementation = PlanPInfoDto.class)
+		)})
 	public ResponseEntity<?> modifyPlanP(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
@@ -95,6 +104,29 @@ public class PlanPController {
 
 		return ResponseEntity.ok("modified");
 	}
+
+	@DeleteMapping("/{invitationCode}/plan/delete")
+	@Operation(summary = "planP 수정")
+	@ApiResponse(responseCode = "200", description = "planP 수정", content = {
+		@Content(mediaType = "application/json",
+			examples = @ExampleObject(value = "웹소켓 : planId, http : 수정된 order 개수(참고용)"),
+			schema = @Schema(implementation = PlanPInfoDto.class)
+		)})
+	public ResponseEntity<?> deletePlanP(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId
+	){
+		int modifiedOrder = planPService.deletePlanPByPlanId(planId);
+
+		template.convertAndSend(
+			"/topic/api/trip/" + invitationCode,
+			new PlanResponseBody<>("delete", planId)
+		);
+
+		return ResponseEntity.ok(modifiedOrder);
+	}
+
 
 
 }

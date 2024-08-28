@@ -1,10 +1,13 @@
 package com.ll.trip.domain.trip.plan.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.trip.plan.dto.PlanPCreateRequestDto;
+import com.ll.trip.domain.trip.plan.dto.PlanPDeleteDto;
 import com.ll.trip.domain.trip.plan.dto.PlanPInfoDto;
 import com.ll.trip.domain.trip.plan.entity.PlanP;
 import com.ll.trip.domain.trip.plan.repository.PlanPRepository;
@@ -54,6 +57,7 @@ public class PlanPService {
 		return planPRepository.findAllByTripIdOrderByDayAfterStartAndOrderByDate(tripId);
 	}
 
+	@Transactional
 	public PlanP updatePlanPByPlanId(Long planId, PlanPInfoDto requestBody) {
 		PlanP plan = planPRepository.findPlanPById(planId).orElseThrow(NullPointerException::new);
 
@@ -61,5 +65,22 @@ public class PlanPService {
 		plan.setCheckbox(requestBody.isCheckbox());
 
 		return planPRepository.save(plan);
+	}
+
+	@Transactional
+	public int deletePlanPByPlanId(Long planId) {
+		Optional<PlanPDeleteDto> optDto = planPRepository.findPlanPDeleteDtoByPlanId(planId);
+		PlanPDeleteDto dto = optDto.orElseThrow(NullPointerException::new);
+
+		int modifiedOrder = subtractOrderBiggerThanPlanOrder(dto.getTripId(), dto.getDayAfterStart(), dto.getOrderByDate());
+
+		planPRepository.deleteById(planId);
+
+		return modifiedOrder;
+	}
+
+	@Transactional
+	public int subtractOrderBiggerThanPlanOrder(long tripId, int dayAfterStart, int orderByDate) {
+		return planPRepository.subtractOrder(tripId, dayAfterStart, orderByDate);
 	}
 }

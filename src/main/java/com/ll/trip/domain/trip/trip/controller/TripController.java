@@ -47,7 +47,9 @@ public class TripController {
 	@Operation(summary = "여행방 생성")
 	@ApiResponse(responseCode = "200", description = "여행방 생성", content = {
 		@Content(mediaType = "application/json",
-			examples = @ExampleObject(value = "1A2B3C4D"))})
+			examples = @ExampleObject(value = "1A2B3C4D"),
+			schema = @Schema(implementation = String.class)
+		)})
 	public ResponseEntity<?> createTrip(
 		@RequestBody TripCreateDto tripCreateDto,
 		@AuthenticationPrincipal SecurityUser securityUser
