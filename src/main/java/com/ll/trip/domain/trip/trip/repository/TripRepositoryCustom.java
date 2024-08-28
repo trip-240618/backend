@@ -10,5 +10,5 @@ public interface TripRepositoryCustom {
 		String sortDirection, String type);
 
 	List<TripInfoDto> findBookmarkTripInfosWithDynamicSort(Long userId, String sortField,
-		String sortDirection, String type);
+		String sortDirection);
 }

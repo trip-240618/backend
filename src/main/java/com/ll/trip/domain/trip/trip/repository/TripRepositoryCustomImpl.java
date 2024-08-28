@@ -69,7 +69,7 @@ public class TripRepositoryCustomImpl implements TripRepositoryCustom {
 
 	@Override
 	public List<TripInfoDto> findBookmarkTripInfosWithDynamicSort(Long userId, String sortField,
-		String sortDirection, String type) {
+		String sortDirection) {
 		QTrip trip = QTrip.trip;
 		QBookmark bookmark = QBookmark.bookmark;
 

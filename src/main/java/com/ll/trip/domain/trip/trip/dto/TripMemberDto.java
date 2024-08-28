@@ -10,6 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TripMemberDto {
 	@Schema(
+		description = "uuid",
+		example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4")
+	private String uuid;
+
+	@Schema(
 		description = "닉네임",
 		example = "master Choi")
 	private String nickname;

@@ -16,7 +16,7 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 	boolean existsTripMemberByTripIdAndUserId(long tripId, long userId);
 
 	@Query("""
-		     select new com.ll.trip.domain.trip.trip.dto.TripMemberDto(u.nickname, u.profileImg, tm.isLeader)
+		     select new com.ll.trip.domain.trip.trip.dto.TripMemberDto(u.uuid, u.nickname, u.profileImg, tm.isLeader)
 		     from TripMember tm
 		     left join tm.user u
 		     where tm.trip.id = :tripId
@@ -25,6 +25,7 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 
 	@Query("SELECT new com.ll.trip.domain.trip.trip.dto.TripMemberServiceDto( " +
 		   "tm.trip.id," +
+		   "tm.user.uuid," +
 		   "tm.user.nickname, " +
 		   "tm.user.profileImg, " +
 		   "tm.isLeader) " +
