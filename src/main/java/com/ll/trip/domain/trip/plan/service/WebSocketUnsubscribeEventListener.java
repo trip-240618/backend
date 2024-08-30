@@ -19,7 +19,7 @@ public class WebSocketUnsubscribeEventListener implements ApplicationListener<Se
 		String destination = accessor.getDestination();
 
 		if (destination != null && destination.startsWith("/topic/api/trip/")) {
-			planEditService.decrementSubscription(destination, accessor.getSessionId());
+			planEditService.decrementSubscription(destination, accessor.getUser().getName());
 		}
 	}
 }

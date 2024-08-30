@@ -3,30 +3,82 @@ package com.ll.trip.domain.trip.plan.service;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.ll.trip.domain.trip.plan.dto.PlanEditDto;
+import com.ll.trip.domain.trip.plan.repository.PlanPRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PlanEditService {
-	//planJ는 초대코드 + day로 구독
-	//planP는 초대코드로 구독
-	private final String TOPIC_PREFIX = "/topic/api/trip/edit/";
-	private final ConcurrentHashMap<String, String> activeEditTopics = new ConcurrentHashMap<>();
 
-	public void decrementSubscription(String destination, String sessionId) {
+	private final PlanPRepository planPRepository;
+
+	private final String TOPIC_PREFIX = "/topic/api/trip/edit/";
+	private final ConcurrentHashMap<String, String> activeEditTopicsAndUuid = new ConcurrentHashMap<>();
+
+	public void decrementSubscription(String destination, String username) {
 		String invitationCode = destination.substring(TOPIC_PREFIX.length());
-		if (activeEditTopics.contains(invitationCode) &&
-			activeEditTopics.get(invitationCode).equals(sessionId)) {
-			activeEditTopics.remove(invitationCode);
+		if (activeEditTopicsAndUuid.contains(invitationCode) &&
+			activeEditTopicsAndUuid.get(invitationCode).equals(username)) {
+			activeEditTopicsAndUuid.remove(invitationCode);
 		}
 	}
 
-	public void addEditor(String invitationCode, String sessionId) {
-		activeEditTopics.put(invitationCode, sessionId);
+	public void addEditor(String invitationCode, String username) {
+		activeEditTopicsAndUuid.put(invitationCode, username);
 	}
 
-	public boolean isEditing(String invitationCode) {
-		return activeEditTopics.contains(invitationCode);
+	public String getEditorByInvitationCode(String invitationCode) {
+		return activeEditTopicsAndUuid.getOrDefault(invitationCode, null);
+	}
+
+	public int movePlanByDayAndOrder(long planId, int dayTo, int orderTo) {
+		PlanEditDto planEditDto = planPRepository.findPlanEditDtoById(planId).orElseThrow(NullPointerException::new);
+
+		if (planEditDto.getDayAfterStart() == dayTo) {
+			return movePlanPInSameDay(planEditDto, dayTo, orderTo);
+		} else {
+			return movePlanPInAnotherDay(planEditDto, dayTo, orderTo);
+		}
+	}
+
+	@Transactional
+	public int movePlanPInSameDay(PlanEditDto planEditDto, int dayTo, int orderTo) {
+		int order = planEditDto.getOrderByDate();
+		int updated = 0;
+
+		if (orderTo > order) {
+			updated += planPRepository.reduceOrderFromToByTripIdAndDay(planEditDto.getTripId(), dayTo, order + 1,
+				orderTo);
+		} else {
+			updated += planPRepository.increaseOrderFromToByTripIdAndDay(planEditDto.getTripId(), dayTo, orderTo,
+				order - 1);
+
+		}
+		updated += planPRepository.updateDayOrderById(planEditDto.getId(), dayTo, orderTo);
+
+		return updated;
+	}
+
+	@Transactional
+	public int movePlanPInAnotherDay(PlanEditDto planEditDto, int dayTo, int orderTo) {
+		long tripId = planEditDto.getTripId();
+		int day = planEditDto.getDayAfterStart();
+		int order = planEditDto.getOrderByDate();
+		int updated = 0;
+
+		updated += planPRepository.reduceOrderFromByTripIdAndDay(tripId, day, order);
+		updated += planPRepository.increaseOrderFromByTripIdAndDay(tripId, dayTo, orderTo);
+		updated += planPRepository.updateDayOrderById(planEditDto.getId(), dayTo, orderTo);
+
+		return updated;
+	}
+
+	public boolean isEditor(String invitationCode, String uuid) {
+		return activeEditTopicsAndUuid.get(invitationCode).equals(uuid);
 	}
 }
