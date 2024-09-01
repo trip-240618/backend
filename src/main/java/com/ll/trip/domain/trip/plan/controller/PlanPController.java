@@ -32,11 +32,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/trip/p")
+@Tag(name = "Plan P", description = "P타입 플랜의 CRUD 기능 (순서변경 제외)")
 public class PlanPController {
 
 	private final TripService tripService;
@@ -47,7 +49,9 @@ public class PlanPController {
 	@Operation(summary = "P형 Plan 생성")
 	@ApiResponse(responseCode = "200", description = "P형 Plan생성, 응답데이터는 websocket으로 전송", content = {
 		@Content(mediaType = "application/json",
-			examples = @ExampleObject(value = "웹소켓 : PlanInfoDto, http : \"created\""),
+			examples = {
+			@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"create\", \"data\": \"PlanPInfoDto\"}"),
+			@ExampleObject(name = "http 응답", value = "created")},
 			schema = @Schema(implementation = PlanPInfoDto.class))})
 	public ResponseEntity<?> createPlanP(
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D" ,in = ParameterIn.PATH) String invitationCode,
@@ -85,9 +89,10 @@ public class PlanPController {
 	@ApiResponse(responseCode = "200", description = "planP 수정", content = {
 		@Content(
 			mediaType = "application/json",
-			examples = @ExampleObject(value = "웹소켓 : PlanInfoDto, http : \"modified\""),
-			schema = @Schema(implementation = PlanPInfoDto.class)
-		)})
+			examples = {
+				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"modify\", \"data\": \"PlanPInfoDto\"}"),
+				@ExampleObject(name = "http 응답", value = "modified")},
+			schema = @Schema(implementation = PlanPInfoDto.class))})
 	public ResponseEntity<?> modifyPlanP(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
@@ -109,8 +114,9 @@ public class PlanPController {
 	@Operation(summary = "planP 수정")
 	@ApiResponse(responseCode = "200", description = "planP 수정", content = {
 		@Content(mediaType = "application/json",
-			examples = @ExampleObject(value = "웹소켓 : planId, http : 수정된 order 개수(참고용)"),
-			schema = @Schema(implementation = PlanPInfoDto.class)
+			examples = {
+				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"delete\", \"data\": planId}"),
+				@ExampleObject(name = "http 응답", value = "삭제로 인해 순서가 수정된 plan 수")}
 		)})
 	public ResponseEntity<?> deletePlanP(
 		@AuthenticationPrincipal SecurityUser securityUser,

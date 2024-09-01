@@ -2,11 +2,13 @@ package com.ll.trip.domain.trip.plan.service;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.trip.plan.dto.PlanEditDto;
 import com.ll.trip.domain.trip.plan.repository.PlanPRepository;
+import com.ll.trip.domain.trip.plan.response.PlanResponseBody;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,12 +21,15 @@ public class PlanEditService {
 
 	private final String TOPIC_PREFIX = "/topic/api/trip/edit/";
 	private final ConcurrentHashMap<String, String> activeEditTopicsAndUuid = new ConcurrentHashMap<>();
+	private final SimpMessagingTemplate template;
 
-	public void decrementSubscription(String destination, String username) {
+	public void editorClosedSubscription(String destination, String username) {
 		String invitationCode = destination.substring(TOPIC_PREFIX.length());
 		if (activeEditTopicsAndUuid.contains(invitationCode) &&
 			activeEditTopicsAndUuid.get(invitationCode).equals(username)) {
 			activeEditTopicsAndUuid.remove(invitationCode);
+
+			template.convertAndSend(destination, new PlanResponseBody<>("edit finish", username));
 		}
 	}
 
