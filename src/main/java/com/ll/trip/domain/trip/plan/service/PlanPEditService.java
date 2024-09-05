@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class PlanEditService {
+public class PlanPEditService {
 
 	private final PlanPRepository planPRepository;
 

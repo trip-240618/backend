@@ -50,7 +50,8 @@ public class SpringSecurityConfig {
 					"/swagger-ui/**",
 					"/swagger-ui.html",
 					"/api-docs/**",
-					"/api-docs.yaml"
+					"/api-docs.yaml",
+					"/trip/location/**"
 					// "/chat/**",
 					// "/ws/**",
 					// "/plan/**",

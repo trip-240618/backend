@@ -61,6 +61,11 @@ public class TripInfoDto {
 	private String labelColor;
 
 	@Schema(
+		description = "북마크 여부",
+		example = "false")
+	private boolean bookmark;
+
+	@Schema(
 		description = "참가자 리스트")
 	private List<TripMemberDto> tripMemberDtoList = new ArrayList<>();
 
@@ -74,10 +79,11 @@ public class TripInfoDto {
 		this.endDate = trip.getEndDate();
 		this.thumbnail = trip.getThumbnail();
 		this.labelColor = trip.getLabelColor();
+		this.bookmark = false;
 	}
 
 	public TripInfoDto(long id, String name, char type, LocalDate startDate, LocalDate endDate, String country, String thumbnail,
-		String invitationCode, String labelColor) {
+		String invitationCode, String labelColor, boolean bookmark) {
 		this.id = id;
 		this.name = name;
 		this.type = type;
@@ -87,5 +93,6 @@ public class TripInfoDto {
 		this.thumbnail = thumbnail;
 		this.invitationCode = invitationCode;
 		this.labelColor = labelColor;
+		this.bookmark = bookmark;
 	}
 }

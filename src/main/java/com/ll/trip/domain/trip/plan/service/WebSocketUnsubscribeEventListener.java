@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebSocketUnsubscribeEventListener implements ApplicationListener<SessionUnsubscribeEvent> {
 
-	private final PlanEditService planEditService;
+	private final PlanPEditService planEditService;
 
 	@Override
 	public void onApplicationEvent(SessionUnsubscribeEvent event) {

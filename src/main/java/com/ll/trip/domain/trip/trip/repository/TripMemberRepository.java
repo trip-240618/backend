@@ -10,8 +10,10 @@ import com.ll.trip.domain.trip.trip.dto.TripMemberServiceDto;
 import com.ll.trip.domain.trip.trip.entity.TripMember;
 import com.ll.trip.domain.trip.trip.entity.TripMemberId;
 
+import lombok.NonNull;
+
 public interface TripMemberRepository extends JpaRepository<TripMember, TripMemberId> {
-	boolean existsById(TripMemberId tripMemberId);
+	boolean existsById(@NonNull TripMemberId tripMemberId);
 
 	boolean existsTripMemberByTripIdAndUserId(long tripId, long userId);
 

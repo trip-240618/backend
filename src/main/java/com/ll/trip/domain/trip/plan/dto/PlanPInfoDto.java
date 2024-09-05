@@ -41,4 +41,5 @@ public class PlanPInfoDto {
 		example = "true")
 	private boolean checkbox;
 
+
 }
