@@ -12,6 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserInfoDto {
 	@Schema(
+		description = "uuid",
+		example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4")
+	private String uuid;
+
+	@Schema(
 		description = "실제이름",
 		example = "최순자")
 	private String name;
@@ -32,6 +37,7 @@ public class UserInfoDto {
 	private String type;
 
 	public UserInfoDto(UserEntity user, String type) {
+		this.uuid = user.getUuid();
 		this.name = user.getName();
 		this.nickName = user.getNickname();
 		this.profileImg = user.getProfileImg();

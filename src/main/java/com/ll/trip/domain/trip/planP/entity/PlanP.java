@@ -1,11 +1,8 @@
-package com.ll.trip.domain.flight.entity;
-
-import java.time.LocalDateTime;
+package com.ll.trip.domain.trip.planP.entity;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.ll.trip.domain.trip.plan.entity.PlanJ;
-import com.ll.trip.domain.trip.plan.entity.PlanP;
+import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.global.base.entity.BaseEntity;
 
 import jakarta.persistence.Entity;
@@ -15,10 +12,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -27,33 +27,28 @@ import lombok.experimental.SuperBuilder;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class Flight extends BaseEntity {
+@Table(name = "plan_p")
+public class PlanP extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ManyToOne
-	@JoinColumn(name = "plan_j_id")
-	private PlanJ planJ;
+	@JoinColumn(name = "trip_id")
+	private Trip trip;
 
-	@ManyToOne
-	@JoinColumn(name = "plan_p_id")
-	private PlanP planP;
+	private Integer dayAfterStart;
 
-	private String flightCode;
+	private Integer orderByDate;
 
-	private String flightNum;
+	private boolean locker;
 
-	private String departureIata;
+	private String writerUuid;
 
-	private String departureAirport;
+	@NotBlank
+	@Setter
+	private String content;
 
-	private LocalDateTime departureDate;
-
-	private String arrivalIata;
-
-	private String arrivalAirport;
-
-	private LocalDateTime arrivalDate;
-
+	@Setter
+	private boolean checkbox;
 }

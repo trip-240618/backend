@@ -38,7 +38,7 @@ public class UserController {
 	public ResponseEntity<?> getUserInfo(
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
-		log.info(securityUser.getUsername());
+		log.info("uuid : " + securityUser.getUsername());
 		Optional<UserEntity> user = userService.findUserByUuid(securityUser.getUuid());
 
 		if (user.isEmpty()) {
@@ -58,7 +58,7 @@ public class UserController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestBody UserModifyDto modifyDto
 	) {
-		log.info(securityUser.getUsername());
+		log.info("uuid : " + securityUser.getUsername());
 		Optional<UserEntity> user = userService.findUserByUuid(securityUser.getUuid());
 
 		if (user.isEmpty()) {

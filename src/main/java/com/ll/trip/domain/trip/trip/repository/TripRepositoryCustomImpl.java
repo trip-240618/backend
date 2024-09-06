@@ -8,9 +8,12 @@ import com.ll.trip.domain.trip.trip.entity.QBookmark;
 import com.ll.trip.domain.trip.trip.entity.QTrip;
 import com.ll.trip.domain.trip.trip.entity.QTripMember;
 import com.ll.trip.domain.trip.trip.entity.Trip;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -27,6 +30,7 @@ public class TripRepositoryCustomImpl implements TripRepositoryCustom {
 		String sortDirection, String type) {
 		QTrip trip = QTrip.trip;
 		QTripMember tripMember = QTripMember.tripMember;
+		QBookmark bookmark = QBookmark.bookmark;
 
 		JPAQuery<TripInfoDto> query = jpaQueryFactory
 			.select(
@@ -39,11 +43,16 @@ public class TripRepositoryCustomImpl implements TripRepositoryCustom {
 					trip.country,
 					trip.thumbnail,
 					trip.invitationCode,
-					trip.labelColor
+					trip.labelColor,
+					new CaseBuilder()
+						.when(bookmark.isNotNull().and(bookmark.toggle)).then(true)
+						.otherwise(false)
+						.as("bookmark")
 				)
 			)
 			.from(tripMember)
 			.leftJoin(tripMember.trip, trip)
+			.leftJoin(bookmark).on(bookmark.trip.eq(trip).and(bookmark.user.id.eq(userId)))
 			.where(
 				tripMember.user.id.eq(userId)
 			);
@@ -69,7 +78,7 @@ public class TripRepositoryCustomImpl implements TripRepositoryCustom {
 
 	@Override
 	public List<TripInfoDto> findBookmarkTripInfosWithDynamicSort(Long userId, String sortField,
-		String sortDirection, String type) {
+		String sortDirection) {
 		QTrip trip = QTrip.trip;
 		QBookmark bookmark = QBookmark.bookmark;
 
@@ -84,7 +93,8 @@ public class TripRepositoryCustomImpl implements TripRepositoryCustom {
 					trip.country,
 					trip.thumbnail,
 					trip.invitationCode,
-					trip.labelColor
+					trip.labelColor,
+					ExpressionUtils.as(Expressions.constant(true), "bookmark")
 				)
 			)
 			.from(bookmark)

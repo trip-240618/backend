@@ -113,6 +113,7 @@ public class TripService {
 			long id = tripMemberServiceDto.getId();
 
 			TripMemberDto tripMemberDto = new TripMemberDto(
+				tripMemberServiceDto.getUuid(),
 				tripMemberServiceDto.getNickname(),
 				tripMemberServiceDto.getProfileImg(),
 				tripMemberServiceDto.isLeader()
@@ -123,7 +124,7 @@ public class TripService {
 	}
 
 	public List<TripInfoDto> findBookmarkByUserId(Long userId, String sortDirection, String sortField) {
-		return tripRepository.findAllBookmarkTripInfoDtosByUserId(userId);
+		return tripRepository.findBookmarkTripInfosWithDynamicSort(userId, sortField, sortDirection);
 	}
 
 	@Transactional

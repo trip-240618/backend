@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.plan.dto;
+package com.ll.trip.domain.trip.planP.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -11,14 +11,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PlanPInfoDto {
 	@Schema(
+		description = "plan pk",
+		example = "1")
+	private Long planId;
+
+	@Schema(
 		description = "시작일 기준 몇일째인지",
-		example = "0")
-	private int dayAfterStart;
+		example = "1")
+	private Integer dayAfterStart;
 
 	@Schema(
 		description = "예정일 별 순서",
 		example = "2")
-	private int orderByDate;
+	private Integer orderByDate;
 
 	@Schema(
 		description = "작성자 uuid",
@@ -35,5 +40,6 @@ public class PlanPInfoDto {
 		description = "체크박스",
 		example = "true")
 	private boolean checkbox;
+
 
 }

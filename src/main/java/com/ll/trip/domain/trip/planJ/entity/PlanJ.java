@@ -1,16 +1,14 @@
-package com.ll.trip.domain.trip.plan.entity;
+package com.ll.trip.domain.trip.planJ.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.ll.trip.domain.flight.entity.Flight;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.global.base.entity.BaseEntity;
 
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -18,14 +16,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -44,22 +41,33 @@ public class PlanJ extends BaseEntity {
 	@JoinColumn(name = "trip_id")
 	private Trip trip;
 
-	private int dayAfterStart;
+	@Setter
+	private Integer dayAfterStart;
 
+	@Setter
 	private LocalTime startTime;
 
-	private long orderByDate;
+	@Setter
+	private Integer orderByDate;
 
 	private boolean locker;
 
 	private String writerUuid;
 
+	@Setter
+	@Column(precision = 10, scale = 8)
+	private BigDecimal latitude; //위도
+
+	@Setter
+	@Column(precision = 11, scale = 8)
+	private BigDecimal longitude; //경도
+
+	@Setter
 	@NotBlank
 	private String title;
 
+	@Setter
 	private String memo;
 
-	@OneToMany(mappedBy = "planJ",cascade = CascadeType.ALL, orphanRemoval = true)
-	@Builder.Default
-	private List<Flight> flights  = new ArrayList<>();
+	private Integer flightId;
 }

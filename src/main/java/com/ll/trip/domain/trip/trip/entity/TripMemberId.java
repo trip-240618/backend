@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +16,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 public class TripMemberId implements Serializable {
+	@NotNull
 	private Long userId;
+	@NotNull
 	private Long tripId;
 
 	@Override

@@ -11,16 +11,16 @@ import lombok.Getter;
 
 @Getter
 public class SecurityUser extends User implements OAuth2User {
-    private Long id;
+    private final Long id;
 
-    private String uuid;
+    private final String uuid;
 
-    private String name;// 이름
+    private final String name;// 이름
 
-    private String profileImage;
+    private final String profileImage;
 
     public SecurityUser(Long id, String uuid, String name, String providerId, String profileImage, Collection<? extends GrantedAuthority> authorities) {
-        super(uuid, providerId, authorities);
+        super(uuid, providerId, authorities); //username = uuid, password = providerId
         this.id = id;
         this.uuid = uuid;
         this.name = name;
@@ -44,5 +44,4 @@ public class SecurityUser extends User implements OAuth2User {
     public String getName() {
         return this.name;
     }
-
 }

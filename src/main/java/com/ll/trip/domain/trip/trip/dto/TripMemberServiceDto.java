@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 public class TripMemberServiceDto {
 	private long id;
 
+	private String uuid;
+
 	private String nickname;
 
 	private String profileImg;
