@@ -1,21 +1,23 @@
-package com.ll.trip.domain.trip.plan.repository;
+package com.ll.trip.domain.trip.planP.repository;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import com.ll.trip.domain.trip.plan.dto.PlanEditDto;
-import com.ll.trip.domain.trip.plan.dto.PlanPDeleteDto;
-import com.ll.trip.domain.trip.plan.entity.PlanP;
+import com.ll.trip.domain.trip.planP.dto.PlanPEditDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPDeleteDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
+import com.ll.trip.domain.trip.planP.entity.PlanP;
 
 public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 	@Query("select max(p.orderByDate) from PlanP p where p.trip.id = :tripId and p.dayAfterStart = :dayAfterStart")
-	Integer findMaxIdx(Long tripId, int dayAfterStart);
+	Integer findMaxOrder(Long tripId, int dayAfterStart);
 
 	@Query("""
-		SELECT new com.ll.trip.domain.trip.plan.dto.PlanPInfoDto(
+		SELECT new com.ll.trip.domain.trip.planP.dto.PlanPInfoDto(
 			p.id,
 			p.dayAfterStart,
 			p.orderByDate,
@@ -27,12 +29,19 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		WHERE p.trip.id = :tripId
 		order by p.dayAfterStart asc, p.orderByDate asc
 		""")
-	List<PlanP> findAllByTripIdOrderByDayAfterStartAndOrderByDate(long tripId);
+	List<PlanPInfoDto> findAllByTripIdOrderByDayAfterStartAndOrderByDate(long tripId);
+
+	@Query("""
+		update PlanP p
+		set p.checkbox = :checkbox
+		where p.id = :planId
+		""")
+	int updateCheckBoxByPlanId(long planId, boolean checkbox);
 
 	Optional<PlanP> findPlanPById(long planId);
 
 	@Query("""
-			select new com.ll.trip.domain.trip.plan.dto.PlanPDeleteDto(
+			select new com.ll.trip.domain.trip.planP.dto.PlanPDeleteDto(
 				p.trip.id,
 				p.id,
 				p.dayAfterStart,
@@ -44,18 +53,19 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 	)
 	Optional<PlanPDeleteDto> findPlanPDeleteDtoByPlanId(long planId);
 
+	@Modifying
 	@Query("""
 					update PlanP p
-					set p.orderByDate = p.orderByDate + 1
+					set p.orderByDate = p.orderByDate - 1
 					where p.trip.id = :tripId and
 					p.dayAfterStart = :dayAfterStart and
 					p.orderByDate > :orderByDate
 		"""
 	)
-	int subtractOrder(long tripId, int dayAfterStart, int orderByDate);
+	int reduceOrderBiggerThanOrder(long tripId, int dayAfterStart, int orderByDate);
 
 	@Query("""
-			select new com.ll.trip.domain.trip.plan.dto.PlanEditDto(
+			select new com.ll.trip.domain.trip.planP.dto.PlanPEditDto(
 				p.id,
 				p.trip.id,
 				p.dayAfterStart,
@@ -64,8 +74,9 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 			from PlanP p
 			where p.id = :planId
 		""")
-	Optional<PlanEditDto> findPlanEditDtoById(long planId);
+	Optional<PlanPEditDto> findPlanEditDtoById(long planId);
 
+	@Modifying
 	@Query("""
 		update PlanP p
 		set p.dayAfterStart = :dayTo,
@@ -74,6 +85,7 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		""")
 	int updateDayOrderById(long planId, int dayTo, int orderTo);
 
+	@Modifying
 	@Query("""
 		update PlanP p
 		set p.orderByDate = p.orderByDate - 1
@@ -84,6 +96,7 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		""")
 	int reduceOrderFromToByTripIdAndDay(long tripId, int day, int from, int to);
 
+	@Modifying
 	@Query("""
 		update PlanP p
 		set p.orderByDate = p.orderByDate + 1
@@ -94,6 +107,7 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		""")
 	int increaseOrderFromToByTripIdAndDay(long tripId, int day, int from, int to);
 
+	@Modifying
 	@Query("""
 		update PlanP p
 		set p.orderByDate = p.orderByDate - 1
@@ -103,6 +117,7 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		""")
 	int reduceOrderFromByTripIdAndDay(long tripId, int day, int from);
 
+	@Modifying
 	@Query("""
 		update PlanP p
 		set p.orderByDate = p.orderByDate + 1
@@ -111,4 +126,11 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		p.orderByDate >= :from
 		""")
 	int increaseOrderFromByTripIdAndDay(long tripId, int day, int from);
+
+	@Query("""
+		select p.checkbox
+		from PlanP p
+		where p.id = :planId
+	""")
+	boolean findIsCheckBoxByPlanId(Long planId);
 }

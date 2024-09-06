@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.plan.service;
+package com.ll.trip.domain.trip.planP.service;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -6,8 +6,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.trip.plan.dto.PlanEditDto;
-import com.ll.trip.domain.trip.plan.repository.PlanPRepository;
+import com.ll.trip.domain.trip.planP.dto.PlanPEditDto;
+import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
 import com.ll.trip.domain.trip.plan.response.PlanResponseBody;
 
 import lombok.RequiredArgsConstructor;
@@ -42,43 +42,43 @@ public class PlanPEditService {
 	}
 
 	public int movePlanByDayAndOrder(long planId, int dayTo, int orderTo) {
-		PlanEditDto planEditDto = planPRepository.findPlanEditDtoById(planId).orElseThrow(NullPointerException::new);
+		PlanPEditDto planPEditDto = planPRepository.findPlanEditDtoById(planId).orElseThrow(NullPointerException::new);
 
-		if (planEditDto.getDayAfterStart() == dayTo) {
-			return movePlanPInSameDay(planEditDto, dayTo, orderTo);
+		if (planPEditDto.getDayAfterStart() == dayTo) {
+			return movePlanPInSameDay(planPEditDto, dayTo, orderTo);
 		} else {
-			return movePlanPInAnotherDay(planEditDto, dayTo, orderTo);
+			return movePlanPInAnotherDay(planPEditDto, dayTo, orderTo);
 		}
 	}
 
 	@Transactional
-	public int movePlanPInSameDay(PlanEditDto planEditDto, int dayTo, int orderTo) {
-		int order = planEditDto.getOrderByDate();
+	public int movePlanPInSameDay(PlanPEditDto planPEditDto, int dayTo, int orderTo) {
+		int orderFrom = planPEditDto.getOrderByDate();
 		int updated = 0;
 
-		if (orderTo > order) {
-			updated += planPRepository.reduceOrderFromToByTripIdAndDay(planEditDto.getTripId(), dayTo, order + 1,
+		if (orderTo > orderFrom) {
+			updated += planPRepository.reduceOrderFromToByTripIdAndDay(planPEditDto.getTripId(), dayTo, orderFrom + 1,
 				orderTo);
 		} else {
-			updated += planPRepository.increaseOrderFromToByTripIdAndDay(planEditDto.getTripId(), dayTo, orderTo,
-				order - 1);
+			updated += planPRepository.increaseOrderFromToByTripIdAndDay(planPEditDto.getTripId(), dayTo, orderTo,
+				orderFrom - 1);
 
 		}
-		updated += planPRepository.updateDayOrderById(planEditDto.getId(), dayTo, orderTo);
+		updated += planPRepository.updateDayOrderById(planPEditDto.getId(), dayTo, orderTo);
 
 		return updated;
 	}
 
 	@Transactional
-	public int movePlanPInAnotherDay(PlanEditDto planEditDto, int dayTo, int orderTo) {
-		long tripId = planEditDto.getTripId();
-		int day = planEditDto.getDayAfterStart();
-		int order = planEditDto.getOrderByDate();
+	public int movePlanPInAnotherDay(PlanPEditDto planPEditDto, int dayTo, int orderTo) {
+		long tripId = planPEditDto.getTripId();
+		int day = planPEditDto.getDayAfterStart();
+		int order = planPEditDto.getOrderByDate();
 		int updated = 0;
 
 		updated += planPRepository.reduceOrderFromByTripIdAndDay(tripId, day, order);
 		updated += planPRepository.increaseOrderFromByTripIdAndDay(tripId, dayTo, orderTo);
-		updated += planPRepository.updateDayOrderById(planEditDto.getId(), dayTo, orderTo);
+		updated += planPRepository.updateDayOrderById(planPEditDto.getId(), dayTo, orderTo);
 
 		return updated;
 	}

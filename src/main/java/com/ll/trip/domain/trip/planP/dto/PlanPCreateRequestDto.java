@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.plan.dto;
+package com.ll.trip.domain.trip.planP.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -18,6 +18,6 @@ public class PlanPCreateRequestDto {
 
 	@Schema(
 		description = "시작일 기준 몇일째인지",
-		example = "0")
+		example = "1")
 	private int dayAfterStart;
 }

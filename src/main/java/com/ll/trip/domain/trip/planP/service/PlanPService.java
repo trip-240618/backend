@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.plan.service;
+package com.ll.trip.domain.trip.planP.service;
 
 import java.util.List;
 import java.util.Optional;
@@ -6,17 +6,19 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.trip.plan.dto.PlanPCreateRequestDto;
-import com.ll.trip.domain.trip.plan.dto.PlanPDeleteDto;
-import com.ll.trip.domain.trip.plan.dto.PlanPInfoDto;
-import com.ll.trip.domain.trip.plan.entity.PlanP;
-import com.ll.trip.domain.trip.plan.repository.PlanPRepository;
+import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPDeleteDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
+import com.ll.trip.domain.trip.planP.entity.PlanP;
+import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PlanPService {
 
 	private final PlanPRepository planPRepository;
@@ -38,8 +40,8 @@ public class PlanPService {
 	}
 
 	public int getNextIdx(long tripId, int dayAfterStart) {
-		Integer maxIdx = planPRepository.findMaxIdx(tripId, dayAfterStart);
-		return maxIdx == null ? 0 : maxIdx + 1;
+		Integer maxOrder = planPRepository.findMaxOrder(tripId, dayAfterStart);
+		return maxOrder == null ? 0 : maxOrder + 1;
 	}
 
 	public PlanPInfoDto convertPlanPToDto(PlanP plan) {
@@ -53,13 +55,13 @@ public class PlanPService {
 		);
 	}
 
-	public List<PlanP> findAllByTripId(Long tripId) {
+	public List<PlanPInfoDto> findAllByTripId(Long tripId) {
 		return planPRepository.findAllByTripIdOrderByDayAfterStartAndOrderByDate(tripId);
 	}
 
 	@Transactional
-	public PlanP updatePlanPByPlanId(Long planId, PlanPInfoDto requestBody) {
-		PlanP plan = planPRepository.findPlanPById(planId).orElseThrow(NullPointerException::new);
+	public PlanP updatePlanPByPlanId(PlanPInfoDto requestBody) {
+		PlanP plan = planPRepository.findPlanPById(requestBody.getPlanId()).orElseThrow(NullPointerException::new);
 
 		plan.setContent(requestBody.getContent());
 		plan.setCheckbox(requestBody.isCheckbox());
@@ -72,15 +74,26 @@ public class PlanPService {
 		Optional<PlanPDeleteDto> optDto = planPRepository.findPlanPDeleteDtoByPlanId(planId);
 		PlanPDeleteDto dto = optDto.orElseThrow(NullPointerException::new);
 
-		int modifiedOrder = subtractOrderBiggerThanPlanOrder(dto.getTripId(), dto.getDayAfterStart(), dto.getOrderByDate());
+		int updated = reduceOrderBiggerThanPlanOrder(dto.getTripId(), dto.getDayAfterStart(),
+			dto.getOrderByDate());
 
 		planPRepository.deleteById(planId);
 
-		return modifiedOrder;
+		return updated;
 	}
 
 	@Transactional
-	public int subtractOrderBiggerThanPlanOrder(long tripId, int dayAfterStart, int orderByDate) {
-		return planPRepository.subtractOrder(tripId, dayAfterStart, orderByDate);
+	public int reduceOrderBiggerThanPlanOrder(long tripId, int dayAfterStart, int orderByDate) {
+		return planPRepository.reduceOrderBiggerThanOrder(tripId, dayAfterStart, orderByDate);
+	}
+
+	public PlanPCheckBoxResponseDto updateCheckBoxById(Long planId) {
+		boolean checkbox = planPRepository.findIsCheckBoxByPlanId(planId);
+		int cnt = planPRepository.updateCheckBoxByPlanId(planId, !checkbox);
+
+		if (cnt == 0)
+			return null;
+
+		return new PlanPCheckBoxResponseDto(planId, !checkbox);
 	}
 }

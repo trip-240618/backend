@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.plan.dto;
+package com.ll.trip.domain.trip.planP.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlanEditResponseDto {
+public class PlanPEditResponseDto {
 	@Schema(
 		description = "plan pk",
 		example = "1")

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ll.trip.domain.trip.plan.dto.AutoCompleteRequestDto;
 import com.ll.trip.domain.trip.plan.dto.AutoCompleteResponseDto;
 import com.ll.trip.domain.trip.plan.dto.PlaceDetailResponse;
-import com.ll.trip.domain.trip.plan.dto.PlanPInfoDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
 import com.ll.trip.domain.trip.plan.service.LocationService;
 
 import io.swagger.v3.oas.annotations.Operation;

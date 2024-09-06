@@ -1,14 +1,10 @@
-package com.ll.trip.domain.trip.plan.entity;
-
-import java.math.BigDecimal;
-import java.time.LocalTime;
+package com.ll.trip.domain.trip.planP.entity;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.global.base.entity.BaseEntity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -22,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -30,8 +27,8 @@ import lombok.experimental.SuperBuilder;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "plan_j")
-public class PlanJ extends BaseEntity {
+@Table(name = "plan_p")
+public class PlanP extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -42,24 +39,16 @@ public class PlanJ extends BaseEntity {
 
 	private Integer dayAfterStart;
 
-	private LocalTime startTime;
-
-	private Long orderByDate;
+	private Integer orderByDate;
 
 	private boolean locker;
 
 	private String writerUuid;
 
-	@Column(precision = 10, scale = 8)
-	private BigDecimal latitude; //위도
-
-	@Column(precision = 11, scale = 8)
-	private BigDecimal longitude; //경도
-
 	@NotBlank
-	private String title;
+	@Setter
+	private String content;
 
-	private String memo;
-
-	private Long flightId;
+	@Setter
+	private boolean checkbox;
 }
