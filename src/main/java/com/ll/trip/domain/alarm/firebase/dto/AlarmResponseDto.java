@@ -10,7 +10,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AlramResponseDto {
+public class AlarmResponseDto {
 	private String token;
 
 	private String title;
@@ -18,7 +18,7 @@ public class AlramResponseDto {
 	private String body;
 
 	@Builder(toBuilder = true)
-	public AlramResponseDto(String token, String title, String body) {
+	public AlarmResponseDto(String token, String title, String body) {
 		this.token = token;
 		this.title = title;
 		this.body = body;
