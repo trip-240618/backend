@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .build();
 
                 response.addHeader("Set-Cookie", newAccessTokenCookie.toString());
-
+                response.sendError(420, "액세스 토큰이 재발급 되었습니다.");
 
                 Authentication auth = jwtTokenUtil.getAuthentication(newAccessToken);
                 SecurityContextHolder.getContext().setAuthentication(auth);

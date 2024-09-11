@@ -16,7 +16,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.ll.trip.domain.file.file.dto.PreSignedUrlRequestBody;
 import com.ll.trip.domain.file.file.dto.PreSignedUrlResponseDto;
 
 import lombok.RequiredArgsConstructor;
@@ -30,11 +29,11 @@ public class AwsAuthService {
 
 	private final AmazonS3 amazonS3;
 
-	public PreSignedUrlResponseDto getPreSignedUrl(PreSignedUrlRequestBody requestBody) {
+	public PreSignedUrlResponseDto getPreSignedUrl(String prefix, int photoCnt) {
 		List<String> preSignedUrls = new ArrayList<>();
 
-		for (int i = 0; i < requestBody.getPhotoCount(); i++) {
-			String fileName = createPath(requestBody.getPrefix(), null);
+		for (int i = 0; i < photoCnt; i++) {
+			String fileName = createPath(prefix, null);
 			GeneratePresignedUrlRequest generatePresignedUrlRequest = getGeneratePreSignedUrlRequest(bucket, fileName);
 			URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
 			preSignedUrls.add(url.toString());
