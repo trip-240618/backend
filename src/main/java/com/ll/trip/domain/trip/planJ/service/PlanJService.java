@@ -51,9 +51,12 @@ public class PlanJService {
 		return planJRepository.findAllByTripIdAndDay(tripId, day);
 	}
 
+	@Transactional
 	public PlanJ updatePlanJByPlanId(PlanJ plan, PlanJModifyRequestDto requestBody, int order) {
 		plan.setTitle(requestBody.getTitle());
 		plan.setMemo(requestBody.getMemo());
+		plan.setDayAfterStart(requestBody.getDayAfterStart());
+		plan.setStartTime(requestBody.getStartTime());
 		plan.setLatitude(requestBody.getLatitude());
 		plan.setLongitude(requestBody.getLongitude());
 		plan.setOrderByDate(order);

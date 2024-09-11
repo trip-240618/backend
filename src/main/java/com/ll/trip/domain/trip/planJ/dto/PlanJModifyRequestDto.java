@@ -19,6 +19,11 @@ public class PlanJModifyRequestDto {
 	private long planId;
 
 	@Schema(
+		description = "시작일로 부터 몇일 째",
+		example = "1")
+	private int dayAfterStart;
+
+	@Schema(
 		description = "일정 시작 시간",
 		example = "14:30")
 	private LocalTime startTime;
