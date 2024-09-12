@@ -70,9 +70,14 @@ spring:
       on-profile: common
   jpa:
     show-sql: true
+    open-in-view: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
+        transaction:
+          jta:
+            platform: org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform
+
+
   security:
     oauth2:
       client:
