@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.user.jwt.JwtTokenUtil;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
-import com.ll.trip.domain.user.user.entity.RefreshToken;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
 import com.ll.trip.domain.user.user.service.UserService;
@@ -34,11 +33,7 @@ public class OAuth2Service {
 
 		if (optUser.isEmpty()) {
 			uuid = userService.generateUUID();
-			String tokenKey = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
-
-			RefreshToken createdRefreshToken = RefreshToken.builder()
-				.keyValue(tokenKey)
-				.build();
+			refreshToken = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
 
 			UserEntity user = UserEntity
 				.builder()
@@ -50,17 +45,14 @@ public class OAuth2Service {
 				.email(email)
 				.build();
 
-			createdRefreshToken.setUser(user);
-			user.getRefreshTokens().add(createdRefreshToken);
-
 			user = userRepository.save(user);
+
 			userInfoDto = new UserInfoDto(user, "register");
-			refreshToken = createdRefreshToken.getKeyValue();
 		} else {
 			UserEntity user = optUser.get();
-			RefreshToken foundRefreshToken = userService.findRefreshTokenByUserId(user.getId());
-			refreshToken = foundRefreshToken.getKeyValue();
 			uuid = user.getUuid();
+
+			refreshToken = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
 
 			if(user.getNickname() == null) userInfoDto = new UserInfoDto(user, "register");
 			else userInfoDto = new UserInfoDto(user, "login");

@@ -1,6 +1,5 @@
 package com.ll.trip.domain.user.user.service;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,9 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.dto.UserModifyDto;
-import com.ll.trip.domain.user.user.entity.RefreshToken;
 import com.ll.trip.domain.user.user.entity.UserEntity;
-import com.ll.trip.domain.user.user.repository.RefreshTokenRepository;
 import com.ll.trip.domain.user.user.repository.UserRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserService {
 	private final UserRepository userRepository;
-	private final RefreshTokenRepository refreshTokenRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	public Optional<UserEntity> findUserByUuid(String uuid) {
@@ -31,11 +27,6 @@ public class UserService {
 
 	public String generateUUID() {
 		return UUID.randomUUID().toString();
-	}
-
-	public RefreshToken findRefreshTokenByUserId(Long userId) {
-		return refreshTokenRepository.findById(userId)
-			.orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
 	}
 
 	public void setTokenInCookie(String accessToken, String refreshToken, HttpServletResponse response) {
@@ -64,8 +55,7 @@ public class UserService {
 		if (nickname != null)
 			user.setNickname(nickname);
 
-		if (profileImageUrl != null)
-			user.setProfileImg(profileImageUrl);
+		user.setProfileImg(profileImageUrl);
 
 		user = userRepository.save(user);
 

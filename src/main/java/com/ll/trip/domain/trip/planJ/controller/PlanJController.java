@@ -22,6 +22,7 @@ import com.ll.trip.domain.trip.plan.response.PlanResponseBody;
 import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJModifyRequestDto;
+import com.ll.trip.domain.trip.planJ.dto.PlanJSwapRequestDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.service.PlanJEditService;
 import com.ll.trip.domain.trip.planJ.service.PlanJService;
@@ -66,10 +67,7 @@ public class PlanJController {
 		@RequestBody PlanJCreateRequestDto requestDto
 	) {
 		Trip trip = tripService.findByInvitationCode(invitationCode);
-
-		//order 수정 있음
-		int order = planJEditService.findAndMovePlanJOrderByStartTimeWhereIdAndDay(trip.getId(),
-			requestDto.getDayAfterStart(), null, requestDto.getStartTime());
+		int order = planJEditService.getLastOrderByTripId(trip.getId(), requestDto.getDayAfterStart());
 
 		PlanJ plan = planJService.createPlan(trip, requestDto, order, securityUser.getUuid());
 		PlanJInfoDto response = planJService.convertPlanJToDto(plan);
@@ -97,7 +95,7 @@ public class PlanJController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PutMapping("/{invitationCode}/plan/modify")
+	@PutMapping("/{invitationCode}/plan/edit/modify")
 	@Operation(summary = "PlanJ 수정")
 	@ApiResponse(responseCode = "200", description = "PlanJ 수정", content = {
 		@Content(
@@ -112,17 +110,18 @@ public class PlanJController {
 		@RequestBody PlanJModifyRequestDto requestBody
 	) {
 		PlanJ plan = planJService.findPlanJById(requestBody.getPlanId());
-
-		if (!planJEditService.isEditor(invitationCode, securityUser.getUuid(), plan.getDayAfterStart()))
-			return ResponseEntity.badRequest().body("편집자가 아닙니다.");
-
 		int order = plan.getOrderByDate();
+		int dayFrom = plan.getDayAfterStart();
+		int dayTo = requestBody.getDayAfterStart();
 
-		if (plan.getStartTime() != requestBody.getStartTime()) {
+		if (plan.getStartTime() != requestBody.getStartTime() || dayFrom != dayTo) {
+			if (!planJEditService.isEditor(invitationCode, securityUser.getUuid(), dayFrom))
+				return ResponseEntity.badRequest().body("day" + dayFrom + "의 편집자가 아닙니다.");
+			if (dayTo != dayFrom && !planJEditService.isEditor(invitationCode, securityUser.getUuid(), dayTo))
+				return ResponseEntity.badRequest().body("day" + dayTo + "의 편집자가 아닙니다.");
+
 			Trip trip = tripService.findByInvitationCode(invitationCode);
-			order = planJEditService.findAndMovePlanJOrderByStartTimeWhereIdAndDay(trip.getId(),
-				plan.getDayAfterStart(),
-				plan.getOrderByDate(), requestBody.getStartTime());
+			order = planJEditService.getLastOrderByTripId(trip.getId(), requestBody.getDayAfterStart());
 
 		}
 
@@ -135,6 +134,37 @@ public class PlanJController {
 		);
 
 		return ResponseEntity.ok("modified");
+	}
+
+	@PutMapping("/{invitationCode}/plan/edit/swap")
+	@Operation(summary = "PlanJ 스왑")
+	@ApiResponse(responseCode = "200", description = "PlanJ 스왑", content = {
+		@Content(
+			mediaType = "application/json",
+			examples = {
+				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"swap\", \"data\": \"PlanJSwapRequestDto\"}"),
+				@ExampleObject(name = "http 응답", value = "swapped")},
+			schema = @Schema(implementation = PlanJSwapRequestDto.class))})
+	public ResponseEntity<?> swapPlanJ(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@RequestBody PlanJSwapRequestDto requestBody
+	) {
+		int day = requestBody.getDayAfterStart();
+
+		if (!planJEditService.isEditor(invitationCode, securityUser.getUuid(), day))
+			return ResponseEntity.badRequest().body("day" + day + "의 편집자가 아닙니다.");
+
+		if(planJEditService.swapPlanJByIds(requestBody.getPlanId1(), requestBody.getPlanId2()) != 2)
+			return ResponseEntity.internalServerError().body("swap 실패");
+
+
+		template.convertAndSend(
+			"/topic/api/trip/j/" + invitationCode,
+			new PlanResponseBody<>("modify", requestBody)
+		);
+
+		return ResponseEntity.ok("swapped");
 	}
 
 	@DeleteMapping("/{invitationCode}/plan/delete")
@@ -152,15 +182,12 @@ public class PlanJController {
 	) {
 		planJService.deletePlanJById(planId);
 
-		//order 수정 있음
-		int updated = planJEditService.movePlanJAfterDeleteByPlanId(planId);
-
 		template.convertAndSend(
 			"/topic/api/trip/j/" + invitationCode,
 			new PlanResponseBody<>("delete", planId)
 		);
 
-		return ResponseEntity.ok(updated);
+		return ResponseEntity.ok("deleted");
 	}
 
 	@MessageMapping("/j/{invitationCode}/{day}/edit/register")
@@ -194,7 +221,7 @@ public class PlanJController {
 		@Content(mediaType = "application/json",
 			examples = {
 				@ExampleObject(name = "편집자로 등록된 경우", value = "{\"command\": \"edit start\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}"),
-				@ExampleObject(name = "편집중인 사람이 존재할 경우", value = "{\"command\": \"wait\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}")
+				@ExampleObject(name = "편집중인 사람이 존재할 경우", value = "{\"command\": \"wait\", \"data\": \"223e4567-e89b-12d3-a456-426614174001\"}")
 			}
 		)})
 	public PlanResponseBody<String> addEditor(
@@ -203,6 +230,5 @@ public class PlanJController {
 	) {
 		return new PlanResponseBody<>("edit start", "uuid");
 	}
-
 
 }

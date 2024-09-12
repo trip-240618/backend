@@ -5,10 +5,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.trip.planJ.dto.PlanJDeleteDto;
+import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.repository.PlanJRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,62 +20,11 @@ public class PlanJEditService {
 
 	private final ConcurrentHashMap<String, ConcurrentHashMap<String, Integer>> activeEditTopicsAndUuidAndDay = new ConcurrentHashMap<>();
 
-	public int findAndMovePlanJOrderByStartTimeWhereIdAndDay(long tripId, int dayAfterStart, Integer orderFrom,
-		LocalTime startTime) {
-		int to = findOrderByDayAndTime(tripId, dayAfterStart, startTime);
-
-		if (orderFrom == null) {
-			planJRepository.increaseOrderWhereBiggerThanOrder(tripId, dayAfterStart, to);
-			return to;
-		}
-
-		int updated = movePlanJInSameDay(tripId, dayAfterStart, orderFrom, to);
-		if (updated == 0)
-			throw new UnexpectedRollbackException("order 업데이트가 정상적으로 이루어지지 않음");
-
-		return to;
-	}
-
-	private int findOrderByDayAndTime(long tripId, int dayAfterStart, LocalTime startTime) {
-		Object[] object = planJRepository.findOrderByDayAndStartTime(tripId, dayAfterStart, startTime);
-		Integer maxOrder = (Integer)object[0];
-		Integer firstBiggerOrder = (Integer)object[1];
-
-		if (maxOrder == null)
+	public int getLastOrderByTripId(long tripId, int dayAfterStart) {
+		Integer order = planJRepository.findMaxOrder(tripId, dayAfterStart);
+		if (order == null)
 			return 0;
-
-		if (firstBiggerOrder == null)
-			return maxOrder + 1;
-
-		return firstBiggerOrder;
-	}
-
-	@Transactional
-	public int movePlanJInSameDay(long tripId, int day, int orderFrom, int orderTo) {
-		int updated = 0;
-
-		if (orderTo > orderFrom) {
-			updated += planJRepository.reduceOrderFromToByTripIdAndDay(tripId, day, orderFrom + 1,
-				orderTo);
-		} else {
-			updated += planJRepository.increaseOrderFromToByTripIdAndDay(tripId, day, orderTo,
-				orderFrom - 1);
-
-		}
-		return updated;
-	}
-
-	@Transactional
-	public int movePlanJAfterDeleteByPlanId(Long planId) {
-		PlanJDeleteDto dto = planJRepository.findPlanJDeleteDtoByPlanId(planId).orElseThrow(NullPointerException::new);
-
-		return reduceOrderBiggerThanPlanOrder(dto.getTripId(), dto.getDayAfterStart(),
-			dto.getOrderByDate());
-	}
-
-	private int reduceOrderBiggerThanPlanOrder(long tripId, int dayAfterStart, int orderByDate) {
-		return planJRepository.reduceOrderBiggerThanOrder(tripId, dayAfterStart, orderByDate);
-
+		return order;
 	}
 
 	public String getEditorByInvitationCodeAndDay(String invitationCode, int day) {
@@ -105,5 +53,19 @@ public class PlanJEditService {
 		if (!activeEditTopicsAndUuidAndDay.containsKey(invitationCode))
 			return false;
 		return activeEditTopicsAndUuidAndDay.get(invitationCode).get(uuid) == day;
+	}
+
+	@Transactional
+	public int swapPlanJByIds(long planId1, long planId2) {
+		PlanJ plan1 = planJRepository.findById(planId1).orElseThrow(NullPointerException::new);
+		PlanJ plan2 = planJRepository.findById(planId2).orElseThrow(NullPointerException::new);
+
+		LocalTime startTime1 = plan1.getStartTime();
+		LocalTime startTime2 = plan2.getStartTime();
+		int order1 = plan1.getOrderByDate();
+		int order2 = plan2.getOrderByDate();
+
+		return planJRepository.updateStartTimeAndOrder(planId1, startTime2, order2) +
+			   planJRepository.updateStartTimeAndOrder(planId2, startTime1, order1);
 	}
 }
