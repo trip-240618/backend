@@ -142,9 +142,9 @@ public class PlanJController {
 		@Content(
 			mediaType = "application/json",
 			examples = {
-				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"swap\", \"data\": \"PlanJSwapDto\"}"),
+				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"swap\", \"data\": \"PlanJSwapRequestDto\"}"),
 				@ExampleObject(name = "http 응답", value = "swapped")},
-			schema = @Schema(implementation = PlanJInfoDto.class))})
+			schema = @Schema(implementation = PlanJSwapRequestDto.class))})
 	public ResponseEntity<?> swapPlanJ(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,

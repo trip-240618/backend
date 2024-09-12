@@ -125,21 +125,21 @@ public class PlanPController {
 		@Content(mediaType = "application/json",
 			examples = {
 				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"delete\", \"data\": planId}"),
-				@ExampleObject(name = "http 응답", value = "삭제로 인해 순서가 수정된 plan 수")}
+				@ExampleObject(name = "http 응답", value = "deleted")}
 		)})
 	public ResponseEntity<?> deletePlanP(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
 		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId
 	) {
-		int modifiedOrder = planPService.deletePlanPByPlanId(planId);
+		planPService.deletePlanPByPlanId(planId);
 
 		template.convertAndSend(
 			"/topic/api/trip/p/" + invitationCode,
 			new PlanResponseBody<>("delete", planId)
 		);
 
-		return ResponseEntity.ok(modifiedOrder);
+		return ResponseEntity.ok("deleted");
 	}
 
 	@PutMapping("/{invitationCode}/plan/check")

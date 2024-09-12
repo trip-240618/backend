@@ -1,14 +1,12 @@
 package com.ll.trip.domain.trip.planP.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPDeleteDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
 import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
@@ -70,16 +68,9 @@ public class PlanPService {
 	}
 
 	@Transactional
-	public int deletePlanPByPlanId(Long planId) {
-		Optional<PlanPDeleteDto> optDto = planPRepository.findPlanPDeleteDtoByPlanId(planId);
-		PlanPDeleteDto dto = optDto.orElseThrow(NullPointerException::new);
-
-		int updated = reduceOrderBiggerThanPlanOrder(dto.getTripId(), dto.getDayAfterStart(),
-			dto.getOrderByDate());
-
+	public void deletePlanPByPlanId(Long planId) {
 		planPRepository.deleteById(planId);
-
-		return updated;
+		return;
 	}
 
 	@Transactional
