@@ -57,7 +57,7 @@ public class JwtTokenUtil {
 
 	public String createAccessToken(String uuid, List<String> roles) {
 
-		return getString(uuid, roles, accessTokenValidityInMilliseconds);
+		return getString(uuid, roles, 6000);
 	}
 
 	private String getString(String uuid, List<String> roles, long tokenValidityInMilliseconds) {

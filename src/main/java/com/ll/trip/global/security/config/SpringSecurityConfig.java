@@ -21,6 +21,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 
 import com.ll.trip.domain.user.jwt.JwtAuthenticationFilter;
 import com.ll.trip.domain.user.jwt.JwtTokenUtil;
+import com.ll.trip.global.security.service.UserDetailsServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class SpringSecurityConfig {
 
 	private final JwtTokenUtil jwtTokenUtil;
+	private final UserDetailsServiceImpl userDetailsService;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -49,10 +51,6 @@ public class SpringSecurityConfig {
 					"/api-docs/**",
 					"/api-docs.yaml",
 					"/trip/location/**"
-					// "/chat/**",
-					// "/ws/**",
-					// "/plan/**",
-					// "/file/**"
 				).permitAll()
 				.anyRequest().authenticated()
 			);
