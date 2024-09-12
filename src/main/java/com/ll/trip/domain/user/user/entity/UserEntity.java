@@ -77,10 +77,6 @@ public class UserEntity extends BaseEntity {
 
 	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
-	private List<RefreshToken> refreshTokens = new ArrayList<>();
-
-	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
-	@Builder.Default
 	private List<NotificationConfig> notificationConfigs = new ArrayList<>();
 
 	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
