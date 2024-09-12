@@ -11,8 +11,8 @@ import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
 	private final UserRepository userRepository;

@@ -55,10 +55,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 			Authentication auth = jwtTokenUtil.getAuthentication(newAccessToken);
 			SecurityContextHolder.getContext().setAuthentication(auth);
+
 			filterChain.doFilter(request, response);
+			return;
 		}
 
 		logger.info("유효하지 않은 리프레시토큰: " + refreshToken);
-		response.sendError(421, "로그인이 만료되었습니다.");
+
+		filterChain.doFilter(request, response);
 	}
 }
