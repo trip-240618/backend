@@ -39,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		logger.info("유효하지 않은 액세스토큰");
+		logger.info("유효하지 않은 액세스토큰: " + accessToken);
 
 		//액세스토큰이 있으나 유효하지 않고 리프레시 토큰이 유효함
 		if (refreshToken != null && jwtTokenUtil.validateToken(refreshToken)) {
@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 		}
 
-		logger.info("유효하지 않은 리프레시토큰");
+		logger.info("유효하지 않은 리프레시토큰: " + refreshToken);
 		response.sendError(421, "로그인이 만료되었습니다.");
 	}
 }
