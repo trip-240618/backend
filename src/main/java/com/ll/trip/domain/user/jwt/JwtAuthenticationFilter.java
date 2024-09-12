@@ -53,14 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				.secure(true)
 				.build();
 
-			ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
-				.httpOnly(true)
-				.path("/")
-				.secure(true)
-				.build();
-
 			response.addHeader("Set-Cookie", newAccessTokenCookie.toString());
-			response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
 			Authentication auth = jwtTokenUtil.getAuthentication(newAccessToken);
 			SecurityContextHolder.getContext().setAuthentication(auth);
