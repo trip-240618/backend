@@ -46,13 +46,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (refreshToken != null && jwtTokenUtil.validateToken(refreshToken)) {
 			String uuid = jwtTokenUtil.getUuid(refreshToken);
 			String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
+
 			ResponseCookie newAccessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)
 				.httpOnly(true)
 				.path("/")
 				.secure(true)
 				.build();
 
+			ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+				.httpOnly(true)
+				.path("/")
+				.secure(true)
+				.build();
+
 			response.addHeader("Set-Cookie", newAccessTokenCookie.toString());
+			response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
 			Authentication auth = jwtTokenUtil.getAuthentication(newAccessToken);
 			SecurityContextHolder.getContext().setAuthentication(auth);
