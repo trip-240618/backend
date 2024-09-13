@@ -37,10 +37,14 @@ public class OAuthController {
 	@Operation(summary = "카카오 로그인")
 	@ApiResponse(responseCode = "200", description = "카카오 로그인 & 유저정보 반환", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
-	public Mono<ResponseEntity<?>> handleOAuth2Callback(@RequestParam String token, HttpServletResponse response) {
-		log.info("token = {}", token);
+	public Mono<ResponseEntity<?>> handleOAuth2Callback(
+		HttpServletResponse response,
+		@RequestParam String kakaoToken,
+		@RequestParam String fcmToken
+	) {
+		log.info("token = {}", kakaoToken);
 		//TODO code가 아니라 token을 사용하기 때문에 프론트와 함께 파라미터명을 수정해야함
-		return kakaoOAuth2Service.getUserInfo(token)
+		return kakaoOAuth2Service.getUserInfo(kakaoToken)
 			.publishOn(Schedulers.boundedElastic())
 			.map(userInfo -> {
 				KakaoPropertiesDto properties = userInfo.getProperties();
@@ -49,7 +53,8 @@ public class OAuthController {
 				String name = properties.getNickname();
 				String profileImageUrl = properties.getProfile_image();
 
-				UserInfoDto userInfoDto = oAuth2Service.registerUser(oauthId, name, null, profileImageUrl, "KAKAO", response);
+				UserInfoDto userInfoDto = oAuth2Service.whenLogin(oauthId, name, null, profileImageUrl, "KAKAO",
+					fcmToken, response);
 				log.info("name : {}", properties.getNickname());
 				log.info("oauthId : {}", oauthId);
 				log.info("profileImageUrl : {}", profileImageUrl);
@@ -71,8 +76,10 @@ public class OAuthController {
 		String name = requestBody.getDisplayName();
 		String profileImg = requestBody.getPhotoUrl();
 		String email = requestBody.getEmail();
+		String fcmToken = requestBody.getFcmToken();
 
-		UserInfoDto userInfoDto = oAuth2Service.registerUser(oauthId, name, email, profileImg, "GOOGLE", response);
+		UserInfoDto userInfoDto = oAuth2Service.whenLogin(oauthId, name, email, profileImg, "GOOGLE", fcmToken,
+			response);
 
 		return ResponseEntity.ok(userInfoDto);
 	}
@@ -87,8 +94,10 @@ public class OAuthController {
 		String name = requestBody.getFamilyName() + requestBody.getGivenName();
 		String profileImg = null;
 		String email = requestBody.getEmail();
+		String fcmToken = requestBody.getFcmToken();
 
-		UserInfoDto userInfoDto = oAuth2Service.registerUser(oauthId, name, email, profileImg, "APPLE", response);
+		UserInfoDto userInfoDto = oAuth2Service.whenLogin(oauthId, name, email, profileImg, "APPLE", fcmToken,
+			response);
 		if (userInfoDto == null)
 			return ResponseEntity.badRequest().body("userInfo is null");
 		return ResponseEntity.ok(userInfoDto);

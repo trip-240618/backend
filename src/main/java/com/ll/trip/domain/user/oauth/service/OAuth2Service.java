@@ -23,8 +23,8 @@ public class OAuth2Service {
 	private final JwtTokenUtil jwtTokenUtil;
 
 	@Transactional
-	public UserInfoDto registerUser(String oauthId, String name, String email, String profileImg, String provider,
-		HttpServletResponse response) {
+	public UserInfoDto whenLogin(String oauthId, String name, String email, String profileImg, String provider,
+		String fcmToken, HttpServletResponse response) {
 		String providerId = provider + oauthId;
 		Optional<UserEntity> optUser = userRepository.findByProviderId(providerId);
 		String uuid;
@@ -43,6 +43,7 @@ public class OAuth2Service {
 				.providerId(providerId)
 				.uuid(uuid)
 				.email(email)
+				.fcmToken(fcmToken)
 				.build();
 
 			user = userRepository.save(user);
@@ -51,6 +52,8 @@ public class OAuth2Service {
 		} else {
 			UserEntity user = optUser.get();
 			uuid = user.getUuid();
+
+			userService.updateFcmTokenByUserId(user.getId(), fcmToken);
 
 			refreshToken = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
 

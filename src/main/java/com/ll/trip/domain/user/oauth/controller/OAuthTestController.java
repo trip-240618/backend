@@ -59,7 +59,7 @@ public class OAuthTestController {
 				String name = properties.getNickname();
 				String profileImageUrl = properties.getProfile_image();
 
-				UserInfoDto userInfoDto = oAuth2Service.registerUser(oauthId, name, null, profileImageUrl, "KAKAO", response);
+				UserInfoDto userInfoDto = oAuth2Service.whenLogin(oauthId, name, null, profileImageUrl, "KAKAO", null, response);
 				log.info("name : {}", properties.getNickname());
 				log.info("oauthId : {}", oauthId);
 				log.info("profileImageUrl : {}", profileImageUrl);
