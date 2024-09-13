@@ -9,4 +9,5 @@ public class GoogleLoginRequestBody {
 	private String id;
 	private String photoUrl;
 	private String serverAuthCode;
+	private String fcmToken;
 }

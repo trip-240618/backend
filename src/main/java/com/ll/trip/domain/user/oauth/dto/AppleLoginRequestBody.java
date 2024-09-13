@@ -10,4 +10,5 @@ public class AppleLoginRequestBody {
 	private String identityToken;
 	private String state;
 	private String userIdentifier;
+	private String fcmToken;
 }
