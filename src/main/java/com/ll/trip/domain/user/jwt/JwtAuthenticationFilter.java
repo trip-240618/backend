@@ -9,7 +9,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,48 +18,50 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Value(value = "${jwt.token-secret}")
-    private String tokenSecret;
+	@Value(value = "${jwt.token-secret}")
+	private String tokenSecret;
 
+	private final JwtTokenUtil jwtTokenUtil;
 
-    private final JwtTokenUtil jwtTokenUtil;
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+		throws ServletException, IOException {
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+		String accessToken = jwtTokenUtil.resolveToken(request, "accessToken");
+		String refreshToken = jwtTokenUtil.resolveToken(request, "refreshToken");
 
+		//액세스 토큰이 없음
+		if (accessToken != null && jwtTokenUtil.validateToken(accessToken)) {
+			//액세스 토큰이 유효함
+			Authentication auth = jwtTokenUtil.getAuthentication(accessToken);
+			SecurityContextHolder.getContext().setAuthentication(auth);
+			filterChain.doFilter(request, response);
+			return;
+		}
 
-        String accessToken = jwtTokenUtil.resolveToken(request, "accessToken");
-        String refreshToken = jwtTokenUtil.resolveToken(request, "refreshToken");
+		logger.info("유효하지 않은 액세스토큰: " + accessToken);
 
-        try {
-            if (accessToken != null && jwtTokenUtil.validateToken(accessToken)) {
-                Authentication auth = jwtTokenUtil.getAuthentication(accessToken, tokenSecret);
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            } else {
-                throw new JwtException("로그인을 안한 유저의 요청");
-            }
-        } catch (JwtException ex) {
-            if (refreshToken != null && jwtTokenUtil.validateToken(refreshToken)) {
-                String uuid = jwtTokenUtil.getUuid(refreshToken);
-                String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
-                ResponseCookie newAccessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)
-                        .httpOnly(true)
-                        .path("/")
-                        .secure(true)
-                        .build();
+		//액세스토큰이 있으나 유효하지 않고 리프레시 토큰이 유효함
+		if (refreshToken != null && jwtTokenUtil.validateToken(refreshToken)) {
+			String uuid = jwtTokenUtil.getUuid(refreshToken);
+			String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
+			ResponseCookie newAccessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)
+				.httpOnly(true)
+				.path("/")
+				.secure(true)
+				.build();
 
-                response.addHeader("Set-Cookie", newAccessTokenCookie.toString());
+			response.addHeader("Set-Cookie", newAccessTokenCookie.toString());
 
+			Authentication auth = jwtTokenUtil.getAuthentication(newAccessToken);
+			SecurityContextHolder.getContext().setAuthentication(auth);
 
-                Authentication auth = jwtTokenUtil.getAuthentication(newAccessToken, tokenSecret);
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            } else {
-                // Here you can add some response to the client about no token
-                logger.info("로그인을 안한 유저의 요청");
-            }
-        }
+			filterChain.doFilter(request, response);
+			return;
+		}
 
-        filterChain.doFilter(request, response);
-    }
+		logger.info("유효하지 않은 리프레시토큰: " + refreshToken);
+
+		filterChain.doFilter(request, response);
+	}
 }

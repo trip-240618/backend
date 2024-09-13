@@ -2,7 +2,7 @@ package com.ll.trip.domain.file.file.entity;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.ll.trip.domain.plan.room.entity.Trip;
+import com.ll.trip.domain.trip.trip.entity.Trip;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;

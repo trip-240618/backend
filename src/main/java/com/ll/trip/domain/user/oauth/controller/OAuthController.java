@@ -23,6 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,16 +38,18 @@ public class OAuthController {
 	@ApiResponse(responseCode = "200", description = "카카오 로그인 & 유저정보 반환", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
 	public Mono<ResponseEntity<?>> handleOAuth2Callback(@RequestParam String token, HttpServletResponse response) {
-		log.info("code = {}", token);
+		log.info("token = {}", token);
 		//TODO code가 아니라 token을 사용하기 때문에 프론트와 함께 파라미터명을 수정해야함
 		return kakaoOAuth2Service.getUserInfo(token)
+			.publishOn(Schedulers.boundedElastic())
 			.map(userInfo -> {
 				KakaoPropertiesDto properties = userInfo.getProperties();
 
-				Long oauthId = userInfo.getId();
-				String profileImageUrl = properties.getThumbnail_image();
+				String oauthId = userInfo.getId().toString();
+				String name = properties.getNickname();
+				String profileImageUrl = properties.getProfile_image();
 
-				UserInfoDto userInfoDto = kakaoOAuth2Service.registerUser(oauthId, properties, response);
+				UserInfoDto userInfoDto = oAuth2Service.registerUser(oauthId, name, null, profileImageUrl, "KAKAO", response);
 				log.info("name : {}", properties.getNickname());
 				log.info("oauthId : {}", oauthId);
 				log.info("profileImageUrl : {}", profileImageUrl);

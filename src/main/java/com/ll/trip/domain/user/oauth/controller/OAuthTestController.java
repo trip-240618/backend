@@ -9,12 +9,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ll.trip.domain.user.oauth.dto.KakaoPropertiesDto;
 import com.ll.trip.domain.user.oauth.service.KakaoOAuth2Service;
+import com.ll.trip.domain.user.oauth.service.OAuth2Service;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Controller
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class OAuthTestController {
 	private String kakaoRedirectUri; // 리다이렉트 URI
 
 	private final KakaoOAuth2Service kakaoOAuth2Service;
+	private final OAuth2Service oAuth2Service;
 
 	@GetMapping("/login/kakao")
 	public String kakaoLogin() {
@@ -48,13 +51,15 @@ public class OAuthTestController {
 
 					return kakaoOAuth2Service.getUserInfo(accessToken);
 				})
+			.publishOn(Schedulers.boundedElastic())
 			.map(userInfo -> {
 				KakaoPropertiesDto properties = userInfo.getProperties();
 
-				Long oauthId = userInfo.getId();
-				String profileImageUrl = properties.getThumbnail_image();
+				String oauthId = userInfo.getId().toString();
+				String name = properties.getNickname();
+				String profileImageUrl = properties.getProfile_image();
 
-				UserInfoDto userInfoDto = kakaoOAuth2Service.registerUser(oauthId, properties, response);
+				UserInfoDto userInfoDto = oAuth2Service.registerUser(oauthId, name, null, profileImageUrl, "KAKAO", response);
 				log.info("name : {}", properties.getNickname());
 				log.info("oauthId : {}", oauthId);
 				log.info("profileImageUrl : {}", profileImageUrl);

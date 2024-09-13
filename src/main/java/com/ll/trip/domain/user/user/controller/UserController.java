@@ -5,10 +5,13 @@ import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
+import com.ll.trip.domain.user.user.dto.UserModifyDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.service.UserService;
 import com.ll.trip.global.security.userDetail.SecurityUser;
@@ -32,8 +35,10 @@ public class UserController {
 	@Operation(summary = "유저 정보 반환")
 	@ApiResponse(responseCode = "200", description = "유저정보 반환", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
-	public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal SecurityUser securityUser) {
-		log.info(securityUser.getUsername());
+	public ResponseEntity<?> getUserInfo(
+		@AuthenticationPrincipal SecurityUser securityUser
+	) {
+		log.info("uuid : " + securityUser.getUsername());
 		Optional<UserEntity> user = userService.findUserByUuid(securityUser.getUuid());
 
 		if (user.isEmpty()) {
@@ -44,5 +49,27 @@ public class UserController {
 
 		return ResponseEntity.ok(userInfoDto);
 	}
+
+	@PostMapping("/modify")
+	@Operation(summary = "유저 정보 수정")
+	@ApiResponse(responseCode = "200", description = "유저정보 수정", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
+	public ResponseEntity<?> modifyUserInfo(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestBody UserModifyDto modifyDto
+	) {
+		log.info("uuid : " + securityUser.getUsername());
+		Optional<UserEntity> user = userService.findUserByUuid(securityUser.getUuid());
+
+		if (user.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+
+		UserInfoDto userInfoDto = userService.modifyUserInfo(user.get(), modifyDto);
+
+		return ResponseEntity.ok(userInfoDto);
+	}
+
+
 
 }

@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.user.jwt.JwtTokenUtil;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
-import com.ll.trip.domain.user.user.entity.RefreshToken;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
 import com.ll.trip.domain.user.user.service.UserService;
@@ -22,43 +22,40 @@ public class OAuth2Service {
 	private final UserService userService;
 	private final JwtTokenUtil jwtTokenUtil;
 
-	public UserInfoDto registerUser(String oauthId, String nickName, String email, String profileImg, String provider, HttpServletResponse response) {
+	@Transactional
+	public UserInfoDto registerUser(String oauthId, String name, String email, String profileImg, String provider,
+		HttpServletResponse response) {
 		String providerId = provider + oauthId;
 		Optional<UserEntity> optUser = userRepository.findByProviderId(providerId);
 		String uuid;
 		String refreshToken;
 		UserInfoDto userInfoDto;
 
-		if (optUser.isPresent()) {
-			UserEntity userEntity = optUser.get();
-			RefreshToken foundRefreshToken = userService.findRefreshTokenByUserId(userEntity.getId());
-			refreshToken = foundRefreshToken.getKeyValue();
-			uuid = userEntity.getUuid();
-			userInfoDto = new UserInfoDto(userEntity, "login");
-		} else {
-			if(oauthId == null || nickName == null || email == null) return null;
-
+		if (optUser.isEmpty()) {
 			uuid = userService.generateUUID();
-			String tokenKey = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
-
-			RefreshToken createdRefreshToken = RefreshToken.builder()
-				.keyValue(tokenKey)
-				.build();
+			refreshToken = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
 
 			UserEntity user = UserEntity
 				.builder()
-				.name(nickName)
+				.name(name)
 				.roles("USER")
 				.profileImg(profileImg)
 				.providerId(providerId)
 				.uuid(uuid)
 				.email(email)
-				.refreshToken(createdRefreshToken)
 				.build();
 
-			UserEntity userEntity = userRepository.save(user);
-			userInfoDto = new UserInfoDto(userEntity, "register");
-			refreshToken = createdRefreshToken.getKeyValue();
+			user = userRepository.save(user);
+
+			userInfoDto = new UserInfoDto(user, "register");
+		} else {
+			UserEntity user = optUser.get();
+			uuid = user.getUuid();
+
+			refreshToken = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
+
+			if(user.getNickname() == null) userInfoDto = new UserInfoDto(user, "register");
+			else userInfoDto = new UserInfoDto(user, "login");
 		}
 		String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
 

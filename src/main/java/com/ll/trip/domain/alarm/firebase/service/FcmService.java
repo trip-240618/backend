@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
-import com.ll.trip.domain.alarm.firebase.dto.AlramResponseDto;
+import com.ll.trip.domain.alarm.firebase.dto.AlarmResponseDto;
 import com.ll.trip.domain.alarm.firebase.dto.FcmMessageDto;
 
 @Service
@@ -27,7 +27,7 @@ public class FcmService {
 	@Value("${firebase.secret-path}")
 	private String secret_path;
 
-	public int sendMessageTo(AlramResponseDto responseDto) throws IOException {
+	public int sendMessageTo(AlarmResponseDto responseDto) throws IOException {
 
 		String message = makeMessage(responseDto);
 		RestTemplate restTemplate = new RestTemplate();
@@ -60,7 +60,7 @@ public class FcmService {
 		return googleCredentials.getAccessToken().getTokenValue();
 	}
 
-	private String makeMessage(AlramResponseDto responseDto) throws JsonProcessingException {
+	private String makeMessage(AlarmResponseDto responseDto) throws JsonProcessingException {
 
 		ObjectMapper om = new ObjectMapper();
 		FcmMessageDto fcmMessageDto = FcmMessageDto.builder()
