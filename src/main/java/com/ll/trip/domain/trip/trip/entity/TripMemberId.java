@@ -22,6 +22,17 @@ public class TripMemberId implements Serializable {
 	private Long tripId;
 
 	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		TripMemberId that = (TripMemberId) o;
+		return Objects.equals(this.tripId, that.getTripId()) &&
+			   Objects.equals(this.userId, that.getUserId());
+	}
+
+	@Override
 	public int hashCode() {
 		return Objects.hash(userId, tripId);
 	}

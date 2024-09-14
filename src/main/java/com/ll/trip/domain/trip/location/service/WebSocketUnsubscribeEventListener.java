@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.plan.service;
+package com.ll.trip.domain.trip.location.service;
 
 import org.springframework.context.ApplicationListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;

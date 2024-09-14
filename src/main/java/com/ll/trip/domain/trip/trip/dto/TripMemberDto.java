@@ -20,6 +20,11 @@ public class TripMemberDto {
 	private String nickname;
 
 	@Schema(
+		description = "축소된 프로필 url",
+		example = "https://trip-story.s3.ap-northeast-2.amazonaws.com/photoTest/c3396416-1e2e-4d0d-9a82-788831e5ac1f")
+	private String thumbnail;
+
+	@Schema(
 		description = "프로필 url",
 		example = "https://trip-story.s3.ap-northeast-2.amazonaws.com/photoTest/c3396416-1e2e-4d0d-9a82-788831e5ac1f")
 	private String profileImg;

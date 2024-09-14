@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.plan.response;
+package com.ll.trip.domain.trip.location.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

@@ -1,13 +1,13 @@
 package com.ll.trip.domain.user.user.controller;
 
-import java.util.Optional;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
@@ -39,13 +39,9 @@ public class UserController {
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
 		log.info("uuid : " + securityUser.getUsername());
-		Optional<UserEntity> user = userService.findUserByUuid(securityUser.getUuid());
+		UserEntity user = userService.findUserByUserId(securityUser.getId());
 
-		if (user.isEmpty()) {
-			return ResponseEntity.notFound().build();
-		}
-
-		UserInfoDto userInfoDto = new UserInfoDto(user.get(),"login");
+		UserInfoDto userInfoDto = new UserInfoDto(user, "login");
 
 		return ResponseEntity.ok(userInfoDto);
 	}
@@ -59,17 +55,24 @@ public class UserController {
 		@RequestBody UserModifyDto modifyDto
 	) {
 		log.info("uuid : " + securityUser.getUsername());
-		Optional<UserEntity> user = userService.findUserByUuid(securityUser.getUuid());
+		UserEntity user = userService.findUserByUserId(securityUser.getId());
 
-		if (user.isEmpty()) {
-			return ResponseEntity.notFound().build();
-		}
-
-		UserInfoDto userInfoDto = userService.modifyUserInfo(user.get(), modifyDto);
+		UserInfoDto userInfoDto = userService.modifyUserInfo(user, modifyDto);
 
 		return ResponseEntity.ok(userInfoDto);
 	}
 
+	@PutMapping("/update/fcmToken")
+	@Operation(summary = "fcmToken 업데이트")
+	@ApiResponse(responseCode = "200", description = "fcmToken업데이트", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = Integer.class))})
+	public ResponseEntity<?> updateFcmToken(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam String fcmToken
+	) {
+		int updated = userService.updateFcmTokenByUserId(securityUser.getId(), fcmToken);
 
+		return ResponseEntity.ok(updated);
+	}
 
 }

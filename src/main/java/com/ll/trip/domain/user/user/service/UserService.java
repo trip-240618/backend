@@ -56,6 +56,8 @@ public class UserService {
 			user.setNickname(nickname);
 
 		user.setProfileImg(profileImageUrl);
+		user.setThumbnail(modifyDto.getThumbnail());
+		user.setMemo(modifyDto.getMemo());
 
 		user = userRepository.save(user);
 
@@ -64,5 +66,9 @@ public class UserService {
 
 	public UserEntity findUserByUserId(long userId) {
 		return userRepository.findById(userId).orElseThrow(NullPointerException::new);
+	}
+
+	public int updateFcmTokenByUserId(long userId, String fcmToken) {
+		return userRepository.updateFcmTokenByUserId(userId, fcmToken);
 	}
 }

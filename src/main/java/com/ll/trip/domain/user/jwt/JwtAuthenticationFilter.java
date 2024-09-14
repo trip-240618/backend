@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -45,6 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (refreshToken != null && jwtTokenUtil.validateToken(refreshToken)) {
 			String uuid = jwtTokenUtil.getUuid(refreshToken);
 			String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
+
 			ResponseCookie newAccessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)
 				.httpOnly(true)
 				.path("/")
