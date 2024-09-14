@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,7 +16,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 
 import com.ll.trip.domain.user.jwt.JwtAuthenticationFilter;
 import com.ll.trip.domain.user.jwt.JwtTokenUtil;
@@ -26,8 +24,6 @@ import com.ll.trip.global.security.service.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
-@EnableMethodSecurity
-@EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class SpringSecurityConfig {
 
@@ -37,6 +33,7 @@ public class SpringSecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenUtil);
+
 		http
 			.cors(withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
