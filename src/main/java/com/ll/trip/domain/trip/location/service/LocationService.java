@@ -16,7 +16,10 @@ import org.springframework.web.client.RestTemplate;
 import com.ll.trip.domain.trip.location.dto.AutoCompleteRequestDto;
 import com.ll.trip.domain.trip.location.dto.AutoCompleteResponseDto;
 import com.ll.trip.domain.trip.location.dto.AutocompleteResponse;
+import com.ll.trip.domain.trip.location.dto.LocationDto;
+import com.ll.trip.domain.trip.location.dto.TextQueryLocationResponseDto;
 import com.ll.trip.domain.trip.location.dto.PlaceDetailResponse;
+import com.ll.trip.domain.trip.location.dto.TextSearchDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -46,6 +49,7 @@ public class LocationService {
 		);
 
 		List<AutoCompleteResponseDto> response = new ArrayList<>();
+
 		if (responseEntity.getBody() != null && responseEntity.getBody().getSuggestions() != null) {
 			response = responseEntity.getBody().getSuggestions().stream()
 				.map(suggestion -> new AutoCompleteResponseDto(
@@ -66,5 +70,29 @@ public class LocationService {
 		ResponseEntity<PlaceDetailResponse> responseEntity = restTemplate.getForEntity(url, PlaceDetailResponse.class);
 
 		return responseEntity.getBody();
+	}
+
+	public LocationDto getPlaceLocation(String text) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Goog-Api-Key", API_KEY);
+		headers.set("X-Goog-FieldMask", "places.location");
+
+		HttpEntity<TextSearchDto> requestEntity = new HttpEntity<>(new TextSearchDto(text), headers);
+
+		ResponseEntity<TextQueryLocationResponseDto> responseEntity = restTemplate.exchange(
+			"https://places.googleapis.com/v1/places:searchText",
+			HttpMethod.POST,
+			requestEntity,
+			TextQueryLocationResponseDto.class
+		);
+
+		LocationDto location = null;
+
+		if(responseEntity.getBody() != null && responseEntity.getBody().getPlaces().length > 0) {
+			location = responseEntity.getBody().getPlaces()[0].getLocation();
+		}
+
+		return location;
 	}
 }
