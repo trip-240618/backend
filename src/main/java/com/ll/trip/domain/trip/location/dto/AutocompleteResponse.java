@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.plan.dto;
+package com.ll.trip.domain.trip.location.dto;
 
 import java.util.List;
 

@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.trip.planP.dto.PlanPEditDto;
 import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
-import com.ll.trip.domain.trip.plan.response.PlanResponseBody;
+import com.ll.trip.domain.trip.location.response.PlanResponseBody;
 
 import lombok.RequiredArgsConstructor;
 

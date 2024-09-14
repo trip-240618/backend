@@ -43,6 +43,7 @@ public class FlightService {
 		int last = flightStatus[0].getFlightPoints().length - 1;
 
 		DatedFlight.FlightPoint flightPoint_d = flightStatus[0].getFlightPoints()[0];
+
 		String departureDate = flightPoint_d.getDeparture().getTimings()[0].getValue(); //STD
 		String departureAirport = flightPoint_d.getIataCode();
 		String departureAirport_kr;

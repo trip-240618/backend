@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.plan.dto;
+package com.ll.trip.domain.trip.location.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

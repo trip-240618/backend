@@ -24,7 +24,7 @@ public class PlanJEditService {
 		Integer order = planJRepository.findMaxOrder(tripId, dayAfterStart);
 		if (order == null)
 			return 0;
-		return order;
+		return order + 1;
 	}
 
 	public String getEditorByInvitationCodeAndDay(String invitationCode, int day) {

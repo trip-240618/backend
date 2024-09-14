@@ -51,4 +51,12 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 		where p.id = :planId
 		""")
 	int updateStartTimeAndOrder(long planId, LocalTime startTime, int orderByDate);
+
+	@Modifying
+	@Query("""
+		update Trip t
+		set t.flightCnt = t.flightCnt + 1
+		where t.id = :tripId
+		""")
+	int updateFlightCntByTripId(Long tripId);
 }
