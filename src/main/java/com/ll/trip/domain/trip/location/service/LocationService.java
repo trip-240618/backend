@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.plan.service;
+package com.ll.trip.domain.trip.location.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.ll.trip.domain.trip.plan.dto.AutoCompleteRequestDto;
-import com.ll.trip.domain.trip.plan.dto.AutoCompleteResponseDto;
-import com.ll.trip.domain.trip.plan.dto.AutocompleteResponse;
-import com.ll.trip.domain.trip.plan.dto.PlaceDetailResponse;
+import com.ll.trip.domain.trip.location.dto.AutoCompleteRequestDto;
+import com.ll.trip.domain.trip.location.dto.AutoCompleteResponseDto;
+import com.ll.trip.domain.trip.location.dto.AutocompleteResponse;
+import com.ll.trip.domain.trip.location.dto.PlaceDetailResponse;
 
 import lombok.RequiredArgsConstructor;
 

@@ -23,7 +23,7 @@ import com.ll.trip.domain.trip.planP.dto.PlanPEditResponseDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
-import com.ll.trip.domain.trip.plan.response.PlanResponseBody;
+import com.ll.trip.domain.trip.location.response.PlanResponseBody;
 import com.ll.trip.domain.trip.planP.service.PlanPEditService;
 import com.ll.trip.domain.trip.planP.service.PlanPService;
 import com.ll.trip.domain.trip.trip.entity.Trip;

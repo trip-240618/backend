@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ll.trip.domain.trip.plan.response.PlanResponseBody;
+import com.ll.trip.domain.trip.location.response.PlanResponseBody;
 import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJModifyRequestDto;
