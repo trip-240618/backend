@@ -1,6 +1,5 @@
 package com.ll.trip.domain.trip.planJ.service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -65,56 +64,55 @@ public class PlanJService {
 		String uuid) {
 
 		String airline = dto.getAirlineCode() + dto.getAirlineNumber();
+
 		String memo;
-
 		ObjectMapper objectMapper = new ObjectMapper();
-
 		try {
 			memo = objectMapper.writeValueAsString(dto);
 		} catch (JsonProcessingException e) {
 			throw new UnexpectedRollbackException("ScheduleResponseDto의 jsonString 변환 실패");
 		}
 
-		int daysDifference_d = getDaysDifference(trip.getStartDate(), dto.getDepartureDate());
-		int daysDifference_a = getDaysDifference(trip.getStartDate(), dto.getArrivalDate());
-
-		int departureOrder = planJEditService.getLastOrderByTripId(trip.getId(), daysDifference_d);
-		int arrivalOrder = planJEditService.getLastOrderByTripId(trip.getId(), daysDifference_a);
-
 		if (planJRepository.updateFlightCntByTripId(trip.getId()) == 0) {
 			throw new UnexpectedRollbackException("trip flightCnt 업데이트 실패");
 		}
 
-		LocationDto location_d = locationService.getPlaceLocation(
-			dto.getDepartureAirport_kr() + dto.getDepartureAirport());
-		LocationDto location_a = locationService.getPlaceLocation(dto.getArrivalAirport_kr() + dto.getArrivalAirport());
+		int updatedFlightCnt = trip.getFlightCnt() + 1;
 
-		PlanJ departPlan = createPlanJ(trip, daysDifference_d, getLocalTime(dto.getDepartureDate()),
-			trip.getFlightCnt() + 1, uuid, airline + " " + dto.getDepartureAirport_kr() + " 출발", memo,
-			location_d.getLongitude(), location_d.getLatitude());
+		PlanJ departPlan = createAirlinePlanJ(trip, dto.getDepartureDate(), getLocalTime(dto.getDepartureDate()),
+			updatedFlightCnt, uuid,
+			airline, dto.getDepartureAirport_kr(), dto.getDepartureAirport(), " 출발",
+			memo);
 
-		PlanJ arrivalPlan = createPlanJ(trip, daysDifference_a, getLocalTime(dto.getArrivalDate()),
-			trip.getFlightCnt() + 1, uuid, airline + " " + dto.getArrivalAirport_kr() + " 도착", memo,
-			location_a.getLongitude(), location_a.getLatitude());
+		PlanJ arrivalPlan = createAirlinePlanJ(trip, dto.getArrivalDate(), getLocalTime(dto.getArrivalDate()),
+			updatedFlightCnt, uuid,
+			airline, dto.getArrivalAirport_kr(), dto.getArrivalAirport(), " 도착",
+			memo);
 
-		planJRepository.save(departPlan);
-		planJRepository.save(arrivalPlan);
+		planJRepository.saveAll(List.of(departPlan, arrivalPlan));
 
 		return Map.of("departure", departPlan, "arrival", arrivalPlan);
 	}
 
-	private PlanJ createPlanJ(Trip trip, int daysDifference, LocalTime startTime, int flightId, String uuid,
-		String title, String memo, BigDecimal longitude, BigDecimal latitude) {
+	private PlanJ createAirlinePlanJ(Trip trip, String date, LocalTime startTime, int flightId, String uuid,
+		String airline, String airportKr, String airportIata, String prefix, String memo) {
+
+		int daysDifference = getDaysDifference(trip.getStartDate(), date);
+		int order = planJEditService.getLastOrderByTripId(trip.getId(), daysDifference);
+
+		LocationDto location = locationService.getPlaceLocation(airportKr + airportIata);
+
 		return PlanJ.builder()
 			.trip(trip)
 			.dayAfterStart(daysDifference)
 			.startTime(startTime)
 			.flightId(flightId)
 			.writerUuid(uuid)
-			.title(title)
+			.title(airline + " " + airportKr + prefix)
 			.memo(memo)
-			.longitude(longitude)
-			.latitude(latitude)
+			.longitude(location.getLongitude())
+			.latitude(location.getLatitude())
+			.orderByDate(order)
 			.build();
 	}
 
