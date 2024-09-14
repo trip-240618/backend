@@ -14,6 +14,8 @@ public class TripMemberServiceDto {
 
 	private String nickname;
 
+	private String thumbnail;
+
 	private String profileImg;
 
 	private boolean isLeader;

@@ -115,6 +115,7 @@ public class TripService {
 			TripMemberDto tripMemberDto = new TripMemberDto(
 				tripMemberServiceDto.getUuid(),
 				tripMemberServiceDto.getNickname(),
+				tripMemberServiceDto.getThumbnail(),
 				tripMemberServiceDto.getProfileImg(),
 				tripMemberServiceDto.isLeader()
 			);
