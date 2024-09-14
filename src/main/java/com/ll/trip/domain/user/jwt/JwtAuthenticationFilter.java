@@ -63,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 
 		logger.info("유효하지 않은 리프레시토큰: " + refreshToken);
-		response.sendError(420, "유효하지 않은 리프레시토큰, 다시 로그인 하십시오.");
+
 		filterChain.doFilter(request, response);
 	}
 }
