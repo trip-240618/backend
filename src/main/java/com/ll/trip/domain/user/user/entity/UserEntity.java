@@ -59,11 +59,17 @@ public class UserEntity extends BaseEntity {
 	@NotBlank
 	private String providerId;
 
+	@Setter
+	private String memo;
+
 	@NotBlank
 	private String uuid;
 
 	@Setter
 	private String nickname;
+
+	@Setter
+	private String thumbnail;
 
 	@Setter
 	private String profileImg;

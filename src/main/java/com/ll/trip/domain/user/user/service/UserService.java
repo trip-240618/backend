@@ -56,6 +56,8 @@ public class UserService {
 			user.setNickname(nickname);
 
 		user.setProfileImg(profileImageUrl);
+		user.setThumbnail(modifyDto.getThumbnail());
+		user.setMemo(modifyDto.getMemo());
 
 		user = userRepository.save(user);
 
