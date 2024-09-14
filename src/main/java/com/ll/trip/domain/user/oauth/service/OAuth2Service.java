@@ -27,28 +27,14 @@ public class OAuth2Service {
 		String fcmToken, HttpServletResponse response) {
 		String providerId = provider + oauthId;
 		Optional<UserEntity> optUser = userRepository.findByProviderId(providerId);
-		String uuid;
 		String refreshToken;
+		String uuid;
 		UserInfoDto userInfoDto;
 
 		if (optUser.isEmpty()) {
-			uuid = userService.generateUUID();
+			userInfoDto = registerUser(name, profileImg, providerId, email, fcmToken);
+			uuid = userInfoDto.getUuid();
 			refreshToken = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
-
-			UserEntity user = UserEntity
-				.builder()
-				.name(name)
-				.roles("USER")
-				.profileImg(profileImg)
-				.providerId(providerId)
-				.uuid(uuid)
-				.email(email)
-				.fcmToken(fcmToken)
-				.build();
-
-			user = userRepository.save(user);
-
-			userInfoDto = new UserInfoDto(user, "register");
 		} else {
 			UserEntity user = optUser.get();
 			uuid = user.getUuid();
@@ -57,13 +43,34 @@ public class OAuth2Service {
 
 			refreshToken = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
 
-			if(user.getNickname() == null) userInfoDto = new UserInfoDto(user, "register");
-			else userInfoDto = new UserInfoDto(user, "login");
+			if (user.getNickname() == null)
+				userInfoDto = new UserInfoDto(user, "register");
+			else
+				userInfoDto = new UserInfoDto(user, "login");
 		}
 		String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
 
 		userService.setTokenInCookie(newAccessToken, refreshToken, response);
 
 		return userInfoDto;
+	}
+
+	public UserInfoDto registerUser(String name, String profileImg, String providerId, String email,
+		String fcmToken) {
+		String uuid = userService.generateUUID();
+
+		UserEntity user = UserEntity.builder()
+			.name(name)
+			.roles("USER")
+			.profileImg(profileImg)
+			.providerId(providerId)
+			.uuid(uuid)
+			.email(email)
+			.fcmToken(fcmToken)
+			.build();
+
+		user = userRepository.save(user);
+
+		return new UserInfoDto(user, "register");
 	}
 }

@@ -9,7 +9,6 @@ import com.ll.trip.domain.trip.trip.entity.Trip;
 
 @Repository
 public interface TripRepository extends JpaRepository<Trip, Long>, TripRepositoryCustom {
-
 	boolean existsById(long id);
 
 	boolean existsByInvitationCode(String invitationCode);

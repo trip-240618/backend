@@ -40,7 +40,6 @@ public class History extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-
 	@ManyToOne
 	@JoinColumn(name = "trip_id")
 	private Trip trip;
@@ -48,6 +47,9 @@ public class History extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private UserEntity user;
+
+	@NotBlank
+	private String thumbnail;
 
 	@NotBlank
 	private String imageUrl;
@@ -64,5 +66,9 @@ public class History extends BaseEntity {
 
 	@OneToMany(mappedBy = "history",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
-	private List<HistoryReply> historyReplies  = new ArrayList<>();
+	private List<HistoryReply> historyReplies = new ArrayList<>();
+
+	@OneToMany(mappedBy = "history",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<HistoryTag> historyTags = new ArrayList<>();
 }

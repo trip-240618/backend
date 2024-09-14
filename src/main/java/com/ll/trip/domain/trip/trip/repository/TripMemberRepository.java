@@ -9,13 +9,18 @@ import com.ll.trip.domain.trip.trip.dto.TripMemberDto;
 import com.ll.trip.domain.trip.trip.dto.TripMemberServiceDto;
 import com.ll.trip.domain.trip.trip.entity.TripMember;
 import com.ll.trip.domain.trip.trip.entity.TripMemberId;
+import com.ll.trip.domain.user.user.entity.UserEntity;
 
 import lombok.NonNull;
 
 public interface TripMemberRepository extends JpaRepository<TripMember, TripMemberId> {
 	boolean existsById(@NonNull TripMemberId tripMemberId);
 
+	int countByUser(UserEntity user);
+
 	boolean existsTripMemberByTripIdAndUserId(long tripId, long userId);
+
+	boolean existsTripMemberByTrip_InvitationCodeAndUserId(String invitationCode, long userId);
 
 	@Query("""
 		     select new com.ll.trip.domain.trip.trip.dto.TripMemberDto(u.uuid, u.nickname,u.thumbnail, u.profileImg, tm.isLeader)

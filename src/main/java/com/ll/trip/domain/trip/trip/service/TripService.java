@@ -90,6 +90,10 @@ public class TripService {
 		return tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId);
 	}
 
+	public boolean existTripMemberByTripInvitationCodeAndUserId(String invitationCode, long userId) {
+		return tripMemberRepository.existsTripMemberByTrip_InvitationCodeAndUserId(invitationCode, userId);
+	}
+
 	public List<TripInfoDto> findAllByUserId(Long userId, LocalDate date, String type, String sortDirection,
 		String sortField) {
 
