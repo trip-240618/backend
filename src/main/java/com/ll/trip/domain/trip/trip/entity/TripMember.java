@@ -50,4 +50,5 @@ public class TripMember {
 	private LocalDateTime modifyDate;
 
 	private boolean isLeader;
+
 }
