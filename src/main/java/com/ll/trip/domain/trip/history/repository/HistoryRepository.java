@@ -21,4 +21,29 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 	public List<History> findAllByTripId(Long tripId);
 
 	long countByTrip(Trip trip);
+
+	@Query("""
+		    SELECT DISTINCT h
+		    FROM History h
+		    JOIN FETCH h.user u
+		    LEFT JOIN FETCH h.historyTags ht
+		    LEFT JOIN FETCH h.historyReplies hr
+		    WHERE h.id = :historyId
+		    ORDER BY ht.id ASC, hr.createDate asc
+		""")
+	History findHistoryById(long historyId);
+
+	@Query("""
+			SELECT CASE WHEN COUNT(h) > 0 THEN TRUE ELSE FALSE END
+		     FROM History h
+		     WHERE h.id = :historyId AND h.user.id = :userId
+		""")
+	boolean existsByHistoryIdAndUserId(long historyId, long userId);
+
+	@Query("""
+  		update History h
+  		set h.likeCnt = h.likeCnt + :i
+  		where h.id = :historyId
+		""")
+	int updateLikeCntById(long historyId, int i);
 }

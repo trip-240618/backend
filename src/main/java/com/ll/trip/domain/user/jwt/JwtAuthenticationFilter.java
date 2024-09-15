@@ -43,7 +43,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		logger.info("유효하지 않은 액세스토큰: " + accessToken);
 
 		//액세스토큰이 있으나 유효하지 않고 리프레시 토큰이 유효함
-		if (refreshToken != null && jwtTokenUtil.validateToken(refreshToken)) {
+		if (refreshToken != null) {
+			if(!jwtTokenUtil.validateToken(refreshToken)) {
+				response.sendError(420, "유효하지 않은 리프레시토큰, 다시 로그인 하십시오.");
+				return;
+			}
 			String uuid = jwtTokenUtil.getUuid(refreshToken);
 			String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
 
@@ -63,7 +67,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 
 		logger.info("유효하지 않은 리프레시토큰: " + refreshToken);
-
 		filterChain.doFilter(request, response);
 	}
 }
