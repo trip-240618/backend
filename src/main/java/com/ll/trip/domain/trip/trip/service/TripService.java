@@ -178,4 +178,5 @@ public class TripService {
 
 		return new TripInfoDto(modifiedTrip);
 	}
+
 }

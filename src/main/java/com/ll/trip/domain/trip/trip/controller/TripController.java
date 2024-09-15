@@ -168,8 +168,8 @@ public class TripController {
 	}
 
 	@PostMapping("/modify")
-	@Operation(summary = "Trip 수정 (개발중)")
-	@ApiResponse(responseCode = "200", description = "Trip 수정 (날짜 수정 시 변경사항 미적용)", content = {
+	@Operation(summary = "Trip 수정")
+	@ApiResponse(responseCode = "200", description = "Trip 수정", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = TripInfoDto.class))})
 	public ResponseEntity<?> modifyTripByInvitationCode(
 		@AuthenticationPrincipal SecurityUser securityUser,
