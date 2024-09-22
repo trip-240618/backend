@@ -177,7 +177,7 @@ public class PlanPController {
 
 		String uuid = planEditService.getEditorByInvitationCode(invitationCode);
 		if (uuid != null) {
-			template.convertAndSendToUser(username, "/topic/api/trip/p/",
+			template.convertAndSendToUser(username, "/topic/api/trip/p/" + invitationCode,
 				new PlanResponseBody<>("wait", uuid)
 			);
 			return;

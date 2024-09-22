@@ -193,7 +193,6 @@ public class PlanJController {
 	}
 
 	@MessageMapping("/j/{invitationCode}/{day}/edit/register")
-	//TODO messageMapping 설명용 getMapping 만들기
 	public void addEditor(
 		SimpMessageHeaderAccessor headerAccessor,
 		@DestinationVariable String invitationCode,
@@ -231,6 +230,22 @@ public class PlanJController {
 		@PathVariable int day
 	) {
 		return new PlanResponseBody<>("edit start", "uuid");
+	}
+
+	@GetMapping("j/{inviationCode}/{day}/edit/finish")
+	public void removeEditor(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@DestinationVariable String invitationCode,
+		@DestinationVariable int day
+	) {
+		String username = securityUser.getUuid();
+		log.info("uuid : " + username);
+
+		planJEditService.removeEditor(invitationCode, day, username);
+
+		template.convertAndSend("/topic/api/trip/j/" + invitationCode,
+			new PlanResponseBody<>("edit finish", username)
+		);
 	}
 
 	@PostMapping("j/{invitationCode}/flight/create")
