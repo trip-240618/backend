@@ -1,7 +1,6 @@
 package com.ll.trip.domain.trip.trip.entity;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -50,6 +49,7 @@ public class Bookmark {
 	@LastModifiedDate
 	private LocalDateTime modifyDate;
 
+	//toggle방식 수정
 	private boolean toggle;
 
 

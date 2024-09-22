@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.dto.UserModifyDto;
+import com.ll.trip.domain.user.user.dto.UserRegisterDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.service.UserService;
 import com.ll.trip.global.security.userDetail.SecurityUser;
@@ -57,7 +58,30 @@ public class UserController {
 		log.info("uuid : " + securityUser.getUsername());
 		UserEntity user = userService.findUserByUserId(securityUser.getId());
 
-		UserInfoDto userInfoDto = userService.modifyUserInfo(user, modifyDto);
+		UserInfoDto userInfoDto = userService.modifyUserInfo(
+			user, modifyDto.getNickname(), modifyDto.getProfileImg(), modifyDto.getThumbnail(),
+			modifyDto.getMemo());
+
+		return ResponseEntity.ok(userInfoDto);
+	}
+
+	@PostMapping("/register")
+	@Operation(summary = "유저 정보 수정")
+	@ApiResponse(responseCode = "200", description = "유저정보 수정", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
+	public ResponseEntity<?> registerUserInfo(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestBody UserRegisterDto registerDto
+	) {
+		log.info("uuid : " + securityUser.getUsername());
+		UserEntity user = userService.findUserByUserId(securityUser.getId());
+
+		UserInfoDto userInfoDto = userService.registerUserInfo(
+			user, registerDto.getNickname(),
+			registerDto.getProfileImg(),
+			registerDto.getThumbnail(),
+			registerDto.getMemo(),
+			registerDto.isMarketing());
 
 		return ResponseEntity.ok(userInfoDto);
 	}

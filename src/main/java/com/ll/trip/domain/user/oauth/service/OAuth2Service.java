@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.user.jwt.JwtTokenUtil;
+import com.ll.trip.domain.user.mypage.service.MypageService;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
@@ -21,6 +22,7 @@ public class OAuth2Service {
 	private final UserRepository userRepository;
 	private final UserService userService;
 	private final JwtTokenUtil jwtTokenUtil;
+	private final MypageService mypageService;
 
 	@Transactional
 	public UserInfoDto whenLogin(String oauthId, String name, String email, String profileImg, String provider,
@@ -40,7 +42,7 @@ public class OAuth2Service {
 			uuid = user.getUuid();
 
 			userService.updateFcmTokenByUserId(user.getId(), fcmToken);
-
+			mypageService.createNotificationConfig(user);
 			refreshToken = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
 
 			if (user.getNickname() == null)
