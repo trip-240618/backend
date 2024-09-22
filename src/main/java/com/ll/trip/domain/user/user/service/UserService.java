@@ -7,8 +7,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ll.trip.domain.user.mypage.repository.NotificationConfigRepository;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
-import com.ll.trip.domain.user.user.dto.UserModifyDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
 
@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final NotificationConfigRepository notificationConfigRepository;
 
 	public Optional<UserEntity> findUserByUuid(String uuid) {
 		return userRepository.findByUuid(uuid);
@@ -48,16 +49,14 @@ public class UserService {
 		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 	}
 
-	public UserInfoDto modifyUserInfo(UserEntity user, UserModifyDto modifyDto) {
-		String nickname = modifyDto.getNickname();
-		String profileImageUrl = modifyDto.getProfileImg();
-
+	public UserInfoDto modifyUserInfo(UserEntity user, String nickname, String profileImage, String thumbnail,
+		String memo) {
 		if (nickname != null)
 			user.setNickname(nickname);
 
-		user.setProfileImg(profileImageUrl);
-		user.setThumbnail(modifyDto.getThumbnail());
-		user.setMemo(modifyDto.getMemo());
+		user.setProfileImg(profileImage);
+		user.setThumbnail(thumbnail);
+		user.setMemo(memo);
 
 		user = userRepository.save(user);
 
@@ -70,5 +69,12 @@ public class UserService {
 
 	public int updateFcmTokenByUserId(long userId, String fcmToken) {
 		return userRepository.updateFcmTokenByUserId(userId, fcmToken);
+	}
+
+	public UserInfoDto registerUserInfo(UserEntity user, String nickname, String profileImg, String thumbnail,
+		String memo, boolean marketing) {
+		UserInfoDto userInfoDto = modifyUserInfo(user, nickname, profileImg, thumbnail, memo);
+		notificationConfigRepository.updateMarketingAgree(user.getId(), marketing);
+		return userInfoDto;
 	}
 }
