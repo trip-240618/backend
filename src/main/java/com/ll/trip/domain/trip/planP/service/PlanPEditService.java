@@ -19,17 +19,16 @@ public class PlanPEditService {
 
 	private final PlanPRepository planPRepository;
 
-	private final String TOPIC_PREFIX = "/topic/api/trip/edit/";
+	private final String TOPIC_PREFIX = "/topic/api/trip/p/";
 	private final ConcurrentHashMap<String, String> activeEditTopicsAndUuid = new ConcurrentHashMap<>();
 	private final SimpMessagingTemplate template;
 
-	public void editorClosedSubscription(String destination, String username) {
-		String invitationCode = destination.substring(TOPIC_PREFIX.length());
+	public void editorClosedSubscription(String invitationCode, String username) {
 		if (activeEditTopicsAndUuid.contains(invitationCode) &&
 			activeEditTopicsAndUuid.get(invitationCode).equals(username)) {
 			activeEditTopicsAndUuid.remove(invitationCode);
 
-			template.convertAndSend(destination, new PlanResponseBody<>("edit finish", username));
+			template.convertAndSend(TOPIC_PREFIX + invitationCode, new PlanResponseBody<>("edit finish", username));
 		}
 	}
 

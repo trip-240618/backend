@@ -4,9 +4,11 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.trip.location.response.PlanResponseBody;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.repository.PlanJRepository;
 
@@ -17,8 +19,9 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class PlanJEditService {
 	private final PlanJRepository planJRepository;
-
 	private final ConcurrentHashMap<String, ConcurrentHashMap<String, Integer>> activeEditTopicsAndUuidAndDay = new ConcurrentHashMap<>();
+	private final SimpMessagingTemplate template;
+	private final String TOPIC_PREFIX = "/topic/api/trip/j/";
 
 	public int getLastOrderByTripId(long tripId, int dayAfterStart) {
 		Integer order = planJRepository.findMaxOrder(tripId, dayAfterStart);
@@ -67,5 +70,16 @@ public class PlanJEditService {
 
 		return planJRepository.updateStartTimeAndOrder(planId1, startTime2, order2) +
 			   planJRepository.updateStartTimeAndOrder(planId2, startTime1, order1);
+	}
+
+	public void editorClosedSubscription(String invitationCode, String uuid) {
+		ConcurrentHashMap<String, Integer> map = activeEditTopicsAndUuidAndDay.getOrDefault(invitationCode, null);
+		map.remove(uuid);
+		template.convertAndSend(TOPIC_PREFIX + invitationCode, new PlanResponseBody<>("edit finish", uuid));
+	}
+
+	public void removeEditor(String invitationCode, int day, String uuid) {
+		ConcurrentHashMap<String, Integer> map = activeEditTopicsAndUuidAndDay.getOrDefault(invitationCode, null);
+		map.remove(uuid, day);
 	}
 }
