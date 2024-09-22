@@ -34,15 +34,16 @@ public class OAuth2Service {
 		UserInfoDto userInfoDto;
 
 		if (optUser.isEmpty()) {
-			userInfoDto = registerUser(name, profileImg, providerId, email, fcmToken);
-			uuid = userInfoDto.getUuid();
+			UserEntity user = registerUser(name, profileImg, providerId, email, fcmToken);
+			mypageService.createNotificationConfig(user);
+			uuid = user.getUuid();
 			refreshToken = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
+			userInfoDto = new UserInfoDto(user, "register");
 		} else {
 			UserEntity user = optUser.get();
 			uuid = user.getUuid();
 
 			userService.updateFcmTokenByUserId(user.getId(), fcmToken);
-			mypageService.createNotificationConfig(user);
 			refreshToken = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
 
 			if (user.getNickname() == null)
@@ -57,7 +58,7 @@ public class OAuth2Service {
 		return userInfoDto;
 	}
 
-	public UserInfoDto registerUser(String name, String profileImg, String providerId, String email,
+	public UserEntity registerUser(String name, String profileImg, String providerId, String email,
 		String fcmToken) {
 		String uuid = userService.generateUUID();
 
@@ -71,8 +72,6 @@ public class OAuth2Service {
 			.fcmToken(fcmToken)
 			.build();
 
-		user = userRepository.save(user);
-
-		return new UserInfoDto(user, "register");
+		return userRepository.save(user);
 	}
 }
