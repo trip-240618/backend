@@ -78,6 +78,7 @@ public class PlanPService {
 		return planPRepository.reduceOrderBiggerThanOrder(tripId, dayAfterStart, orderByDate);
 	}
 
+	@Transactional
 	public PlanPCheckBoxResponseDto updateCheckBoxById(Long planId) {
 		boolean checkbox = planPRepository.findIsCheckBoxByPlanId(planId);
 		int cnt = planPRepository.updateCheckBoxByPlanId(planId, !checkbox);

@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TripService {
 
 	private final TripRepository tripRepository;
@@ -39,6 +40,7 @@ public class TripService {
 	private final BookmarkRepository bookmarkRepository;
 	private final UserRepository userRepository;
 
+	@Transactional
 	public Trip createTrip(TripCreateDto tripCreateDto, String invitationCode) {
 		Trip trip = Trip.builder()
 			.invitationCode(invitationCode)
@@ -58,6 +60,7 @@ public class TripService {
 		return invitationCodeGenerator.generateUniqueCode();
 	}
 
+	@Transactional
 	public void joinTripById(Trip trip, UserEntity user, boolean isLeader) {
 		TripMemberId tripMemberId = TripMemberId.builder()
 			.tripId(trip.getId())
@@ -168,6 +171,7 @@ public class TripService {
 			return toggle;
 	}
 
+	@Transactional
 	public TripInfoDto modifyTripByDto(Trip trip, TripInfoDto requestBody) {
 		trip.setName(requestBody.getName());
 		trip.setThumbnail(requestBody.getThumbnail());

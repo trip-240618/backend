@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -50,6 +51,7 @@ public class UserService {
 		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 	}
 
+	@Transactional
 	public UserInfoDto modifyUserInfo(UserEntity user, String nickname, String profileImage, String thumbnail,
 		String memo) {
 		if (nickname != null)
@@ -68,6 +70,7 @@ public class UserService {
 		return userRepository.findById(userId).orElseThrow(NullPointerException::new);
 	}
 
+	@Transactional
 	public int updateFcmTokenByUserId(long userId, String fcmToken) {
 		return userRepository.updateFcmTokenByUserId(userId, fcmToken);
 	}
