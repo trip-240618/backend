@@ -13,6 +13,10 @@ public class MypageService {
 	@Transactional
 	public void createNotificationConfig(UserEntity user) {
 		NotificationConfig config = NotificationConfig.builder()
-			.user(user).build();
+			.user(user)
+			.activeReplyNotification(true)
+			.activeAdNotification(true)
+			.activePlanNotification(true)
+			.build();
 	}
 }
