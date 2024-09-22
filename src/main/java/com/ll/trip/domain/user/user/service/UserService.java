@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.user.mypage.repository.NotificationConfigRepository;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
@@ -71,6 +72,7 @@ public class UserService {
 		return userRepository.updateFcmTokenByUserId(userId, fcmToken);
 	}
 
+	@Transactional
 	public UserInfoDto registerUserInfo(UserEntity user, String nickname, String profileImg, String thumbnail,
 		String memo, boolean marketing) {
 		UserInfoDto userInfoDto = modifyUserInfo(user, nickname, profileImg, thumbnail, memo);
