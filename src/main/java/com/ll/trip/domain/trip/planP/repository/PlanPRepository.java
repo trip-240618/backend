@@ -31,6 +31,7 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		""")
 	List<PlanPInfoDto> findAllByTripIdOrderByDayAfterStartAndOrderByDate(long tripId);
 
+	@Modifying
 	@Query("""
 		update PlanP p
 		set p.checkbox = :checkbox
