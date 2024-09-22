@@ -58,6 +58,7 @@ public class OAuth2Service {
 		return userInfoDto;
 	}
 
+	@Transactional
 	public UserEntity registerUser(String name, String profileImg, String providerId, String email,
 		String fcmToken) {
 		String uuid = userService.generateUUID();

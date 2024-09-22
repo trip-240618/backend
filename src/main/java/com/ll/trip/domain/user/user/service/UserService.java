@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.user.mypage.repository.NotificationConfigRepository;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -49,6 +51,7 @@ public class UserService {
 		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 	}
 
+	@Transactional
 	public UserInfoDto modifyUserInfo(UserEntity user, String nickname, String profileImage, String thumbnail,
 		String memo) {
 		if (nickname != null)
@@ -67,10 +70,12 @@ public class UserService {
 		return userRepository.findById(userId).orElseThrow(NullPointerException::new);
 	}
 
+	@Transactional
 	public int updateFcmTokenByUserId(long userId, String fcmToken) {
 		return userRepository.updateFcmTokenByUserId(userId, fcmToken);
 	}
 
+	@Transactional
 	public UserInfoDto registerUserInfo(UserEntity user, String nickname, String profileImg, String thumbnail,
 		String memo, boolean marketing) {
 		UserInfoDto userInfoDto = modifyUserInfo(user, nickname, profileImg, thumbnail, memo);
