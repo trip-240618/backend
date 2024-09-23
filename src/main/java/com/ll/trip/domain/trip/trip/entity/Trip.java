@@ -69,8 +69,6 @@ public class Trip extends BaseEntity {
 	@Setter
 	private String labelColor;
 
-	private int flightCnt = 0; //PlanJ의 flightId를 계산할 때 사용
-
 	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<Bookmark> bookmarks = new ArrayList<>();

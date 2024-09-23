@@ -11,7 +11,10 @@ import com.amadeus.exceptions.ResponseException;
 import com.amadeus.resources.DatedFlight;
 import com.ll.trip.domain.flight.dto.ScheduleResponseDto;
 import com.ll.trip.domain.flight.entity.Airport;
+import com.ll.trip.domain.flight.entity.Flight;
 import com.ll.trip.domain.flight.repository.AirportRepository;
+import com.ll.trip.domain.flight.repository.FlightRepository;
+import com.ll.trip.domain.trip.trip.entity.Trip;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +27,7 @@ public class FlightService {
 
 	private final Amadeus amadeus;
 	private final AirportRepository airportRepository;
+	private final FlightRepository flightRepository;
 
 	public DatedFlight[] getFlightInfo(
 		int flightNumber,
@@ -71,4 +75,27 @@ public class FlightService {
 			.build();
 	}
 
+	public ScheduleResponseDto createFlight(DatedFlight[] flightStatus, Trip trip) {
+		ScheduleResponseDto dto = parseToDto(flightStatus);
+
+		Flight flight = Flight.builder()
+			.airlineCode(dto.getAirlineCode())
+			.arrivalAirport(dto.getArrivalAirport())
+			.arrivalAirport_kr(dto.getArrivalAirport_kr())
+			.airlineNumber(dto.getAirlineNumber())
+			.arrivalDate(dto.getArrivalDate())
+			.departureAirport(dto.getDepartureAirport())
+			.departureAirport_kr(dto.getDepartureAirport_kr())
+			.departureDate(dto.getDepartureDate())
+			.trip(trip)
+			.build();
+
+		flightRepository.save(flight);
+
+		return dto;
+	}
+
+	public List<ScheduleResponseDto> findByInvitationCode(String invitationCode) {
+		return flightRepository.findByInvitationCode(invitationCode);
+	}
 }

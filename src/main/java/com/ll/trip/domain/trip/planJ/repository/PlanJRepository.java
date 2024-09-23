@@ -37,26 +37,8 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 	@Query("""
 		update PlanJ p
 		set p.orderByDate = :orderByDate,
-		p.startTime = :startTime,
-		p.dayAfterStart = :dayAfterStart
-		where p.id = :planId
-		""")
-	int updateStartTimeAndDayAfterStartAndOrderByPlanId(LocalTime startTime, int dayAfterStart, long planId, int orderByDate);
-
-	@Modifying
-	@Query("""
-		update PlanJ p
-		set p.orderByDate = :orderByDate,
 		p.startTime = :startTime
 		where p.id = :planId
 		""")
 	int updateStartTimeAndOrder(long planId, LocalTime startTime, int orderByDate);
-
-	@Modifying
-	@Query("""
-		update Trip t
-		set t.flightCnt = t.flightCnt + 1
-		where t.id = :tripId
-		""")
-	int updateFlightCntByTripId(Long tripId);
 }

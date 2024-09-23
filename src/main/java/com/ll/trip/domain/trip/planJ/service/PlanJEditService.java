@@ -12,6 +12,7 @@ import com.ll.trip.domain.trip.location.response.PlanResponseBody;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.repository.PlanJRepository;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class PlanJEditService {
 	private final PlanJRepository planJRepository;
+	@Getter
 	private final ConcurrentHashMap<String, ConcurrentHashMap<String, Integer>> activeEditTopicsAndUuidAndDay = new ConcurrentHashMap<>();
 	private final SimpMessagingTemplate template;
 	private final String TOPIC_PREFIX = "/topic/api/trip/j/";

@@ -10,6 +10,7 @@ import com.ll.trip.domain.trip.planP.dto.PlanPEditDto;
 import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
 import com.ll.trip.domain.trip.location.response.PlanResponseBody;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -20,6 +21,7 @@ public class PlanPEditService {
 	private final PlanPRepository planPRepository;
 
 	private final String TOPIC_PREFIX = "/topic/api/trip/p/";
+	@Getter
 	private final ConcurrentHashMap<String, String> activeEditTopicsAndUuid = new ConcurrentHashMap<>();
 	private final SimpMessagingTemplate template;
 

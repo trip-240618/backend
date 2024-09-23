@@ -1,7 +1,6 @@
 package com.ll.trip.domain.trip.planJ.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ll.trip.domain.flight.dto.ScheduleResponseDto;
 import com.ll.trip.domain.trip.location.response.PlanResponseBody;
 import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
@@ -232,7 +230,7 @@ public class PlanJController {
 		return new PlanResponseBody<>("edit start", "uuid");
 	}
 
-	@GetMapping("j/{inviationCode}/{day}/edit/finish")
+	@GetMapping("/j/{inviationCode}/{day}/edit/finish")
 	public void removeEditor(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@DestinationVariable String invitationCode,
@@ -248,37 +246,12 @@ public class PlanJController {
 		);
 	}
 
-	@PostMapping("j/{invitationCode}/flight/create")
-	@Operation(summary = "항공편 플랜 등록")
-	@ApiResponse(responseCode = "200", description = "항공편 플랜 등록", content = {
-		@Content(mediaType = "application/json", schema = @Schema(implementation = ScheduleResponseDto.class))})
-	public ResponseEntity<?> showFlightSchedule(
-		@PathVariable String invitationCode,
-		@AuthenticationPrincipal SecurityUser securityUser,
-		@RequestBody ScheduleResponseDto requestBody
-		)
-	{
-		//출발지: 서울 (한국 표준시, UTC+09:00)
-		// 도착지: 두바이 (아랍 표준시, UTC+04:00) 도착시간이 더 빠를 수 있음
-		Trip trip = tripService.findByInvitationCode(invitationCode);
-
-		Map<String,PlanJ> map = planJService.createPlanJFromScheduledResponseDto(trip, requestBody, securityUser.getUuid());
-
-		PlanJInfoDto departure = planJService.convertPlanJToDto(map.get("departure"));
-		PlanJInfoDto arrival = planJService.convertPlanJToDto(map.get("arrival"));
-
-		template.convertAndSend(
-			"/topic/api/trip/j/" + invitationCode,
-			new PlanResponseBody<>("create", departure)
-		);
-
-		template.convertAndSend(
-			"/topic/api/trip/j/" + invitationCode,
-			new PlanResponseBody<>("create", arrival)
-		);
-
-		return ResponseEntity.ok("created");
-
+	@GetMapping("/j/show/editors")
+	@Operation(summary = "플랜j editor권한 목록")
+	@ApiResponse(responseCode = "200", description = "플랜j editor권한 목록")
+	public ResponseEntity<?> showEditors() {
+		return ResponseEntity.ok(planJEditService.getActiveEditTopicsAndUuidAndDay());
 	}
+
 
 }

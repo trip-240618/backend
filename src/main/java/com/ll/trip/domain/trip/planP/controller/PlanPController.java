@@ -51,7 +51,7 @@ public class PlanPController {
 
 	private final TripService tripService;
 	private final PlanPService planPService;
-	private final PlanPEditService planEditService;
+	private final PlanPEditService planPEditService;
 	private final SimpMessagingTemplate template;
 
 	@PostMapping("/{invitationCode}/plan/create")
@@ -175,7 +175,7 @@ public class PlanPController {
 		String username = headerAccessor.getUser().getName();
 		log.info("uuid : " + username);
 
-		String uuid = planEditService.getEditorByInvitationCode(invitationCode);
+		String uuid = planPEditService.getEditorByInvitationCode(invitationCode);
 		if (uuid != null) {
 			template.convertAndSendToUser(username, "/topic/api/trip/p/" + invitationCode,
 				new PlanResponseBody<>("wait", uuid)
@@ -183,7 +183,7 @@ public class PlanPController {
 			return;
 		}
 
-		planEditService.addEditor(invitationCode, username);
+		planPEditService.addEditor(invitationCode, username);
 
 		template.convertAndSend("/topic/api/trip/p/" + invitationCode,
 			new PlanResponseBody<>("edit start", username)
@@ -213,15 +213,22 @@ public class PlanPController {
 		@RequestParam int dayTo,
 		@RequestParam int orderTo
 	) {
-		if (!planEditService.isEditor(invitationCode, securityUser.getUuid()))
+		if (!planPEditService.isEditor(invitationCode, securityUser.getUuid()))
 			return ResponseEntity.badRequest().body("편집자가 아닙니다.");
 
-		int updatedCount = planEditService.movePlanByDayAndOrder(planId, dayTo, orderTo);
+		int updatedCount = planPEditService.movePlanByDayAndOrder(planId, dayTo, orderTo);
 		PlanPEditResponseDto response = new PlanPEditResponseDto(planId, dayTo, orderTo, updatedCount);
 
 		template.convertAndSend("/topic/api/trip/p/" + invitationCode, new PlanResponseBody<>("moved", response));
 
 		return ResponseEntity.ok("moved");
+	}
+
+	@GetMapping("/p/show/editors")
+	@Operation(summary = "플랜p editor권한 목록")
+	@ApiResponse(responseCode = "200", description = "플랜p editor권한 목록")
+	public ResponseEntity<?> showEditors() {
+		return ResponseEntity.ok(planPEditService.getActiveEditTopicsAndUuid());
 	}
 
 }
