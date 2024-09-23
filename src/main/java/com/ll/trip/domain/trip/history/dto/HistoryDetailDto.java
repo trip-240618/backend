@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.ll.trip.domain.trip.history.entity.History;
-import com.ll.trip.domain.trip.history.entity.HistoryTag;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -51,7 +50,7 @@ public class HistoryDetailDto {
 		description = "태그 리스트",
 		example = "[\"tag1\", \"tag2\", \"tag3\"]"
 	)
-	private List<String> tags;
+	private List<HistoryTagDto> tags;
 
 	public HistoryDetailDto(History history) {
 		this.id = history.getId();
@@ -63,7 +62,7 @@ public class HistoryDetailDto {
 		this.memo = history.getMemo();
 		this.likeCnt = history.getLikeCnt();
 		this.replyDtos = history.getHistoryReplies().stream().map(HistoryReplyDto::new).toList();
-		this.tags = history.getHistoryTags().stream().map(HistoryTag::getTag_name).toList();
+		this.tags = history.getHistoryTags().stream().map(HistoryTagDto::new).toList();
 	}
 
 }

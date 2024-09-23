@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/trip/location")
-@Tag(name = "Trip Location", description = "장소 검색")
+@Tag(name = "Trip Location", description = "장소 검색 API")
 public class LocationController {
 
 	private final LocationService locationService;

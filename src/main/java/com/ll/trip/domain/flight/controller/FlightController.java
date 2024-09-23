@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/flight")
+@Tag(name = "Flight", description = "항공편 API")
 public class FlightController {
 
 	private final FlightService flightService;
@@ -69,7 +71,7 @@ public class FlightController {
 	}
 
 	@PostMapping("/{invitationCode}/flight/list")
-	@Operation(summary = "항공편 조회")
+	@Operation(summary = "trip 항공편 목록 조회")
 	@ApiResponse(responseCode = "200", description = "항공편으로 항공기 출발,도착 정보 조회", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = ScheduleResponseDto.class))})
 	public ResponseEntity<?> showFlightSchedule(

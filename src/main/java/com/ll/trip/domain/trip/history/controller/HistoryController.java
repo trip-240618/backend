@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.trip.history.dto.HistoriesCreateRequestDto;
 import com.ll.trip.domain.trip.history.dto.HistoryCreateRequestDto;
 import com.ll.trip.domain.trip.history.dto.HistoryDetailDto;
 import com.ll.trip.domain.trip.history.dto.HistoryListDto;
@@ -43,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/trip")
-@Tag(name = "History", description = "History 기능")
+@Tag(name = "History", description = "History API")
 public class HistoryController {
 
 	private final TripService tripService;
@@ -85,6 +86,27 @@ public class HistoryController {
 		Trip trip = tripService.findByInvitationCode(invitationCode);
 
 		historyService.createHistory(requestDto, user, trip);
+
+		return ResponseEntity.ok("created");
+	}
+
+	@PostMapping("/{invitationCode}/history/create/many")
+	@Operation(summary = "History 일괄 생성")
+	@ApiResponse(responseCode = "200", description = "History 생성", content = {
+		@Content(mediaType = "application/json",
+			array = @ArraySchema(schema = @Schema(implementation = HistoryListDto.class)))})
+	public ResponseEntity<?> createManyHistories(
+		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestBody HistoriesCreateRequestDto requestDto
+	) {
+		if (!tripService.existTripMemberByTripInvitationCodeAndUserId(invitationCode, securityUser.getId()))
+			return ResponseEntity.badRequest().body("권한이 없습니다.");
+
+		UserEntity user = userService.findUserByUserId(securityUser.getId());
+		Trip trip = tripService.findByInvitationCode(invitationCode);
+
+		historyService.createManyHistories(requestDto.getHistoryCreateRequestDtos(), user, trip);
 
 		return ResponseEntity.ok("created");
 	}

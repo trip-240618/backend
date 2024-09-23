@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ll.trip.domain.trip.location.response.PlanResponseBody;
 import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
+import com.ll.trip.domain.trip.planJ.dto.PlanJEditorRegisterDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJModifyRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJSwapRequestDto;
@@ -46,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/trip/j")
-@Tag(name = "Plan J", description = "J타입 플랜의 CRUD 기능")
+@Tag(name = "Plan J", description = "J타입 플랜 API")
 public class PlanJController {
 	private final TripService tripService;
 	private final PlanJService planJService;
@@ -155,9 +156,8 @@ public class PlanJController {
 		if (!planJEditService.isEditor(invitationCode, securityUser.getUuid(), day))
 			return ResponseEntity.badRequest().body("day" + day + "의 편집자가 아닙니다.");
 
-		if(planJEditService.swapPlanJByIds(requestBody.getPlanId1(), requestBody.getPlanId2()) != 2)
+		if (planJEditService.swapPlanJByIds(requestBody.getPlanId1(), requestBody.getPlanId2()) != 2)
 			return ResponseEntity.internalServerError().body("swap 실패");
-
 
 		template.convertAndSend(
 			"/topic/api/trip/j/" + invitationCode,
@@ -202,7 +202,7 @@ public class PlanJController {
 		String uuid = planJEditService.getEditorByInvitationCodeAndDay(invitationCode, day);
 		if (uuid != null) {
 			template.convertAndSendToUser(username, "/topic/api/trip/j/" + invitationCode,
-				new PlanResponseBody<>("wait", uuid)
+				new PlanResponseBody<>("wait", new PlanJEditorRegisterDto(day, username))
 			);
 			return;
 		}
@@ -210,7 +210,7 @@ public class PlanJController {
 		planJEditService.addEditor(invitationCode, username, day);
 
 		template.convertAndSend("/topic/api/trip/j/" + invitationCode,
-			new PlanResponseBody<>("edit start", username)
+			new PlanResponseBody<>("edit start", new PlanJEditorRegisterDto(day, username))
 		);
 	}
 
@@ -221,8 +221,8 @@ public class PlanJController {
 			examples = {
 				@ExampleObject(name = "편집자로 등록된 경우", value = "{\"command\": \"edit start\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}"),
 				@ExampleObject(name = "편집중인 사람이 존재할 경우", value = "{\"command\": \"wait\", \"data\": \"223e4567-e89b-12d3-a456-426614174001\"}")
-			}
-		)})
+			},
+			schema = @Schema(implementation = PlanJEditorRegisterDto.class))})
 	public PlanResponseBody<String> addEditor(
 		@PathVariable String invitationCode,
 		@PathVariable int day
@@ -231,6 +231,13 @@ public class PlanJController {
 	}
 
 	@GetMapping("/j/{inviationCode}/{day}/edit/finish")
+	@Operation(summary = "편집자 해제")
+	@ApiResponse(responseCode = "200", description = "편집자 목록에서 제거", content = {
+		@Content(mediaType = "application/json",
+			examples = {
+				@ExampleObject(value = "{\"command\": \"edit finish\", \"data\": PlanJEditorRegisterDto"),
+			},
+			schema = @Schema(implementation = PlanJEditorRegisterDto.class))})
 	public void removeEditor(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@DestinationVariable String invitationCode,
@@ -242,7 +249,7 @@ public class PlanJController {
 		planJEditService.removeEditor(invitationCode, day, username);
 
 		template.convertAndSend("/topic/api/trip/j/" + invitationCode,
-			new PlanResponseBody<>("edit finish", username)
+			new PlanResponseBody<>("edit finish", new PlanJEditorRegisterDto(day, username))
 		);
 	}
 
@@ -252,6 +259,5 @@ public class PlanJController {
 	public ResponseEntity<?> showEditors() {
 		return ResponseEntity.ok(planJEditService.getActiveEditTopicsAndUuidAndDay());
 	}
-
 
 }

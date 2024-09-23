@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.ll.trip.domain.trip.history.entity.History;
-import com.ll.trip.domain.trip.history.entity.HistoryTag;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -57,7 +56,7 @@ public class HistoryListDto {
 		description = "태그 리스트",
 		example = "[\"tag1\", \"tag2\", \"tag3\"]"
 	)
-	private List<String> tags;
+	private List<HistoryTagDto> tags;
 
 	public HistoryListDto(History history) {
 		this.id = history.getId();
@@ -68,6 +67,6 @@ public class HistoryListDto {
 		this.latitude = history.getLatitude();
 		this.longitude = history.getLongitude();
 		this.photoDate = history.getPhotoDate();
-		this.tags = history.getHistoryTags().stream().map(HistoryTag::getTag_name).toList();
+		this.tags = history.getHistoryTags().stream().map(HistoryTagDto::new).toList();
 	}
 }

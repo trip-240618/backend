@@ -46,7 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RequestMapping("/trip/p")
 @Slf4j
-@Tag(name = "Plan P", description = "P타입 플랜의 CRUD 기능")
+@Tag(name = "Plan P", description = "P타입 플랜 API")
 public class PlanPController {
 
 	private final TripService tripService;
@@ -203,6 +203,23 @@ public class PlanPController {
 		@PathVariable String invitationCode
 	) {
 		return new PlanResponseBody<>("edit start", "uuid");
+	}
+
+	@GetMapping("/p/{invitationCode}/edit/finish")
+	@Operation(summary = "편집자 해제")
+	@ApiResponse(responseCode = "200", description = "편집자 목록에서 제거", content = {
+		@Content(mediaType = "application/json",
+			examples = {
+				@ExampleObject(value = "{\"command\": \"edit finish\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}"),
+			}
+		)})
+	public PlanResponseBody<String> removeEditor(
+		@PathVariable String invitationCode,
+		@AuthenticationPrincipal SecurityUser securityUser
+	) {
+		planPEditService.removeEditor(invitationCode, securityUser.getUuid());
+
+		return new PlanResponseBody<>("edit finish", "uuid");
 	}
 
 	@PutMapping("/{invitationCode}/edit/move")

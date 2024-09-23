@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.trip.history.dto.HistoryCreateRequestDto;
+import com.ll.trip.domain.trip.history.dto.HistoryTagDto;
 import com.ll.trip.domain.trip.history.repository.HistoryRepository;
 import com.ll.trip.domain.trip.history.service.HistoryService;
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
@@ -81,7 +82,7 @@ public class DevInit {
 						new BigDecimal("-122.08532419999999"), // longitude
 						LocalDateTime.of(2024, 9, 14, 14, 15), // photoDate
 						"오사카에서 찍은 사진", // memo
-						Arrays.asList("tag1", "tag2", "tag3") // tags 리스트
+						Arrays.asList(new HistoryTagDto("##FFEFF3","tag1"), new HistoryTagDto("##FFEFF3","tag2")) // tags 리스트
 					),user, trip);
 
 				historyService.createHistory(
@@ -94,7 +95,7 @@ public class DevInit {
 						new BigDecimal("-122.08532419999999"), // longitude
 						LocalDateTime.of(2024, 9, 15, 15, 15), // photoDate
 						"오사카에서 찍은 사진", // memo
-						Arrays.asList("tag1", "tag2", "tag3") // tags 리스트
+						Arrays.asList(new HistoryTagDto("##FFEFF3","tag1"), new HistoryTagDto("##FFEFF3","tag2")) // tags 리스트
 					),user, trip);
 			}
 

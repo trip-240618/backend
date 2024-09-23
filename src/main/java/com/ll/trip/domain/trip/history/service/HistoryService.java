@@ -53,15 +53,21 @@ public class HistoryService {
 			.build()
 		);
 
-		List<HistoryTag> tags = requestDto.getTags().stream().map(tag -> {
+		List<HistoryTag> tags = requestDto.getTags().stream().map(dto -> {
 			return HistoryTag.builder()
-				.tag_name(tag)
+				.tagName(dto.getTagName())
+				.tagColor(dto.getTagColor())
 				.trip(trip)
 				.history(history)
 				.build();
 		}).toList();
 
 		historyTagRepository.saveAll(tags);
+	}
+
+	public void createManyHistories(List<HistoryCreateRequestDto> list, UserEntity user, Trip trip) {
+		for (HistoryCreateRequestDto dto : list)
+			createHistory(dto, user, trip);
 	}
 
 	@Transactional
@@ -126,9 +132,10 @@ public class HistoryService {
 		like = optLike.get();
 		boolean toggle = like.isToggle();
 
-		int likeUpdated = historyLikeRepository.updateToggleById(like.getId(), !toggle);
-		int historyUpdated = historyRepository.updateLikeCntById(historyId, toggle? 1 : -1);
+		historyLikeRepository.updateToggleById(like.getId(), !toggle);
+		historyRepository.updateLikeCntById(historyId, toggle ? 1 : -1);
 
 		return !toggle;
 	}
+
 }

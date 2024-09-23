@@ -49,5 +49,5 @@ public class HistoryCreateRequestDto {
 		description = "태그 리스트",
 		example = "[\"tag1\", \"tag2\", \"tag3\"]"
 	)
-	private List<String> tags = new ArrayList<>();
+	private List<HistoryTagDto> tags = new ArrayList<>();
 }

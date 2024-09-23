@@ -15,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -67,6 +68,7 @@ public class PlanJ extends BaseEntity {
 	private String title;
 
 	@Setter
+	@Lob
 	private String memo;
 
 	private Integer flightId;

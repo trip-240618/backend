@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
@@ -43,6 +44,7 @@ public class Scrap extends BaseEntity {
 	private String title;
 
 	@NotBlank
+	@Lob
 	private String content;
 
 	private String color;

@@ -87,4 +87,8 @@ public class PlanPEditService {
 	public boolean isEditor(String invitationCode, String uuid) {
 		return activeEditTopicsAndUuid.get(invitationCode).equals(uuid);
 	}
+
+	public void removeEditor(String invitationCode, String uuid) {
+		this.activeEditTopicsAndUuid.remove(invitationCode,uuid);
+	}
 }

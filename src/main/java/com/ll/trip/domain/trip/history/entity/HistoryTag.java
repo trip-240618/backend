@@ -37,6 +37,8 @@ public class HistoryTag {
 	@JoinColumn(name = "history_id")
 	private History history;
 
+	private String tagColor;
+
 	@NotBlank
-	private String tag_name;
+	private String tagName;
 }
