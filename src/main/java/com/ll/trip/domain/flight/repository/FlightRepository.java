@@ -21,7 +21,7 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
 			f.arrivalAirport,
 			f.arrivalAirport_kr
 		) from Flight f
-		where f.trip.invitationCode =:invitationCdoe
+		where f.trip.invitationCode =:invitationCode
 		""")
 	List<ScheduleResponseDto> findByInvitationCode(String invitationCode);
 }

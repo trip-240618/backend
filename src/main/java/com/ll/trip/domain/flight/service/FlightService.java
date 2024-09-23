@@ -75,6 +75,7 @@ public class FlightService {
 			.build();
 	}
 
+	@Transactional
 	public ScheduleResponseDto createFlight(DatedFlight[] flightStatus, Trip trip) {
 		ScheduleResponseDto dto = parseToDto(flightStatus);
 
