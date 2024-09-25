@@ -100,21 +100,6 @@ public class PlanJController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/{invitationCode}/plan/list/b")
-	@Operation(summary = "PlanJ B안 리스트 요청")
-	@ApiResponse(responseCode = "200", description = "PlanJ B안 리스트 요청", content = {
-		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanJInfoDto.class)))})
-	public ResponseEntity<?> showPlanJBList(
-		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
-		@RequestParam @Parameter(description = "day", example = "1") int day,
-		@AuthenticationPrincipal SecurityUser securityUser
-	) {
-		Trip trip = tripService.findByInvitationCode(invitationCode);
-		List<PlanJInfoDto> response = planJService.findAllPlanAByTripIdAndDay(trip.getId(), day);
-
-		return ResponseEntity.ok(response);
-	}
-
 	@PutMapping("/{invitationCode}/plan/edit/modify")
 	@Operation(summary = "PlanJ 수정")
 	@ApiResponse(responseCode = "200", description = "PlanJ 수정", content = {
