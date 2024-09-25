@@ -52,11 +52,6 @@ public class PlanJInfoDto {
 				  + "항공편의 경우 jsonString 항공편 정보")
 	private String memo;
 
-	@Schema(
-		description = "항공편 id",
-		example = "1")
-	private Integer flightId;
-
 	@Schema(description = "위도",
 		example = "37.4220541")
 	private BigDecimal latitude;
@@ -73,7 +68,6 @@ public class PlanJInfoDto {
 		this.writerUuid = plan.getWriterUuid();
 		this.title = plan.getTitle();
 		this.memo = plan.getMemo();
-		this.flightId = plan.getFlightId();
 		this.latitude = plan.getLatitude();
 		this.longitude = plan.getLongitude();
 	}

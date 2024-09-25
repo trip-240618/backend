@@ -82,16 +82,35 @@ public class PlanJController {
 	}
 
 	@GetMapping("/{invitationCode}/plan/list")
-	@Operation(summary = "Plan 리스트 요청")
+	@Operation(summary = "PlanJ 리스트 요청")
 	@ApiResponse(responseCode = "200", description = "Plan 리스트 요청", content = {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanJInfoDto.class)))})
 	public ResponseEntity<?> showPlanJList(
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
 		@RequestParam @Parameter(description = "day", example = "1") int day,
+		@RequestParam @Parameter(description = "보관함 여부", example = "false") boolean locker,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
 		Trip trip = tripService.findByInvitationCode(invitationCode);
-		List<PlanJInfoDto> response = planJService.findAllByTripIdAndDay(trip.getId(), day);
+		List<PlanJInfoDto> response = null;
+		if (!locker)
+			response = planJService.findAllPlanAByTripIdAndDay(trip.getId(), day);
+		else
+			response = planJService.findAllPlanBByTripId(trip.getId());
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/{invitationCode}/plan/list/b")
+	@Operation(summary = "PlanJ B안 리스트 요청")
+	@ApiResponse(responseCode = "200", description = "PlanJ B안 리스트 요청", content = {
+		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanJInfoDto.class)))})
+	public ResponseEntity<?> showPlanJBList(
+		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@RequestParam @Parameter(description = "day", example = "1") int day,
+		@AuthenticationPrincipal SecurityUser securityUser
+	) {
+		Trip trip = tripService.findByInvitationCode(invitationCode);
+		List<PlanJInfoDto> response = planJService.findAllPlanAByTripIdAndDay(trip.getId(), day);
 
 		return ResponseEntity.ok(response);
 	}

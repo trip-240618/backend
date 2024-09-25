@@ -23,15 +23,33 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 				p.writerUuid,
 				p.title,
 				p.memo,
-				p.flightId,
 				p.latitude,
 				p.longitude
 		) from PlanJ p
 		where p.trip.id = :tripId and
-		p.dayAfterStart = :day
+		p.dayAfterStart = :day and
+		p.locker = :locker
 		order by p.startTime asc, p.orderByDate asc
 		""")
-	List<PlanJInfoDto> findAllByTripIdAndDay(long tripId, int day);
+	List<PlanJInfoDto> findAllPlanAByTripIdAndDay(long tripId, int day, boolean locker);
+
+	@Query("""
+		select new com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto(
+				p.id,
+				p.dayAfterStart,
+				p.orderByDate,
+				p.startTime,
+				p.writerUuid,
+				p.title,
+				p.memo,
+				p.latitude,
+				p.longitude
+		) from PlanJ p
+		where p.trip.id = :tripId and
+		p.locker = :locker
+		order by p.startTime asc, p.orderByDate asc
+		""")
+	List<PlanJInfoDto> findAllPlanBByTripIdAndDay(long tripId, boolean locker);
 
 	@Modifying
 	@Query("""

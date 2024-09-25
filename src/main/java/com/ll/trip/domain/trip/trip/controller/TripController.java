@@ -110,12 +110,18 @@ public class TripController {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TripInfoDto.class)))})
 	public ResponseEntity<?> showIncomingTripListByUserId(
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@RequestParam @Parameter(description = "정렬기준 필드", example = "startDate : 시작 날짜 순, endDate : 끝나는 날짜 순") String sortField,
-		@RequestParam @Parameter(description = "정렬순서", example = "ASC : 오름차순&오래된순, DESC : 내림차순&최신순") String sortDirection
+		@RequestParam(required = false) @Parameter(description = "정렬기준 필드", example = "startDate : 시작 날짜 순, endDate : 끝나는 날짜 순") String sortField,
+		@RequestParam(required = false) @Parameter(description = "정렬순서", example = "ASC : 오름차순&오래된순, DESC : 내림차순&최신순") String sortDirection
 	) {
 		//TODO 북마크, 다가오는, 지난 + queryDSL로 동적 쿼리 생성
-		List<TripInfoDto> response = tripService.findAllByUserId(securityUser.getId(), LocalDate.now(), "incoming",
-			sortDirection, sortField);
+		List<TripInfoDto> response = null;
+		if (sortDirection == null && sortField == null) {
+			response = tripService.findAllByUserId(securityUser.getId(), LocalDate.now(), "incoming",
+				"startDate", "DESC");
+		} else if (sortDirection != null && sortField != null) {
+			tripService.findAllByUserId(securityUser.getId(), LocalDate.now(), "incoming",
+				sortDirection, sortField);
+		}
 		tripService.fillTripMemberToTripInfo(response);
 		return ResponseEntity.ok(response);
 	}
@@ -130,8 +136,14 @@ public class TripController {
 		@RequestParam @Parameter(description = "정렬순서", example = "ASC : 오름차순&오래된순, DESC : 내림차순&최신순") String sortDirection
 	) {
 		//TODO 북마크, 다가오는, 지난 + queryDSL로 동적 쿼리 생성
-		List<TripInfoDto> response = tripService.findAllByUserId(securityUser.getId(), LocalDate.now(), "last",
-			sortDirection, sortField);
+		List<TripInfoDto> response = null;
+		if (sortDirection == null && sortField == null) {
+			response = tripService.findAllByUserId(securityUser.getId(), LocalDate.now(), "last",
+				"startDate", "DESC");
+		} else if (sortDirection != null && sortField != null) {
+			tripService.findAllByUserId(securityUser.getId(), LocalDate.now(), "last",
+				sortDirection, sortField);
+		}
 		tripService.fillTripMemberToTripInfo(response);
 		return ResponseEntity.ok(response);
 	}
@@ -150,6 +162,7 @@ public class TripController {
 		tripService.fillTripMemberToTripInfo(response);
 		return ResponseEntity.ok(response);
 	}
+
 	@GetMapping("/delete")
 	@Operation(summary = "Trip 삭제")
 	@ApiResponse(responseCode = "200", description = "Trip 삭제")
@@ -183,7 +196,6 @@ public class TripController {
 
 		return ResponseEntity.ok(response);
 	}
-
 
 	//북마크
 	@PostMapping("/bookmark/toggle")

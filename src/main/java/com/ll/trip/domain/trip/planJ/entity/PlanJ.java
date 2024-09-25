@@ -51,6 +51,7 @@ public class PlanJ extends BaseEntity {
 	@Setter
 	private Integer orderByDate;
 
+	@Setter
 	private boolean locker;
 
 	private String writerUuid;
@@ -70,6 +71,4 @@ public class PlanJ extends BaseEntity {
 	@Setter
 	@Lob
 	private String memo;
-
-	private Integer flightId;
 }

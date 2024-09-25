@@ -41,6 +41,7 @@ public class PlanJService {
 			.longitude(requestDto.getLongitude())
 			.memo(requestDto.getMemo())
 			.title(requestDto.getTitle())
+			.locker(requestDto.isLocker())
 			.build();
 
 		return planJRepository.save(plan);
@@ -50,8 +51,12 @@ public class PlanJService {
 		return new PlanJInfoDto(plan);
 	}
 
-	public List<PlanJInfoDto> findAllByTripIdAndDay(long tripId, int day) {
-		return planJRepository.findAllByTripIdAndDay(tripId, day);
+	public List<PlanJInfoDto> findAllPlanAByTripIdAndDay(long tripId, int day) {
+		return planJRepository.findAllPlanAByTripIdAndDay(tripId, day, false);
+	}
+
+	public List<PlanJInfoDto> findAllPlanBByTripId(long tripId) {
+		return planJRepository.findAllPlanBByTripIdAndDay(tripId,true);
 	}
 
 	@Transactional
@@ -63,6 +68,7 @@ public class PlanJService {
 		plan.setLatitude(requestBody.getLatitude());
 		plan.setLongitude(requestBody.getLongitude());
 		plan.setOrderByDate(order);
+		plan.setLocker(requestBody.isLocker());
 
 		return planJRepository.save(plan);
 	}

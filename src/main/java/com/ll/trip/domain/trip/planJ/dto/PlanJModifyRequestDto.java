@@ -48,4 +48,7 @@ public class PlanJModifyRequestDto {
 		example = "-122.08532419999999")
 	private BigDecimal longitude;
 
+	@Schema(description = "보관함 여부",
+		example = "false")
+	private boolean locker;
 }

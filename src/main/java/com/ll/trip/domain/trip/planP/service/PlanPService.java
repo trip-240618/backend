@@ -39,7 +39,7 @@ public class PlanPService {
 
 	public int getNextIdx(long tripId, int dayAfterStart) {
 		Integer maxOrder = planPRepository.findMaxOrder(tripId, dayAfterStart);
-		return maxOrder == null ? 0 : maxOrder + 1;
+		return maxOrder == null ? 0 : maxOrder + 11;
 	}
 
 	public PlanPInfoDto convertPlanPToDto(PlanP plan) {
