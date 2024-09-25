@@ -18,12 +18,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.trip.location.response.PlanResponseBody;
 import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPEditResponseDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPLockerDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPMoveDto;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
-import com.ll.trip.domain.trip.location.response.PlanResponseBody;
 import com.ll.trip.domain.trip.planP.service.PlanPEditService;
 import com.ll.trip.domain.trip.planP.service.PlanPService;
 import com.ll.trip.domain.trip.trip.entity.Trip;
@@ -85,10 +86,10 @@ public class PlanPController {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanPInfoDto.class)))})
 	public ResponseEntity<?> showPlanPList(
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
-		@AuthenticationPrincipal SecurityUser securityUser
+		@RequestParam @Parameter(description = "보관함 여부", example = "false") boolean locker
 	) {
 		Trip trip = tripService.findByInvitationCode(invitationCode);
-		List<PlanPInfoDto> response = planPService.findAllByTripId(trip.getId());
+		List<PlanPInfoDto> response = planPService.findAllByTripId(trip.getId(), locker);
 
 		return ResponseEntity.ok(response);
 	}
@@ -103,9 +104,7 @@ public class PlanPController {
 				@ExampleObject(name = "http 응답", value = "modified")},
 			schema = @Schema(implementation = PlanPInfoDto.class))})
 	public ResponseEntity<?> modifyPlanP(
-		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
-		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId,
 		@RequestBody PlanPInfoDto requestBody
 	) {
 		PlanP plan = planPService.updatePlanPByPlanId(requestBody);
@@ -128,7 +127,6 @@ public class PlanPController {
 				@ExampleObject(name = "http 응답", value = "deleted")}
 		)})
 	public ResponseEntity<?> deletePlanP(
-		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
 		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId
 	) {
@@ -152,7 +150,6 @@ public class PlanPController {
 				@ExampleObject(name = "http 응답", value = "checked")},
 			schema = @Schema(implementation = PlanPCheckBoxResponseDto.class))})
 	public ResponseEntity<?> modifyPlanP(
-		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
 		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId
 	) {
@@ -223,20 +220,45 @@ public class PlanPController {
 	}
 
 	@PutMapping("/{invitationCode}/edit/move")
+	@Operation(summary = "Plan P 이동")
+	@ApiResponse(responseCode = "200", description = "Plan P 이동", content = {
+		@Content(mediaType = "application/json",
+			examples = {
+				@ExampleObject(value = "{\"command\": \"move\", \"data\": PlanPMoveDto}")},
+			schema = @Schema(implementation = PlanPMoveDto.class)
+		)})
 	public ResponseEntity<?> movePlanP(
 		@PathVariable String invitationCode,
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@RequestParam long planId,
-		@RequestParam int dayTo,
-		@RequestParam int orderTo
+		@RequestBody PlanPMoveDto moveDto
 	) {
 		if (!planPEditService.isEditor(invitationCode, securityUser.getUuid()))
 			return ResponseEntity.badRequest().body("편집자가 아닙니다.");
+		Trip trip = tripService.findByInvitationCode(invitationCode);
 
-		int updatedCount = planPEditService.movePlanByDayAndOrder(planId, dayTo, orderTo);
-		PlanPEditResponseDto response = new PlanPEditResponseDto(planId, dayTo, orderTo, updatedCount);
+		planPEditService.movePlanByDayAndOrder(trip.getId(), moveDto.getPlanId(), moveDto.getDayFrom(),
+			moveDto.getDayTo(), moveDto.getOrderFrom(), moveDto.getOrderTo());
 
-		template.convertAndSend("/topic/api/trip/p/" + invitationCode, new PlanResponseBody<>("moved", response));
+		template.convertAndSend("/topic/api/trip/p/" + invitationCode, new PlanResponseBody<>("move", moveDto));
+
+		return ResponseEntity.ok("moved");
+	}
+
+	@PutMapping("/{invitationCode}/locker/move")
+	public ResponseEntity<?> moveByLocker(
+		@PathVariable String invitationCode,
+		@RequestBody PlanPLockerDto lockerDto
+	) {
+		Trip trip = tripService.findByInvitationCode(invitationCode);
+		PlanPLockerDto response = planPService.moveLocker(trip.getId(), lockerDto.getPlanId(), lockerDto.getDayTo(),
+			lockerDto.isLocker());
+
+		if (lockerDto.isLocker())
+			template.convertAndSend("/topic/api/trip/p/" + invitationCode,
+				new PlanResponseBody<>("locker in", response));
+		else
+			template.convertAndSend("/topic/api/trip/p/" + invitationCode,
+				new PlanResponseBody<>("locker out", response));
 
 		return ResponseEntity.ok("moved");
 	}

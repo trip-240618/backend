@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPLockerDto;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
 import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
@@ -21,6 +22,7 @@ public class PlanPService {
 
 	private final PlanPRepository planPRepository;
 
+	@Transactional
 	public PlanP createPlanP(Trip trip, PlanPCreateRequestDto requestDto, String uuid) {
 
 		PlanP plan = PlanP.builder()
@@ -32,13 +34,14 @@ public class PlanPService {
 			)
 			.writerUuid(uuid)
 			.checkbox(false)
+			.locker(requestDto.isLocker())
 			.build();
 
 		return planPRepository.save(plan);
 	}
 
-	public int getNextIdx(long tripId, int dayAfterStart) {
-		Integer maxOrder = planPRepository.findMaxOrder(tripId, dayAfterStart);
+	public int getNextIdx(long tripId, Integer day) {
+		Integer maxOrder = planPRepository.findMaxOrder(tripId, day);
 		return maxOrder == null ? 0 : maxOrder + 11;
 	}
 
@@ -53,8 +56,8 @@ public class PlanPService {
 		);
 	}
 
-	public List<PlanPInfoDto> findAllByTripId(Long tripId) {
-		return planPRepository.findAllByTripIdOrderByDayAfterStartAndOrderByDate(tripId);
+	public List<PlanPInfoDto> findAllByTripId(Long tripId, boolean locker) {
+		return planPRepository.findAllByTripIdOrderByDayAfterStartAndOrderByDate(tripId, locker);
 	}
 
 	@Transactional
@@ -70,12 +73,6 @@ public class PlanPService {
 	@Transactional
 	public void deletePlanPByPlanId(Long planId) {
 		planPRepository.deleteById(planId);
-		return;
-	}
-
-	@Transactional
-	public int reduceOrderBiggerThanPlanOrder(long tripId, int dayAfterStart, int orderByDate) {
-		return planPRepository.reduceOrderBiggerThanOrder(tripId, dayAfterStart, orderByDate);
 	}
 
 	@Transactional
@@ -87,5 +84,14 @@ public class PlanPService {
 			return null;
 
 		return new PlanPCheckBoxResponseDto(planId, !checkbox);
+	}
+
+	@Transactional
+	public PlanPLockerDto moveLocker(long tripId, long planId, Integer dayTo, boolean locker) {
+		int order = getNextIdx(tripId, dayTo);
+		if (planPRepository.updatePlanPDayAndLockerByPlanId(planId, dayTo, order, locker) > 0)
+			return new PlanPLockerDto(planId, dayTo, order, locker);
+		else
+			return null;
 	}
 }

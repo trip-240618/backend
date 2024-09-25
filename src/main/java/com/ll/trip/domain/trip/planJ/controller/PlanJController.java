@@ -233,7 +233,7 @@ public class PlanJController {
 		return new PlanResponseBody<>("edit start", "uuid");
 	}
 
-	@GetMapping("/{inviationCode}/{day}/edit/finish")
+	@GetMapping("/{invitationCode}/{day}/edit/finish")
 	@Operation(summary = "편집자 해제")
 	@ApiResponse(responseCode = "200", description = "편집자 목록에서 제거", content = {
 		@Content(mediaType = "application/json",
@@ -243,8 +243,9 @@ public class PlanJController {
 			schema = @Schema(implementation = PlanJEditorRegisterDto.class))})
 	public void removeEditor(
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@DestinationVariable String invitationCode,
-		@PathVariable int day) {
+		@PathVariable String invitationCode,
+		@PathVariable int day
+	) {
 		String username = securityUser.getUuid();
 		log.info("uuid : " + username);
 
