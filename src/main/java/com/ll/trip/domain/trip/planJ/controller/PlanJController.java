@@ -68,7 +68,7 @@ public class PlanJController {
 		@RequestBody PlanJCreateRequestDto requestDto
 	) {
 		Trip trip = tripService.findByInvitationCode(invitationCode);
-		int order = planJEditService.getLastOrderByTripId(trip.getId(), requestDto.getDayAfterStart());
+		int order = planJEditService.getLastOrderByTripId(trip.getId());
 
 		PlanJ plan = planJService.createPlan(trip, requestDto, order, securityUser.getUuid());
 		PlanJInfoDto response = planJService.convertPlanJToDto(plan);
@@ -131,18 +131,19 @@ public class PlanJController {
 	) {
 		PlanJ plan = planJService.findPlanJById(requestBody.getPlanId());
 		int order = plan.getOrderByDate();
-		int dayFrom = plan.getDayAfterStart();
-		int dayTo = requestBody.getDayAfterStart();
+		Integer dayFrom = plan.getDayAfterStart();
+		Integer dayTo = requestBody.getDayAfterStart();
 
-		if (plan.getStartTime() != requestBody.getStartTime() || dayFrom != dayTo) {
-			if (!planJEditService.isEditor(invitationCode, securityUser.getUuid(), dayFrom))
-				return ResponseEntity.badRequest().body("day" + dayFrom + "의 편집자가 아닙니다.");
-			if (dayTo != dayFrom && !planJEditService.isEditor(invitationCode, securityUser.getUuid(), dayTo))
-				return ResponseEntity.badRequest().body("day" + dayTo + "의 편집자가 아닙니다.");
-
+		if ((plan.getStartTime() != requestBody.getStartTime()) || !dayFrom.equals(dayTo)) {
+			if (!requestBody.isLocker()) {
+				if (!planJEditService.isEditor(invitationCode, securityUser.getUuid(), dayFrom))
+					return ResponseEntity.badRequest().body("day" + dayFrom + "의 편집자가 아닙니다.");
+				if (!requestBody.isLocker() && !dayTo.equals(dayFrom) && !planJEditService.isEditor(invitationCode,
+					securityUser.getUuid(), dayTo))
+					return ResponseEntity.badRequest().body("day" + dayTo + "의 편집자가 아닙니다.");
+			}
 			Trip trip = tripService.findByInvitationCode(invitationCode);
-			order = planJEditService.getLastOrderByTripId(trip.getId(), requestBody.getDayAfterStart());
-
+			order = planJEditService.getLastOrderByTripId(trip.getId());
 		}
 
 		plan = planJService.updatePlanJByPlanId(plan, requestBody, order);
@@ -195,7 +196,6 @@ public class PlanJController {
 				@ExampleObject(name = "http 응답", value = "삭제로 인해 순서가 수정된 plan 수")}
 		)})
 	public ResponseEntity<?> deletePlanJ(
-		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
 		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId
 	) {
@@ -243,8 +243,8 @@ public class PlanJController {
 			},
 			schema = @Schema(implementation = PlanJEditorRegisterDto.class))})
 	public PlanResponseBody<String> addEditor(
-		@PathVariable String invitationCode,
-		@PathVariable int day
+		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@PathVariable @Parameter(description = "day", example = "1", in = ParameterIn.PATH) int day
 	) {
 		return new PlanResponseBody<>("edit start", "uuid");
 	}
@@ -260,8 +260,7 @@ public class PlanJController {
 	public void removeEditor(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@DestinationVariable String invitationCode,
-		@DestinationVariable int day
-	) {
+		@PathVariable int day) {
 		String username = securityUser.getUuid();
 		log.info("uuid : " + username);
 

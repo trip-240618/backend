@@ -25,8 +25,8 @@ public class PlanJEditService {
 	private final SimpMessagingTemplate template;
 	private final String TOPIC_PREFIX = "/topic/api/trip/j/";
 
-	public int getLastOrderByTripId(long tripId, int dayAfterStart) {
-		Integer order = planJRepository.findMaxOrder(tripId, dayAfterStart);
+	public int getLastOrderByTripId(long tripId) {
+		Integer order = planJRepository.findMaxOrder(tripId);
 		if (order == null)
 			return 0;
 		return order + 1;

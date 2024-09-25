@@ -11,8 +11,8 @@ import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 
 public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
-	@Query("select max(p.orderByDate) from PlanJ p where p.trip.id = :tripId and p.dayAfterStart = :dayAfterStart")
-	Integer findMaxOrder(Long tripId, int dayAfterStart);
+	@Query("select max(p.orderByDate) from PlanJ p where p.trip.id = :tripId")
+	Integer findMaxOrder(Long tripId);
 
 	@Query("""
 		select new com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto(
@@ -24,7 +24,8 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 				p.title,
 				p.memo,
 				p.latitude,
-				p.longitude
+				p.longitude,
+				p.locker
 		) from PlanJ p
 		where p.trip.id = :tripId and
 		p.dayAfterStart = :day and
@@ -43,7 +44,8 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 				p.title,
 				p.memo,
 				p.latitude,
-				p.longitude
+				p.longitude,
+				p.locker
 		) from PlanJ p
 		where p.trip.id = :tripId and
 		p.locker = :locker

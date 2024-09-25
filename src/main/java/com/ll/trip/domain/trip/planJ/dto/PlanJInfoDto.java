@@ -60,6 +60,10 @@ public class PlanJInfoDto {
 		example = "-122.08532419999999")
 	private BigDecimal longitude;
 
+	@Schema(description = "보관함 여부",
+		example = "false")
+	private boolean locker;
+
 	public PlanJInfoDto(PlanJ plan) {
 		this.planId = plan.getId();
 		this.dayAfterStart = plan.getDayAfterStart();
@@ -70,5 +74,6 @@ public class PlanJInfoDto {
 		this.memo = plan.getMemo();
 		this.latitude = plan.getLatitude();
 		this.longitude = plan.getLongitude();
+		this.locker = plan.isLocker();
 	}
 }
