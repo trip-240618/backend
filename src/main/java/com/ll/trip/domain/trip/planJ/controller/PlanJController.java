@@ -88,8 +88,7 @@ public class PlanJController {
 	public ResponseEntity<?> showPlanJList(
 		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
 		@RequestParam @Parameter(description = "day", example = "1") int day,
-		@RequestParam @Parameter(description = "보관함 여부", example = "false") boolean locker,
-		@AuthenticationPrincipal SecurityUser securityUser
+		@RequestParam @Parameter(description = "보관함 여부", example = "false") boolean locker
 	) {
 		Trip trip = tripService.findByInvitationCode(invitationCode);
 		List<PlanJInfoDto> response = null;
@@ -194,7 +193,7 @@ public class PlanJController {
 		return ResponseEntity.ok("deleted");
 	}
 
-	@MessageMapping("/j/{invitationCode}/{day}/edit/register")
+	@MessageMapping("/{invitationCode}/{day}/edit/register")
 	public void addEditor(
 		SimpMessageHeaderAccessor headerAccessor,
 		@DestinationVariable String invitationCode,
@@ -218,7 +217,7 @@ public class PlanJController {
 		);
 	}
 
-	@GetMapping("/j/{invitationCode}/{day}/edit/register")
+	@GetMapping("/{invitationCode}/{day}/edit/register")
 	@Operation(summary = "(웹소켓 설명용) 편집자 등록")
 	@ApiResponse(responseCode = "200", description = "웹소켓으로 요청해야함, 편집자가 없을 시 편집자로 등록", content = {
 		@Content(mediaType = "application/json",
@@ -234,7 +233,7 @@ public class PlanJController {
 		return new PlanResponseBody<>("edit start", "uuid");
 	}
 
-	@GetMapping("/j/{inviationCode}/{day}/edit/finish")
+	@GetMapping("/{inviationCode}/{day}/edit/finish")
 	@Operation(summary = "편집자 해제")
 	@ApiResponse(responseCode = "200", description = "편집자 목록에서 제거", content = {
 		@Content(mediaType = "application/json",
@@ -256,7 +255,7 @@ public class PlanJController {
 		);
 	}
 
-	@GetMapping("/j/show/editors")
+	@GetMapping("/show/editors")
 	@Operation(summary = "플랜j editor권한 목록")
 	@ApiResponse(responseCode = "200", description = "플랜j editor권한 목록")
 	public ResponseEntity<?> showEditors() {
