@@ -1,8 +1,11 @@
 package com.ll.trip.domain.trip.scrap.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.trip.scrap.dto.ScrapListDto;
 import com.ll.trip.domain.trip.scrap.entity.Scrap;
 import com.ll.trip.domain.trip.scrap.entity.ScrapBookmark;
 import com.ll.trip.domain.trip.scrap.repository.ScrapBookmarkRepository;
@@ -24,13 +27,13 @@ public class ScrapService {
 	private final EntityManager entityManager;
 
 	@Transactional
-	public Scrap createScrap(long userId, Trip trip, String title, String content, String color, boolean hasImage) {
+	public Scrap createScrap(String uuid, Trip trip, String title, String content, String color, boolean hasImage) {
 		String preview = createPreviewContent(content);
 
 		Scrap scrap = Scrap.builder()
-			.user(entityManager.getReference(UserEntity.class, userId))
+			.writerUuid(uuid)
 			.trip(trip)
-			.previewContent(preview)
+			.preview(preview)
 			.title(title)
 			.content(content)
 			.hasImage(hasImage)
@@ -88,5 +91,34 @@ public class ScrapService {
 	public boolean getIsToggleByUserIdAndScrapId(long userId, long scrapId) {
 		return scrapBookmarkRepository.getIsToggleByUserIdAndScrapId(userId, scrapId)
 			.orElseThrow(NullPointerException::new);
+	}
+
+	public List<ScrapListDto> findAllByTripIdAndUserId(long tripId, long userId) {
+		return scrapRepository.findListByTripId(tripId, userId);
+	}
+
+	public List<ScrapListDto> findAllBookmarkByTripIdAndUserId(long tripId, Long userId) {
+		return scrapRepository.findBookmarkListByTripId(tripId, userId);
+	}
+
+	public boolean existByScrapIdAndUuid(long scrapId, String uuid) {
+		return scrapRepository.existsByIdAndWriterUuid(scrapId, uuid);
+	}
+
+	@Transactional
+	public Scrap modifyScrap(long scrapId, String title, String content, String color, boolean hasImage) {
+		Scrap scrap = entityManager.getReference(Scrap.class, scrapId);
+		scrap.setTitle(title);
+		scrap.setContent(content);
+		scrap.setPreview(createPreviewContent(content));
+		scrap.setHasImage(hasImage);
+		scrap.setColor(color);
+
+		return scrapRepository.save(scrap);
+	}
+
+	@Transactional
+	public void deleteById(long scrapId) {
+		scrapRepository.deleteById(scrapId);
 	}
 }

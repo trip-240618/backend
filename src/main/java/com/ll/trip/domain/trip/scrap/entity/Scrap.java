@@ -3,7 +3,6 @@ package com.ll.trip.domain.trip.scrap.entity;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.ll.trip.domain.trip.trip.entity.Trip;
-import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.global.base.entity.BaseEntity;
 
 import jakarta.persistence.Entity;
@@ -19,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -36,21 +36,23 @@ public class Scrap extends BaseEntity {
 	@JoinColumn(name = "trip_id")
 	private Trip trip;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id")
-	private UserEntity user;
+	private String writerUuid;
 
 	@NotBlank
+	@Setter
 	private String title;
 
 	@NotBlank
 	@Lob
+	@Setter
 	private String content;
 
-	private String previewContent;
+	@Setter
+	private String preview;
 
+	@Setter
 	private boolean hasImage;
 
+	@Setter
 	private String color;
-
 }

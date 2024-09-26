@@ -1,7 +1,5 @@
 package com.ll.trip.domain.trip.scrap.dto;
 
-import java.time.LocalDateTime;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
@@ -12,16 +10,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScrapListDto {
+public class ScrapModifyDto {
 	@Schema(
-		description = "스크랩의 pk",
+		description = "스크랩 pk",
 		example = "1")
 	private long id;
-
-	@Schema(
-		description = "uuid",
-		example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4")
-	private String writerUuid;
 
 	@NotBlank
 	@Schema(
@@ -32,9 +25,9 @@ public class ScrapListDto {
 	@Lob
 	@NotBlank
 	@Schema(
-		description = "스크랩 미리보기 내용",
+		description = "스크랩 내용",
 		example = "십..자가..")
-	private String preview;
+	private String content;
 
 	@Schema(
 		description = "사진포함 여부",
@@ -47,12 +40,7 @@ public class ScrapListDto {
 	private String color;
 
 	@Schema(
-		description = "북마크 여부",
+		description = "수정x 응답에 북마크 조인시키기 싫어서 만듬",
 		example = "true")
 	private boolean bookmark;
-
-	@Schema(
-		description = "생성 날짜",
-		example = "2024-08-22T14:05")
-	private LocalDateTime createDate;
 }
