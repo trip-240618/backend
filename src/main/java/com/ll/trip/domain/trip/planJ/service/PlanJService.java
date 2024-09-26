@@ -1,11 +1,11 @@
 package com.ll.trip.domain.trip.planJ.service;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.trip.location.service.LocationService;
 import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJModifyRequestDto;
@@ -21,8 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class PlanJService {
 
 	private final PlanJRepository planJRepository;
-	private final LocationService locationService;
-	private final PlanJEditService planJEditService;
 
 	@Transactional
 	public void deletePlanJById(Long planId) {
@@ -31,12 +29,14 @@ public class PlanJService {
 
 	@Transactional
 	public PlanJ createPlan(Trip trip, PlanJCreateRequestDto requestDto, int order, String uuid) {
+		LocalTime startTime = requestDto.getStartTime();
 
 		PlanJ plan = PlanJ.builder()
 			.trip(trip)
 			.dayAfterStart(requestDto.getDayAfterStart())
 			.orderByDate(order)
 			.writerUuid(uuid)
+			.startTime(startTime == null ? LocalTime.now() : startTime)
 			.latitude(requestDto.getLatitude())
 			.longitude(requestDto.getLongitude())
 			.memo(requestDto.getMemo())
@@ -56,7 +56,7 @@ public class PlanJService {
 	}
 
 	public List<PlanJInfoDto> findAllPlanBByTripId(long tripId) {
-		return planJRepository.findAllPlanBByTripIdAndDay(tripId,true);
+		return planJRepository.findAllPlanBByTripIdAndDay(tripId, true);
 	}
 
 	@Transactional

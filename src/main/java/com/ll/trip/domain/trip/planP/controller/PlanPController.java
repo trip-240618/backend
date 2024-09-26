@@ -197,7 +197,7 @@ public class PlanPController {
 			}
 		)})
 	public PlanResponseBody<String> addEditor(
-		@PathVariable String invitationCode
+		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode
 	) {
 		return new PlanResponseBody<>("edit start", "uuid");
 	}
@@ -211,7 +211,7 @@ public class PlanPController {
 			}
 		)})
 	public PlanResponseBody<String> removeEditor(
-		@PathVariable String invitationCode,
+		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
 		planPEditService.removeEditor(invitationCode, securityUser.getUuid());
@@ -228,7 +228,7 @@ public class PlanPController {
 			schema = @Schema(implementation = PlanPMoveDto.class)
 		)})
 	public ResponseEntity<?> movePlanP(
-		@PathVariable String invitationCode,
+		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestBody PlanPMoveDto moveDto
 	) {
@@ -246,7 +246,7 @@ public class PlanPController {
 
 	@PutMapping("/{invitationCode}/locker/move")
 	public ResponseEntity<?> moveByLocker(
-		@PathVariable String invitationCode,
+		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
 		@RequestBody PlanPLockerDto lockerDto
 	) {
 		Trip trip = tripService.findByInvitationCode(invitationCode);

@@ -47,6 +47,8 @@ public class Scrap extends BaseEntity {
 	@Lob
 	private String content;
 
+	private String previewContent;
+
 	private boolean hasImage;
 
 	private String color;

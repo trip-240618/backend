@@ -40,6 +40,10 @@ public class TripService {
 	private final BookmarkRepository bookmarkRepository;
 	private final UserRepository userRepository;
 
+	public Long getTripIdByInvitationCode(String invitationCode){
+		return tripRepository.getTripIdByInvitationCode(invitationCode).orElseThrow(NullPointerException::new);
+	}
+
 	@Transactional
 	public Trip createTrip(TripCreateDto tripCreateDto, String invitationCode) {
 		Trip trip = Trip.builder()
@@ -53,7 +57,7 @@ public class TripService {
 			.labelColor(tripCreateDto.getLabelColor())
 			.build();
 
-		return trip = tripRepository.save(trip);
+		return tripRepository.save(trip);
 	}
 
 	public String generateInvitationCode() {
@@ -100,7 +104,7 @@ public class TripService {
 	public List<TripInfoDto> findAllByUserId(Long userId, LocalDate date, String type, String sortDirection,
 		String sortField) {
 
-		return tripRepository.findTripInfosWithDynamicSort(userId, LocalDate.now(), sortField, sortDirection, type);
+		return tripRepository.findTripInfosWithDynamicSort(userId, date, sortField, sortDirection, type);
 	}
 
 	public void fillTripMemberToTripInfo(List<TripInfoDto> tripInfoDtoList) {
@@ -158,6 +162,8 @@ public class TripService {
 				.user(user)
 				.toggle(true)
 				.build();
+
+			bookmarkRepository.save(bookmark);
 
 			return true;
 		}

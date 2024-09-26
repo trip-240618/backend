@@ -1,5 +1,7 @@
 package com.ll.trip.domain.trip.scrap.dto;
 
+import java.time.LocalDateTime;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
@@ -48,4 +50,9 @@ public class ScrapDetailDto {
 		description = "북마크 여부",
 		example = "true")
 	private boolean bookmark;
+
+	@Schema(
+		description = "생성 날짜",
+		example = "2024-08-22T14:05")
+	private LocalDateTime createDate;
 }

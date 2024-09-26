@@ -91,7 +91,7 @@ public class PlanJController {
 		@RequestParam @Parameter(description = "보관함 여부", example = "false") boolean locker
 	) {
 		Trip trip = tripService.findByInvitationCode(invitationCode);
-		List<PlanJInfoDto> response = null;
+		List<PlanJInfoDto> response;
 		if (!locker)
 			response = planJService.findAllPlanAByTripIdAndDay(trip.getId(), day);
 		else
@@ -243,7 +243,7 @@ public class PlanJController {
 			schema = @Schema(implementation = PlanJEditorRegisterDto.class))})
 	public void removeEditor(
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@PathVariable String invitationCode,
+		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
 		@PathVariable int day
 	) {
 		String username = securityUser.getUuid();
