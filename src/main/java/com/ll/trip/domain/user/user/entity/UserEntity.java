@@ -12,7 +12,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import com.ll.trip.domain.alarm.alarm.entity.Notification;
 import com.ll.trip.domain.trip.history.entity.History;
 import com.ll.trip.domain.trip.history.entity.HistoryReply;
-import com.ll.trip.domain.trip.scrap.entity.Scrap;
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
 import com.ll.trip.domain.trip.trip.entity.TripMember;
 import com.ll.trip.domain.user.mypage.entity.NotificationConfig;
@@ -96,10 +95,6 @@ public class UserEntity extends BaseEntity {
 	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<TripMember> tripMembers = new ArrayList<>();
-
-	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
-	@Builder.Default
-	private List<Scrap> scraps = new ArrayList<>();
 
 	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
