@@ -68,7 +68,7 @@ public class ScrapController {
 		));
 	}
 
-	@PostMapping("/{tripId}/scrap/modify")
+	@PutMapping("/{tripId}/scrap/modify")
 	@Operation(summary = "스크랩 수정")
 	@ApiResponse(responseCode = "200", description = "스크랩 수정", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = ScrapDetailDto.class))})
@@ -112,7 +112,7 @@ public class ScrapController {
 		return ResponseEntity.ok("deleted");
 	}
 
-	@PutMapping("/{tripId}/scrap/bookmark/toggle")
+	@PostMapping("/{tripId}/scrap/bookmark/toggle")
 	@Operation(summary = "스크랩 생성")
 	@ApiResponse(responseCode = "200", description = "스크랩 생성", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = Boolean.class))})

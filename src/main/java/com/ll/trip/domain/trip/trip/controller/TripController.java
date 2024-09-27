@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -132,7 +134,7 @@ public class TripController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/delete")
+	@DeleteMapping("/delete")
 	@Operation(summary = "Trip 삭제")
 	@ApiResponse(responseCode = "200", description = "Trip 삭제")
 	public ResponseEntity<?> deleteTrip(
@@ -152,7 +154,7 @@ public class TripController {
 		return ResponseEntity.ok("deleted");
 	}
 
-	@PostMapping("/modify")
+	@PutMapping("/modify")
 	@Operation(summary = "Trip 수정")
 	@ApiResponse(responseCode = "200", description = "Trip 수정", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = TripInfoDto.class))})
@@ -169,7 +171,7 @@ public class TripController {
 	}
 
 	//북마크
-	@PostMapping("/bookmark/toggle")
+	@PutMapping("/bookmark/toggle")
 	@Operation(summary = "Trip 북마크 토글")
 	@ApiResponse(responseCode = "200", description = "Trip 북마크 토글", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = Boolean.class))})

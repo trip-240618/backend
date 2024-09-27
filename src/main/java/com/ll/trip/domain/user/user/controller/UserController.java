@@ -3,7 +3,6 @@ package com.ll.trip.domain.user.user.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,7 +48,7 @@ public class UserController {
 		return ResponseEntity.ok(userInfoDto);
 	}
 
-	@PostMapping("/modify")
+	@PutMapping("/modify")
 	@Operation(summary = "유저 정보 수정")
 	@ApiResponse(responseCode = "200", description = "유저정보 수정", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
@@ -67,9 +66,9 @@ public class UserController {
 		return ResponseEntity.ok(userInfoDto);
 	}
 
-	@PostMapping("/register")
-	@Operation(summary = "유저 정보 수정")
-	@ApiResponse(responseCode = "200", description = "유저정보 수정", content = {
+	@PutMapping("/register")
+	@Operation(summary = "회원가입시 정보 기입")
+	@ApiResponse(responseCode = "200", description = "UserInfo의 type이 register일 때 요청", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
 	public ResponseEntity<?> registerUserInfo(
 		@AuthenticationPrincipal SecurityUser securityUser,

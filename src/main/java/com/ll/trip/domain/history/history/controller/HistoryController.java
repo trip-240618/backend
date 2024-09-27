@@ -112,6 +112,10 @@ public class HistoryController {
 	}
 
 	@DeleteMapping("/{tripId}/history/delete/{historyId}")
+	@Operation(summary = "History 삭제")
+	@ApiResponse(responseCode = "200", description = "History 삭제", content = {
+		@Content(mediaType = "application/json",
+			schema = @Schema(implementation = String.class))})
 	public ResponseEntity<?> deleteHistory(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@PathVariable @Parameter(description = "히스토리 id", example = "1", in = ParameterIn.PATH) long historyId,
@@ -126,6 +130,10 @@ public class HistoryController {
 	}
 
 	@GetMapping("/{tripId}/history/detail/{historyId}")
+	@Operation(summary = "History 상세")
+	@ApiResponse(responseCode = "200", description = "History 상세", content = {
+		@Content(mediaType = "application/json",
+			schema = @Schema(implementation = HistoryDetailDto.class))})
 	public ResponseEntity<?> showHistoryDetail(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@PathVariable @Parameter(description = "히스토리 id", example = "1", in = ParameterIn.PATH) long historyId,
@@ -162,7 +170,7 @@ public class HistoryController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PostMapping("/{tripId}/history/{historyId}/reply/delete")
+	@DeleteMapping("/{tripId}/history/{historyId}/reply/delete")
 	@Operation(summary = "History 댓글 삭제")
 	@ApiResponse(responseCode = "200", description = "History 댓글 삭제 후 댓글목록 반환", content = {
 		@Content(mediaType = "application/json",
@@ -201,7 +209,7 @@ public class HistoryController {
 		return ResponseEntity.ok(toggle);
 	}
 
-	@GetMapping("/{tripId}/history/{historyId}/tag/create")
+	@PostMapping("/{tripId}/history/{historyId}/tag/create")
 	@Operation(summary = "History 태그 생성")
 	@ApiResponse(responseCode = "200", description = "History 태그 생성", content = {
 		@Content(mediaType = "application/json",
@@ -222,11 +230,11 @@ public class HistoryController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/{tripId}/history/{historyId}/tag/delete")
-	@Operation(summary = "History 태그 생성")
-	@ApiResponse(responseCode = "200", description = "History 태그 생성", content = {
+	@DeleteMapping("/{tripId}/history/{historyId}/tag/delete")
+	@Operation(summary = "History 태그 삭제")
+	@ApiResponse(responseCode = "200", description = "History 태그 삭제", content = {
 		@Content(mediaType = "application/json",
-			schema = @Schema(implementation = HistoryTagDto.class))})
+			schema = @Schema(implementation = String.class))})
 	public ResponseEntity<?> deleteHistoryTag(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@PathVariable @Parameter(description = "히스토리 id", example = "1", in = ParameterIn.PATH) long historyId,

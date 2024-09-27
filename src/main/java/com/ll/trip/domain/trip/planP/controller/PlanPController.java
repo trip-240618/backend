@@ -249,6 +249,16 @@ public class PlanPController {
 	}
 
 	@PutMapping("/{tripId}/locker/move")
+	@Operation(summary = "Plan P 보관함으로 이동 또는 일정으로 이동")
+	@ApiResponse(responseCode = "200", description = "http응답은 \"moved\""
+		, content = {
+		@Content(mediaType = "application/json",
+			examples = {
+				@ExampleObject(description = "보관함으로 이동", value = "{\"command\": \"locker in\", \"data\": PlanPMoveDto}"),
+				@ExampleObject(description = "일정으로 이동", value = "{\"command\": \"locker out\", \"data\": PlanPMoveDto}")
+			},
+			schema = @Schema(implementation = PlanPLockerDto.class)
+		)})
 	public ResponseEntity<?> moveByLocker(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody PlanPLockerDto lockerDto
