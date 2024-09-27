@@ -13,6 +13,7 @@ import com.ll.trip.domain.trip.planP.entity.PlanP;
 import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -21,9 +22,11 @@ import lombok.RequiredArgsConstructor;
 public class PlanPService {
 
 	private final PlanPRepository planPRepository;
+	private final EntityManager entityManager;
 
 	@Transactional
-	public PlanP createPlanP(Trip trip, PlanPCreateRequestDto requestDto, String uuid) {
+	public PlanP createPlanP(long tripId, PlanPCreateRequestDto requestDto, String uuid) {
+		Trip trip = entityManager.getReference(Trip.class, tripId);
 
 		PlanP plan = PlanP.builder()
 			.trip(trip)

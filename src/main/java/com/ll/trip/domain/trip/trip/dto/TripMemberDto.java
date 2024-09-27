@@ -1,5 +1,8 @@
 package com.ll.trip.domain.trip.trip.dto;
 
+import com.ll.trip.domain.trip.trip.entity.TripMember;
+import com.ll.trip.domain.user.user.entity.UserEntity;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,4 +36,13 @@ public class TripMemberDto {
 		description = "방장여부",
 		example = "true")
 	private boolean isLeader;
+
+	public TripMemberDto(TripMember tripMember) {
+		UserEntity user = tripMember.getUser();
+		this.uuid = user.getUuid();
+		this.nickname = user.getNickname();
+		this.thumbnail = user.getThumbnail();
+		this.profileImg = user.getProfileImg();
+		this.isLeader = tripMember.isLeader();
+	}
 }

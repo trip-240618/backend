@@ -9,7 +9,6 @@ import com.ll.trip.domain.flight.dto.ScheduleResponseDto;
 import com.ll.trip.domain.flight.entity.Flight;
 
 public interface FlightRepository extends JpaRepository<Flight, Long> {
-
 	@Query("""
 		select new com.ll.trip.domain.flight.dto.ScheduleResponseDto(
 			f.airlineCode,
@@ -21,7 +20,7 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
 			f.arrivalAirport,
 			f.arrivalAirport_kr
 		) from Flight f
-		where f.trip.invitationCode =:invitationCode
+		where f.trip.id =:tripId
 		""")
-	List<ScheduleResponseDto> findByInvitationCode(String invitationCode);
+	List<ScheduleResponseDto> findByTrip_Id(long tripId);
 }

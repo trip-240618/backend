@@ -19,7 +19,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.ll.trip.domain.user.jwt.JwtAuthenticationFilter;
 import com.ll.trip.domain.user.jwt.JwtTokenUtil;
-import com.ll.trip.global.security.service.UserDetailsServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 public class SpringSecurityConfig {
 
 	private final JwtTokenUtil jwtTokenUtil;
-	private final UserDetailsServiceImpl userDetailsService;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

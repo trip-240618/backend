@@ -1,11 +1,11 @@
-package com.ll.trip.domain.trip.history.repository;
+package com.ll.trip.domain.history.history.repository;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.ll.trip.domain.trip.history.entity.History;
+import com.ll.trip.domain.history.history.entity.History;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 
 public interface HistoryRepository extends JpaRepository<History, Long> {
@@ -13,8 +13,8 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 	@Query("""
 		    SELECT DISTINCT h
 		    FROM History h
-		    JOIN FETCH h.user u
-		    LEFT JOIN FETCH h.historyTags ht
+		    JOIN fetch h.user u
+		    LEFT JOIN fetch h.historyTags ht
 		    WHERE h.trip.id = :tripId
 		    ORDER BY ht.id ASC
 		""")
@@ -25,9 +25,9 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 	@Query("""
 		    SELECT DISTINCT h
 		    FROM History h
-		    JOIN FETCH h.user u
-		    LEFT JOIN FETCH h.historyTags ht
-		    LEFT JOIN FETCH h.historyReplies hr
+		    JOIN fetch h.user u
+		    LEFT JOIN fetch h.historyTags ht
+		    LEFT JOIN fetch h.historyReplies hr
 		    WHERE h.id = :historyId
 		    ORDER BY ht.id ASC, hr.createDate asc
 		""")
@@ -41,9 +41,9 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 	boolean existsByHistoryIdAndUserId(long historyId, long userId);
 
 	@Query("""
-  		update History h
-  		set h.likeCnt = h.likeCnt + :i
-  		where h.id = :historyId
-		""")
+			update History h
+		 	set h.likeCnt = h.likeCnt + :i
+		 	where h.id = :historyId
+	""")
 	int updateLikeCntById(long historyId, int i);
 }

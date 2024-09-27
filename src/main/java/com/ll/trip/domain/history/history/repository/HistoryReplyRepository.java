@@ -1,17 +1,17 @@
-package com.ll.trip.domain.trip.history.repository;
+package com.ll.trip.domain.history.history.repository;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.ll.trip.domain.trip.history.dto.HistoryReplyDto;
-import com.ll.trip.domain.trip.history.entity.HistoryReply;
+import com.ll.trip.domain.history.history.entity.HistoryReply;
+import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
 
 public interface HistoryReplyRepository extends JpaRepository<HistoryReply, Long> {
 
 	@Query("""
-		select new com.ll.trip.domain.trip.history.dto.HistoryReplyDto(
+		select new com.ll.trip.domain.history.history.dto.HistoryReplyDto(
 			r.id,
 			r.writerUuid,
 			r.createDate,

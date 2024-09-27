@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.history.entity;
+package com.ll.trip.domain.history.history.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

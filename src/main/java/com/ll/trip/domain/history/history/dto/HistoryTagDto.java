@@ -1,6 +1,6 @@
-package com.ll.trip.domain.trip.history.dto;
+package com.ll.trip.domain.history.history.dto;
 
-import com.ll.trip.domain.trip.history.entity.HistoryTag;
+import com.ll.trip.domain.history.history.entity.HistoryTag;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

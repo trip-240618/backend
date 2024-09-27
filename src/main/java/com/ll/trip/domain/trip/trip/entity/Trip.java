@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.ll.trip.domain.trip.history.entity.History;
-import com.ll.trip.domain.trip.history.entity.HistoryTag;
+import com.ll.trip.domain.history.history.entity.History;
+import com.ll.trip.domain.history.history.entity.HistoryTag;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
 import com.ll.trip.domain.trip.scrap.entity.Scrap;

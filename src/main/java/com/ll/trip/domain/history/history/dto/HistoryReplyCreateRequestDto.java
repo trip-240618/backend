@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.history.dto;
+package com.ll.trip.domain.history.history.dto;
 
 import lombok.Data;
 

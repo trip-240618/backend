@@ -27,12 +27,12 @@ public class ScrapService {
 	private final EntityManager entityManager;
 
 	@Transactional
-	public Scrap createScrap(String uuid, Trip trip, String title, String content, String color, boolean hasImage) {
+	public Scrap createScrap(String uuid, long tripId, String title, String content, String color, boolean hasImage) {
 		String preview = createPreviewContent(content);
 
 		Scrap scrap = Scrap.builder()
 			.writerUuid(uuid)
-			.trip(trip)
+			.trip(entityManager.getReference(Trip.class, tripId))
 			.preview(preview)
 			.title(title)
 			.content(content)

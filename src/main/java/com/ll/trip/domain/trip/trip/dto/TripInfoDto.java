@@ -52,7 +52,7 @@ public class TripInfoDto {
 
 	@Schema(
 		description = "초대코드",
-		example = "일본")
+		example = "1A2B3C4D")
 	private String invitationCode;
 
 	@Schema(
@@ -80,19 +80,6 @@ public class TripInfoDto {
 		this.thumbnail = trip.getThumbnail();
 		this.labelColor = trip.getLabelColor();
 		this.bookmark = false;
-	}
-
-	public TripInfoDto(long id, String name, char type, LocalDate startDate, LocalDate endDate, String country, String thumbnail,
-		String invitationCode, String labelColor, boolean bookmark) {
-		this.id = id;
-		this.name = name;
-		this.type = type;
-		this.startDate = startDate;
-		this.endDate = endDate;
-		this.country = country;
-		this.thumbnail = thumbnail;
-		this.invitationCode = invitationCode;
-		this.labelColor = labelColor;
-		this.bookmark = bookmark;
+		this.tripMemberDtoList = trip.getTripMembers().stream().map(TripMemberDto::new).toList();
 	}
 }

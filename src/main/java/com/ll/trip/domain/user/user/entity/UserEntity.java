@@ -10,8 +10,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.ll.trip.domain.alarm.alarm.entity.Notification;
-import com.ll.trip.domain.trip.history.entity.History;
-import com.ll.trip.domain.trip.history.entity.HistoryReply;
+import com.ll.trip.domain.history.history.entity.History;
+import com.ll.trip.domain.history.history.entity.HistoryReply;
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
 import com.ll.trip.domain.trip.trip.entity.TripMember;
 import com.ll.trip.domain.user.mypage.entity.NotificationConfig;

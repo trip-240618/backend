@@ -57,8 +57,8 @@ public class fileController {
 		if (requestBody.getUrls() == null)
 			return ResponseEntity.badRequest().body("null");
 
-		List<String> urls = awsAuthService.abstractUrlFromPresignedUrl(requestBody.getUrls());
-		List<String> keys = awsAuthService.abstractKeyFromUrl(urls);
+		List<String> urls = awsAuthService.extractUrlFromPresignedUrl(requestBody.getUrls());
+		List<String> keys = awsAuthService.extractKeyFromUrl(urls);
 		awsAuthService.deleteObjectByKey(keys);
 
 		return ResponseEntity.ok("deleted");

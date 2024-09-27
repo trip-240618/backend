@@ -13,6 +13,7 @@ import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.repository.PlanJRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class PlanJService {
 
 	private final PlanJRepository planJRepository;
+	private final EntityManager entityManager;
 
 	@Transactional
 	public void deletePlanJById(Long planId) {
@@ -28,7 +30,8 @@ public class PlanJService {
 	}
 
 	@Transactional
-	public PlanJ createPlan(Trip trip, PlanJCreateRequestDto requestDto, int order, String uuid) {
+	public PlanJ createPlan(long tripId, PlanJCreateRequestDto requestDto, int order, String uuid) {
+		Trip trip = entityManager.getReference(Trip.class, tripId);
 		LocalTime startTime = requestDto.getStartTime();
 
 		PlanJ plan = PlanJ.builder()

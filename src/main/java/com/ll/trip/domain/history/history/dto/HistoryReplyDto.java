@@ -1,8 +1,8 @@
-package com.ll.trip.domain.trip.history.dto;
+package com.ll.trip.domain.history.history.dto;
 
 import java.time.LocalDateTime;
 
-import com.ll.trip.domain.trip.history.entity.HistoryReply;
+import com.ll.trip.domain.history.history.entity.HistoryReply;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

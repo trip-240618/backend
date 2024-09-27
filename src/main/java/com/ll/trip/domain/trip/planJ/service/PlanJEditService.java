@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class PlanJEditService {
 	private final PlanJRepository planJRepository;
 	@Getter
-	private final ConcurrentHashMap<String, ConcurrentHashMap<String, Integer>> activeEditTopicsAndUuidAndDay = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<Long, ConcurrentHashMap<String, Integer>> activeEditTopicsAndUuidAndDay = new ConcurrentHashMap<>();
 	private final SimpMessagingTemplate template;
 	private final String TOPIC_PREFIX = "/topic/api/trip/j/";
 
@@ -32,8 +32,8 @@ public class PlanJEditService {
 		return order + 1;
 	}
 
-	public String getEditorByInvitationCodeAndDay(String invitationCode, int day) {
-		ConcurrentHashMap<String, Integer> map = activeEditTopicsAndUuidAndDay.getOrDefault(invitationCode, null);
+	public String getEditorByTripIdAndDay(Long tripId, int day) {
+		ConcurrentHashMap<String, Integer> map = activeEditTopicsAndUuidAndDay.getOrDefault(tripId, null);
 
 		if (map == null)
 			return null;
@@ -46,18 +46,18 @@ public class PlanJEditService {
 			.orElse(null);
 	}
 
-	public void addEditor(String invitationCode, String uuid, int day) {
-		if (!activeEditTopicsAndUuidAndDay.containsKey(invitationCode)) {
-			activeEditTopicsAndUuidAndDay.put(invitationCode, new ConcurrentHashMap<>());
+	public void addEditor(long tripId, String uuid, int day) {
+		if (!activeEditTopicsAndUuidAndDay.containsKey(tripId)) {
+			activeEditTopicsAndUuidAndDay.put(tripId, new ConcurrentHashMap<>());
 		}
 
-		activeEditTopicsAndUuidAndDay.get(invitationCode).put(uuid, day);
+		activeEditTopicsAndUuidAndDay.get(tripId).put(uuid, day);
 	}
 
-	public boolean isEditor(String invitationCode, String uuid, int day) {
-		if (!activeEditTopicsAndUuidAndDay.containsKey(invitationCode))
+	public boolean isEditor(long tripId, String uuid, int day) {
+		if (!activeEditTopicsAndUuidAndDay.containsKey(tripId))
 			return false;
-		return activeEditTopicsAndUuidAndDay.get(invitationCode).get(uuid) == day;
+		return activeEditTopicsAndUuidAndDay.get(tripId).get(uuid) == day;
 	}
 
 	@Transactional
@@ -74,14 +74,14 @@ public class PlanJEditService {
 			   planJRepository.updateStartTimeAndOrder(planId2, startTime1, order1);
 	}
 
-	public void editorClosedSubscription(String invitationCode, String uuid) {
-		ConcurrentHashMap<String, Integer> map = activeEditTopicsAndUuidAndDay.getOrDefault(invitationCode, null);
+	public void editorClosedSubscription(long tripId, String uuid) {
+		ConcurrentHashMap<String, Integer> map = activeEditTopicsAndUuidAndDay.getOrDefault(tripId, null);
 		map.remove(uuid);
-		template.convertAndSend(TOPIC_PREFIX + invitationCode, new PlanResponseBody<>("edit finish", uuid));
+		template.convertAndSend(TOPIC_PREFIX + tripId, new PlanResponseBody<>("edit finish", uuid));
 	}
 
-	public void removeEditor(String invitationCode, int day, String uuid) {
-		ConcurrentHashMap<String, Integer> map = activeEditTopicsAndUuidAndDay.getOrDefault(invitationCode, null);
+	public void removeEditor(long tripId, int day, String uuid) {
+		ConcurrentHashMap<String, Integer> map = activeEditTopicsAndUuidAndDay.getOrDefault(tripId, null);
 		map.remove(uuid, day);
 	}
 }

@@ -42,7 +42,7 @@ public class AwsAuthService {
 		return new PreSignedUrlResponseDto(preSignedUrls);
 	}
 
-	public List<String> abstractUrlFromPresignedUrl(List<String> presignedUrls) {
+	public List<String> extractUrlFromPresignedUrl(List<String> presignedUrls) {
 		List<String> abstractedUrls = new ArrayList<>();
 
 		StringTokenizer st;
@@ -55,16 +55,16 @@ public class AwsAuthService {
 		return abstractedUrls;
 	}
 
-	public List<String> abstractKeyFromUrl(List<String> urls) {
-		List<String> abstractedKeys = new ArrayList<>();
+	public List<String> extractKeyFromUrl(List<String> urls) {
+		List<String> extractedKeys = new ArrayList<>();
 
 		String postRemoveString = "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/";
 
 		for (String url : urls) {
-			abstractedKeys.add(url.replace(postRemoveString, ""));
+			extractedKeys.add(url.replace(postRemoveString, ""));
 		}
 
-		return abstractedKeys;
+		return extractedKeys;
 	}
 
 	@Transactional // 트랜잭션 처리

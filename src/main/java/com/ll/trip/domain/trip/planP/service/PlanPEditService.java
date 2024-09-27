@@ -21,24 +21,25 @@ public class PlanPEditService {
 
 	private final String TOPIC_PREFIX = "/topic/api/trip/p/";
 	@Getter
-	private final ConcurrentHashMap<String, String> activeEditTopicsAndUuid = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<Long, String> activeEditTopicsAndUuid = new ConcurrentHashMap<>();
 	private final SimpMessagingTemplate template;
 
-	public void editorClosedSubscription(String invitationCode, String username) {
-		if (activeEditTopicsAndUuid.contains(invitationCode) &&
-			activeEditTopicsAndUuid.get(invitationCode).equals(username)) {
-			activeEditTopicsAndUuid.remove(invitationCode);
+	public void editorClosedSubscription(long tripId, String username) {
+		String uuid = activeEditTopicsAndUuid.getOrDefault(tripId, null);
 
-			template.convertAndSend(TOPIC_PREFIX + invitationCode, new PlanResponseBody<>("edit finish", username));
+		if (uuid != null && uuid.equals(username)) {
+			activeEditTopicsAndUuid.remove(tripId);
+
+			template.convertAndSend(TOPIC_PREFIX + tripId, new PlanResponseBody<>("edit finish", username));
 		}
 	}
 
-	public void addEditor(String invitationCode, String username) {
-		activeEditTopicsAndUuid.put(invitationCode, username);
+	public void addEditor(long tripId, String username) {
+		activeEditTopicsAndUuid.put(tripId, username);
 	}
 
-	public String getEditorByInvitationCode(String invitationCode) {
-		return activeEditTopicsAndUuid.getOrDefault(invitationCode, null);
+	public String getEditorByTripId(long tripId) {
+		return activeEditTopicsAndUuid.getOrDefault(tripId, null);
 	}
 
 	@Transactional
@@ -77,11 +78,11 @@ public class PlanPEditService {
 		return updated;
 	}
 
-	public boolean isEditor(String invitationCode, String uuid) {
-		return activeEditTopicsAndUuid.get(invitationCode).equals(uuid);
+	public boolean isEditor(long tripId, String uuid) {
+		return activeEditTopicsAndUuid.get(tripId).equals(uuid);
 	}
 
-	public void removeEditor(String invitationCode, String uuid) {
-		this.activeEditTopicsAndUuid.remove(invitationCode, uuid);
+	public void removeEditor(long tripId, String uuid) {
+		this.activeEditTopicsAndUuid.remove(tripId, uuid);
 	}
 }

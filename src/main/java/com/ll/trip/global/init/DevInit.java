@@ -11,10 +11,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.trip.history.dto.HistoryCreateRequestDto;
-import com.ll.trip.domain.trip.history.dto.HistoryTagDto;
-import com.ll.trip.domain.trip.history.repository.HistoryRepository;
-import com.ll.trip.domain.trip.history.service.HistoryService;
+import com.ll.trip.domain.history.history.dto.HistoryCreateRequestDto;
+import com.ll.trip.domain.history.history.dto.HistoryTagDto;
+import com.ll.trip.domain.history.history.repository.HistoryRepository;
+import com.ll.trip.domain.history.history.service.HistoryService;
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.repository.TripMemberRepository;

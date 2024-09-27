@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.history.entity;
+package com.ll.trip.domain.history.history.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,6 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -72,5 +73,6 @@ public class History extends BaseEntity {
 
 	@OneToMany(mappedBy = "history",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
+	@Setter
 	private List<HistoryTag> historyTags = new ArrayList<>();
 }

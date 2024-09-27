@@ -20,7 +20,6 @@ import com.ll.trip.domain.trip.scrap.dto.ScrapListDto;
 import com.ll.trip.domain.trip.scrap.dto.ScrapModifyDto;
 import com.ll.trip.domain.trip.scrap.entity.Scrap;
 import com.ll.trip.domain.trip.scrap.service.ScrapService;
-import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.service.TripService;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
@@ -45,22 +44,20 @@ public class ScrapController {
 	private final ScrapService scrapService;
 	private final TripService tripService;
 
-	@PostMapping("/{invitationCode}/scrap/create")
+	@PostMapping("/{tripId}/scrap/create")
 	@Operation(summary = "스크랩 생성")
 	@ApiResponse(responseCode = "200", description = "스크랩 생성", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = ScrapDetailDto.class))})
 	public ResponseEntity<?> createScrap(
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody ScrapCreateDto scrapCreateDto
 	) {
-		Trip trip = tripService.findByInvitationCode(invitationCode);
-
-		if (!tripService.existTripMemberByTripIdAndUserId(trip.getId(), securityUser.getId()))
+		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
 			return ResponseEntity.badRequest().body("해당 여행방에 대한 권한이 없습니다.");
 
 		Scrap scrap = scrapService.createScrap(
-			securityUser.getUuid(), trip, scrapCreateDto.getTitle(), scrapCreateDto.getContent(),
+			securityUser.getUuid(), tripId, scrapCreateDto.getTitle(), scrapCreateDto.getContent(),
 			scrapCreateDto.getColor(), scrapCreateDto.isHasImage()
 		);
 
@@ -71,13 +68,13 @@ public class ScrapController {
 		));
 	}
 
-	@PostMapping("/{invitationCode}/scrap/modify")
+	@PostMapping("/{tripId}/scrap/modify")
 	@Operation(summary = "스크랩 수정")
 	@ApiResponse(responseCode = "200", description = "스크랩 수정", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = ScrapDetailDto.class))})
 	public ResponseEntity<?> modifyScrap(
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody ScrapModifyDto modifyDto
 	) {
 		if (!scrapService.existByScrapIdAndUuid(modifyDto.getId(), securityUser.getUuid()))
@@ -95,7 +92,7 @@ public class ScrapController {
 		));
 	}
 
-	@DeleteMapping("/{invitationCode}/scrap/delete")
+	@DeleteMapping("/{tripId}/scrap/delete")
 	@Operation(summary = "스크랩 삭제")
 	@ApiResponse(responseCode = "200", description = "스크랩 삭제",
 		content = {
@@ -103,7 +100,7 @@ public class ScrapController {
 				examples = {@ExampleObject(name = "삭제 완료시 응답", value = "{\"deleted\"")})})
 	public ResponseEntity<?> deleteScrap(
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam @Parameter(description = "스크랩 pk", example = "1")
 		long scrapId
 	) {
@@ -115,18 +112,17 @@ public class ScrapController {
 		return ResponseEntity.ok("deleted");
 	}
 
-	@PutMapping("/{invitationCode}/scrap/bookmark/toggle")
+	@PutMapping("/{tripId}/scrap/bookmark/toggle")
 	@Operation(summary = "스크랩 생성")
 	@ApiResponse(responseCode = "200", description = "스크랩 생성", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = Boolean.class))})
 	public ResponseEntity<?> toggleBookmark(
-		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam @Parameter(description = "토글할 스크랩 pk", example = "1") long scrapId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
 		int update = scrapService.toggleScrapBookmark(securityUser.getId(), scrapId);
 		if (update == 0) {
-			long tripId = tripService.getTripIdByInvitationCode(invitationCode);
 			scrapService.createScrapBookmark(securityUser.getId(), scrapId, tripId);
 			return ResponseEntity.ok(true);
 		}
@@ -135,30 +131,26 @@ public class ScrapController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/{invitationCode}/scrap/list")
+	@GetMapping("/{tripId}/scrap/list")
 	@Operation(summary = "스크랩 목록")
 	@ApiResponse(responseCode = "200", description = "스크랩 목록", content = {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ScrapListDto.class)))})
 	public ResponseEntity<?> showScrapList(
-		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
-		long tripId = tripService.getTripIdByInvitationCode(invitationCode);
-
 		List<ScrapListDto> response = scrapService.findAllByTripIdAndUserId(tripId, securityUser.getId());
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/{invitationCode}/scrap/bookmark/list")
+	@GetMapping("/{tripId}/scrap/bookmark/list")
 	@Operation(summary = "스크랩 북마크 목록")
 	@ApiResponse(responseCode = "200", description = "스크랩 북마크 목록", content = {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ScrapListDto.class)))})
 	public ResponseEntity<?> showScrapBookmarkList(
-		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
-		long tripId = tripService.getTripIdByInvitationCode(invitationCode);
-
 		List<ScrapListDto> response = scrapService.findAllBookmarkByTripIdAndUserId(tripId, securityUser.getId());
 		return ResponseEntity.ok(response);
 	}

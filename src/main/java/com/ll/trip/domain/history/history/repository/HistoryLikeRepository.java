@@ -1,11 +1,11 @@
-package com.ll.trip.domain.trip.history.repository;
+package com.ll.trip.domain.history.history.repository;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.ll.trip.domain.trip.history.entity.HistoryLike;
+import com.ll.trip.domain.history.history.entity.HistoryLike;
 
 public interface HistoryLikeRepository extends JpaRepository<HistoryLike, Long> {
 
