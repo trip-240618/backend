@@ -30,7 +30,7 @@ public class ScrapCreateDto {
 	private boolean hasImage;
 
 	@Schema(
-		description = "스크랩 색상",
+		description = "스크랩 컬러",
 		example = "#FFEFF3")
 	private String color;
 }

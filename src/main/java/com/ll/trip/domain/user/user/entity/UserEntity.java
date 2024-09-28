@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.ll.trip.domain.alarm.alarm.entity.Notification;
 import com.ll.trip.domain.history.history.entity.History;
+import com.ll.trip.domain.history.history.entity.HistoryLike;
 import com.ll.trip.domain.history.history.entity.HistoryReply;
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
 import com.ll.trip.domain.trip.trip.entity.TripMember;
@@ -103,6 +104,10 @@ public class UserEntity extends BaseEntity {
 	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<HistoryReply> historyReplies = new ArrayList<>();
+
+	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<HistoryLike> historyLikes = new ArrayList<>();
 
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authorities = new ArrayList<>();

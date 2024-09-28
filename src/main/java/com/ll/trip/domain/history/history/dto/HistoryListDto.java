@@ -33,12 +33,6 @@ public class HistoryListDto {
 		example = "https://trip-story.s3.ap-northeast-2.amazonaws.com/photoTest/c3396416-1e2e-4d0d-9a82-788831e5ac1f")
 	private String thumbnail;
 
-	@NotBlank
-	@Schema(
-		description = "화질 좋은 사진",
-		example = "https://trip-story.s3.ap-northeast-2.amazonaws.com/photoTest/c3396416-1e2e-4d0d-9a82-788831e5ac1f")
-	private String imageUrl;
-
 	@Schema(description = "위도",
 		example = "37.4220541")
 	private BigDecimal latitude; //위도
@@ -63,7 +57,6 @@ public class HistoryListDto {
 		this.writerUuid = history.getUser().getUuid();
 		this.profileImage = history.getUser().getThumbnail();
 		this.thumbnail = history.getThumbnail();
-		this.imageUrl = history.getImageUrl();
 		this.latitude = history.getLatitude();
 		this.longitude = history.getLongitude();
 		this.photoDate = history.getPhotoDate();

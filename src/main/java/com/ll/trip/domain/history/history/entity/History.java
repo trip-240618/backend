@@ -75,4 +75,9 @@ public class History extends BaseEntity {
 	@Builder.Default
 	@Setter
 	private List<HistoryTag> historyTags = new ArrayList<>();
+
+	@OneToMany(mappedBy = "history",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	@Setter
+	private List<HistoryLike> historyLikes = new ArrayList<>();
 }

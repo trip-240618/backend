@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class HistoryTagDto {
 	@Schema(
-		description = "기록 태그 색상",
+		description = "히스토리 태그 컬러",
 		example = "#FFEFF3")
 	private String tagColor;
 

@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AlarmService {
 	private final NotificationRepository notificationRepository;
-	public void sendAlarm() {
 
-	}
+
 }

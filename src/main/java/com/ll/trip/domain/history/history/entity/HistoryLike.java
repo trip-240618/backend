@@ -1,9 +1,13 @@
 package com.ll.trip.domain.history.history.entity;
 
+import com.ll.trip.domain.user.user.entity.UserEntity;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,9 +24,13 @@ public class HistoryLike {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private long userId;
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private UserEntity user;
 
-	private long historyId;
+	@ManyToOne
+	@JoinColumn(name = "history_id")
+	private History history;
 
 	private boolean toggle;
 }

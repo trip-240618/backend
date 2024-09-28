@@ -1,78 +1,75 @@
 package com.ll.trip.domain.alarm.firebase.service;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.ll.trip.domain.alarm.firebase.dto.AlarmResponseDto;
-import com.ll.trip.domain.alarm.firebase.dto.FcmMessageDto;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
+import com.google.firebase.messaging.ApsAlert;
+import com.google.firebase.messaging.BatchResponse;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.MulticastMessage;
+import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.WebpushConfig;
+import com.google.firebase.messaging.WebpushNotification;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class FcmService {
-	@Value("${firebase.secret-path}")
-	private String secret_path;
 
-	public int sendMessageTo(AlarmResponseDto responseDto) throws IOException {
+	public int sendMulticastMessage(List<String> fcmTokens, String title, String body) throws IOException,
+		FirebaseMessagingException {
+		// Android 알림 설정
+		AndroidConfig androidConfig = AndroidConfig.builder()
+			.setNotification(AndroidNotification.builder()
+				.setTitle(title)
+				.setBody(body)
+				.setColor("#f45342")
+				.build())
+			.setPriority(AndroidConfig.Priority.HIGH)
+			.build();
 
-		String message = makeMessage(responseDto);
-		RestTemplate restTemplate = new RestTemplate();
+		// iOS 알림 설정
+		ApnsConfig apnsConfig = ApnsConfig.builder()
+			.setAps(Aps.builder()
+				.setAlert(ApsAlert.builder()
+					.setTitle(title)
+					.setBody(body)
+					.build())
+				.setSound("default")
+				.build())
+			.build();
 
-		restTemplate.getMessageConverters()
-			.add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
+		// Web 알림 설정 (WebPush 알림)
+		WebpushConfig webpushConfig = WebpushConfig.builder()
+			.setNotification(WebpushNotification.builder()
+				.setTitle(title)
+				.setBody(body)
+				.build())
+			.build();
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "Bearer " + getAccessToken());
+		// MulticastMessage를 사용하여 여러 기기로 메시지 전송
+		MulticastMessage message = MulticastMessage.builder()
+			.addAllTokens(fcmTokens)
+			.setNotification(Notification.builder().setTitle(title).setBody(body).setImage(null).build())
+			.setAndroidConfig(androidConfig)
+			.setApnsConfig(apnsConfig)
+			.setWebpushConfig(webpushConfig)
+			.build();
 
-		HttpEntity entity = new HttpEntity<>(message, headers);
+		// FirebaseMessaging을 통해 메시지 전송
+		BatchResponse response = FirebaseMessaging.getInstance().sendMulticast(message);
 
-		String API_URL = "<https://fcm.googleapis.com/v1/projects/tripstory-14935/messages:send>";
-		ResponseEntity response = restTemplate.exchange(API_URL, HttpMethod.POST, entity, String.class);
+		// 응답 출력 (성공한 전송 수와 실패한 전송 수)
+		log.info("failure count: " + response.getFailureCount());
 
-		System.out.println(response.getStatusCode());
-
-		return response.getStatusCode() == HttpStatus.OK ? 1 : 0;
-	}
-
-	private String getAccessToken() throws IOException {
-		String firebaseConfigPath = secret_path;
-
-		GoogleCredentials googleCredentials = GoogleCredentials
-			.fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
-			.createScoped(List.of("<https://www.googleapis.com/auth/cloud-platform>"));
-
-		googleCredentials.refreshIfExpired();
-		return googleCredentials.getAccessToken().getTokenValue();
-	}
-
-	private String makeMessage(AlarmResponseDto responseDto) throws JsonProcessingException {
-
-		ObjectMapper om = new ObjectMapper();
-		FcmMessageDto fcmMessageDto = FcmMessageDto.builder()
-			.message(FcmMessageDto.Message.builder()
-				.token(responseDto.getToken())
-				.notification(FcmMessageDto.Notification.builder()
-					.title(responseDto.getTitle())
-					.body(responseDto.getBody())
-					.image(null)
-					.build()
-				).build()).validateOnly(false).build();
-
-		return om.writeValueAsString(fcmMessageDto);
+		return response.getFailureCount();
 	}
 }

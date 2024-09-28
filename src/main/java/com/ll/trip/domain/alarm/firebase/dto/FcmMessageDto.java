@@ -1,29 +1,36 @@
 package com.ll.trip.domain.alarm.firebase.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import java.util.List;
 
-@Getter
+import lombok.Builder;
+import lombok.Data;
+
+@Data
 @Builder
 public class FcmMessageDto {
-	private boolean validateOnly;
-	private FcmMessageDto.Message message;
 
+	private Message message;
+	private boolean validateOnly;
+
+	@lombok.Data
 	@Builder
-	@AllArgsConstructor
-	@Getter
 	public static class Message {
-		private FcmMessageDto.Notification notification;
-		private String token;
+		private List<String> tokens;
+		private Notification notification;
+		private Data data;
 	}
 
+	@lombok.Data
 	@Builder
-	@AllArgsConstructor
-	@Getter
 	public static class Notification {
 		private String title;
 		private String body;
-		private String image;
+	}
+
+	@lombok.Data
+	@Builder
+	public static class Data {
+		private String key1;
+		private String key2;
 	}
 }

@@ -125,6 +125,7 @@ public class HistoryService {
 	public List<HistoryReplyDto> showHistoryReplyList(long historyId) {
 		return historyReplyRepository.findByHistoryId(historyId);
 	}
+
 	public boolean isWriterOfReply(long historyId, long userId) {
 		return historyReplyRepository.existsByHistoryIdAndUserId(historyId, userId);
 	}
@@ -139,26 +140,24 @@ public class HistoryService {
 	}
 
 	@Transactional
-	public boolean toggleHistoryLike(long historyId, long userId) {
-		Optional<HistoryLike> optLike = historyLikeRepository.findByHistoryIdAndUserId(historyId, userId);
-		HistoryLike like;
+	public boolean toggleHistoryLike(History history, UserEntity user) {
+		Optional<HistoryLike> optLike = historyLikeRepository.findByHistoryIdAndUserId(history.getId(), user.getId());
 
 		if (optLike.isEmpty()) {
-			like = HistoryLike.builder()
-				.historyId(historyId)
-				.userId(userId)
-				.toggle(true)
-				.build();
-
-			historyLikeRepository.save(like);
+			historyLikeRepository.save(
+				HistoryLike.builder()
+					.history(history)
+					.user(user)
+					.toggle(true)
+					.build());
 			return true;
 		}
 
-		like = optLike.get();
+		HistoryLike like = optLike.get();
 		boolean toggle = like.isToggle();
 
 		historyLikeRepository.updateToggleById(like.getId(), !toggle);
-		historyRepository.updateLikeCntById(historyId, toggle ? 1 : -1);
+		historyRepository.updateLikeCntById(history.getId(), toggle ? -1 : 1);
 
 		return !toggle;
 	}

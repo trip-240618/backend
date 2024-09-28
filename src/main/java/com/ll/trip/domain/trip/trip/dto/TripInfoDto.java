@@ -56,7 +56,7 @@ public class TripInfoDto {
 	private String invitationCode;
 
 	@Schema(
-		description = "여행방 라벨 색상",
+		description = "여행방 라벨 컬러",
 		example = "#FFEFF3")
 	private String labelColor;
 

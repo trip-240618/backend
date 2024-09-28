@@ -106,7 +106,8 @@ public class HistoryController {
 		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 		Trip trip = entityManager.getReference(Trip.class, tripId);
 
-		List<HistoryListDto> response = historyService.createManyHistories(requestDto.getHistoryCreateRequestDtos(), user, trip);
+		List<HistoryListDto> response = historyService.createManyHistories(requestDto.getHistoryCreateRequestDtos(),
+			user, trip);
 
 		return ResponseEntity.ok(response);
 	}
@@ -202,9 +203,12 @@ public class HistoryController {
 		@PathVariable @Parameter(description = "히스토리 id", example = "1", in = ParameterIn.PATH) long historyId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
-		if (!historyService.isWriterOfReply(historyId, securityUser.getId()))
+		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
 			return ResponseEntity.badRequest().body("권한이 없습니다.");
-		boolean toggle = historyService.toggleHistoryLike(historyId, securityUser.getId());
+
+		boolean toggle = historyService.toggleHistoryLike(
+			entityManager.getReference(History.class, historyId),
+			entityManager.getReference(UserEntity.class, securityUser.getId()));
 
 		return ResponseEntity.ok(toggle);
 	}
@@ -245,6 +249,22 @@ public class HistoryController {
 			return ResponseEntity.badRequest().body("권한이 없습니다.");
 
 		historyService.deleteHistoryTag(tagId);
+
+		return ResponseEntity.ok("deleted");
+	}
+
+	@GetMapping("/{tripId}/history/search")
+	@Operation(summary = "History 검색")
+	@ApiResponse(responseCode = "200", description = "주어진 파라미터로 검색", content = {
+		@Content(mediaType = "application/json",
+			array = @ArraySchema(schema = @Schema(implementation = HistoryListDto.class)))})
+	public ResponseEntity<?> searchHistory(
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
+		@RequestParam(required = false) @Parameter(description = "작성자 이름", example = "요루시카", in = ParameterIn.PATH) String nickname,
+		@RequestParam(required = false) @Parameter(description = "태그명", example = "# 일본", in = ParameterIn.PATH) String tagName,
+		@RequestParam(required = false) @Parameter(description = "태그 컬러", example = "#FFEFF3", in = ParameterIn.PATH) String tagColor
+	) {
+
 
 		return ResponseEntity.ok("deleted");
 	}

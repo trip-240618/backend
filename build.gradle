@@ -81,6 +81,7 @@ dependencies {
 
     // Google Firebase Admin
     implementation 'com.google.firebase:firebase-admin:9.2.0'
+    implementation 'com.google.firebase:firebase-messaging'
 
     //aws-sdk
     implementation 'com.amazonaws:aws-java-sdk-s3:1.11.238'

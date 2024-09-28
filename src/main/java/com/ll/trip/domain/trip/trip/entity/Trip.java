@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.ll.trip.domain.flight.entity.Flight;
 import com.ll.trip.domain.history.history.entity.History;
 import com.ll.trip.domain.history.history.entity.HistoryTag;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
@@ -96,4 +97,8 @@ public class Trip extends BaseEntity {
 	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<HistoryTag> historyTags = new ArrayList<>();
+
+	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Flight> flights = new ArrayList<>();
 }

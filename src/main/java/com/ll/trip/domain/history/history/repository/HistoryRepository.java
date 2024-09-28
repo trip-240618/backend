@@ -46,4 +46,5 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 		 	where h.id = :historyId
 	""")
 	int updateLikeCntById(long historyId, int i);
+
 }

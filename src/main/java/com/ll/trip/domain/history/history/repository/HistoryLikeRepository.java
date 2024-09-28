@@ -9,6 +9,12 @@ import com.ll.trip.domain.history.history.entity.HistoryLike;
 
 public interface HistoryLikeRepository extends JpaRepository<HistoryLike, Long> {
 
+	@Query("""
+				select l
+				from HistoryLike l
+				where l.user.id = :userId
+				and l.history.id = :historyId
+		""")
 	Optional<HistoryLike> findByHistoryIdAndUserId(long historyId, long userId);
 
 	@Query("""
