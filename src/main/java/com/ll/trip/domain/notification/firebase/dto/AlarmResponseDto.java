@@ -1,4 +1,4 @@
-package com.ll.trip.domain.alarm.firebase.dto;
+package com.ll.trip.domain.notification.firebase.dto;
 
 import lombok.AccessLevel;
 import lombok.Builder;

@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
@@ -27,7 +26,7 @@ import com.ll.trip.domain.trip.planP.dto.PlanPMoveDto;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
 import com.ll.trip.domain.trip.planP.service.PlanPEditService;
 import com.ll.trip.domain.trip.planP.service.PlanPService;
-import com.ll.trip.domain.trip.trip.service.TripService;
+import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,8 +47,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Tag(name = "Plan P", description = "P타입 플랜 API")
 public class PlanPController {
-
-	private final TripService tripService;
 	private final PlanPService planPService;
 	private final PlanPEditService planPEditService;
 	private final SimpMessagingTemplate template;

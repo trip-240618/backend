@@ -1,4 +1,4 @@
-package com.ll.trip.domain.alarm.firebase.controller;
+package com.ll.trip.domain.notification.firebase.controller;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
-import com.ll.trip.domain.alarm.firebase.service.FcmService;
+import com.ll.trip.domain.notification.firebase.service.FcmService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

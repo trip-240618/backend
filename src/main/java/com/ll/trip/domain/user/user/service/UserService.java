@@ -8,7 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.user.mypage.repository.NotificationConfigRepository;
+import com.ll.trip.domain.notification.notification.repository.NotificationConfigRepository;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;

@@ -1,11 +1,9 @@
-package com.ll.trip.domain.alarm.alarm.entity;
+package com.ll.trip.domain.notification.notification.entity;
 
-import java.time.LocalDateTime;
-
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.global.base.entity.BaseEntity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -14,35 +12,32 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.MapsId;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@Builder
+@SuperBuilder(toBuilder = true)
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class Notification {
+public class NotificationConfig extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank
-	private String content;
-
-	private boolean isRead;
-
-	@NotNull
-	@CreatedDate
-	private LocalDateTime createDate;
-
+	@MapsId
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private UserEntity user;
+
+	private boolean activePlanNotification;
+
+	private boolean activeHistoryNotification;
+
+	private boolean activeAdNotification;
 }

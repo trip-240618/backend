@@ -1,4 +1,4 @@
-package com.ll.trip.domain.alarm.firebase.service;
+package com.ll.trip.domain.notification.firebase.service;
 
 import java.io.IOException;
 

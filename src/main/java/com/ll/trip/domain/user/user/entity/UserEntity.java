@@ -9,13 +9,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import com.ll.trip.domain.alarm.alarm.entity.Notification;
+import com.ll.trip.domain.notification.notification.entity.Notification;
 import com.ll.trip.domain.history.history.entity.History;
 import com.ll.trip.domain.history.history.entity.HistoryLike;
 import com.ll.trip.domain.history.history.entity.HistoryReply;
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
 import com.ll.trip.domain.trip.trip.entity.TripMember;
-import com.ll.trip.domain.user.mypage.entity.NotificationConfig;
+import com.ll.trip.domain.notification.notification.entity.NotificationConfig;
 import com.ll.trip.global.base.entity.BaseEntity;
 
 import jakarta.persistence.CascadeType;
