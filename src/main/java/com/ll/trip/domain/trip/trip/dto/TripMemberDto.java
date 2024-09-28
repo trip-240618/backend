@@ -28,11 +28,6 @@ public class TripMemberDto {
 	private String thumbnail;
 
 	@Schema(
-		description = "프로필 url",
-		example = "https://trip-story.s3.ap-northeast-2.amazonaws.com/photoTest/c3396416-1e2e-4d0d-9a82-788831e5ac1f")
-	private String profileImg;
-
-	@Schema(
 		description = "방장여부",
 		example = "true")
 	private boolean isLeader;
@@ -42,7 +37,6 @@ public class TripMemberDto {
 		this.uuid = user.getUuid();
 		this.nickname = user.getNickname();
 		this.thumbnail = user.getThumbnail();
-		this.profileImg = user.getProfileImg();
 		this.isLeader = tripMember.isLeader();
 	}
 }

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ll.trip.domain.trip.location.response.PlanResponseBody;
+import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
@@ -72,7 +72,7 @@ public class PlanPController {
 
 		template.convertAndSend(
 			"/topic/api/trip/p/" + tripId,
-			new PlanResponseBody<>("create", response)
+			new SocketResponseBody<>("create", response)
 		);
 
 		return ResponseEntity.ok("created");
@@ -109,7 +109,7 @@ public class PlanPController {
 
 		template.convertAndSend(
 			"/topic/api/trip/p/" + tripId,
-			new PlanResponseBody<>("modify", response)
+			new SocketResponseBody<>("modify", response)
 		);
 
 		return ResponseEntity.ok("modified");
@@ -131,7 +131,7 @@ public class PlanPController {
 
 		template.convertAndSend(
 			"/topic/api/trip/p/" + tripId,
-			new PlanResponseBody<>("delete", planId)
+			new SocketResponseBody<>("delete", planId)
 		);
 
 		return ResponseEntity.ok("deleted");
@@ -154,7 +154,7 @@ public class PlanPController {
 
 		template.convertAndSend(
 			"/topic/api/trip/p/" + tripId,
-			new PlanResponseBody<>("check", response)
+			new SocketResponseBody<>("check", response)
 		);
 
 		return ResponseEntity.ok("checked");
@@ -171,7 +171,7 @@ public class PlanPController {
 		String uuid = planPEditService.getEditorByTripId(tripId);
 		if (uuid != null) {
 			template.convertAndSendToUser(username, "/topic/api/trip/p/" + tripId,
-				new PlanResponseBody<>("wait", uuid)
+				new SocketResponseBody<>("wait", uuid)
 			);
 			return;
 		}
@@ -179,7 +179,7 @@ public class PlanPController {
 		planPEditService.addEditor(tripId, username);
 
 		template.convertAndSend("/topic/api/trip/p/" + tripId,
-			new PlanResponseBody<>("edit start", username)
+			new SocketResponseBody<>("edit start", username)
 		);
 	}
 
@@ -192,15 +192,15 @@ public class PlanPController {
 				@ExampleObject(name = "편집중인 사람이 존재할 경우", value = "{\"command\": \"wait\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}")
 			}
 		)})
-	public PlanResponseBody<String> addEditor(
+	public SocketResponseBody<String> addEditor(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId
 	) {
 		template.convertAndSend("/topic/api/trip/p/" + tripId,
-			new PlanResponseBody<>("edit start", securityUser.getUuid())
+			new SocketResponseBody<>("edit start", securityUser.getUuid())
 		);
 
-		return new PlanResponseBody<>("edit start", "uuid");
+		return new SocketResponseBody<>("edit start", "uuid");
 	}
 
 	@GetMapping("/{tripId}/edit/finish")
@@ -211,17 +211,17 @@ public class PlanPController {
 				@ExampleObject(value = "{\"command\": \"edit finish\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}"),
 			}
 		)})
-	public PlanResponseBody<String> removeEditor(
+	public SocketResponseBody<String> removeEditor(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
 		planPEditService.removeEditor(tripId, securityUser.getUuid());
 
 		template.convertAndSend("/topic/api/trip/p/" + tripId,
-			new PlanResponseBody<>("edit finish", securityUser.getUuid())
+			new SocketResponseBody<>("edit finish", securityUser.getUuid())
 		);
 
-		return new PlanResponseBody<>("edit finish", "uuid");
+		return new SocketResponseBody<>("edit finish", "uuid");
 	}
 
 	@PutMapping("/{tripId}/edit/move")
@@ -243,7 +243,7 @@ public class PlanPController {
 		planPEditService.movePlanByDayAndOrder(tripId, moveDto.getPlanId(), moveDto.getDayFrom(),
 			moveDto.getDayTo(), moveDto.getOrderFrom(), moveDto.getOrderTo());
 
-		template.convertAndSend("/topic/api/trip/p/" + tripId, new PlanResponseBody<>("move", moveDto));
+		template.convertAndSend("/topic/api/trip/p/" + tripId, new SocketResponseBody<>("move", moveDto));
 
 		return ResponseEntity.ok("moved");
 	}
@@ -268,10 +268,10 @@ public class PlanPController {
 
 		if (lockerDto.isLocker())
 			template.convertAndSend("/topic/api/trip/p/" + tripId,
-				new PlanResponseBody<>("locker in", response));
+				new SocketResponseBody<>("locker in", response));
 		else
 			template.convertAndSend("/topic/api/trip/p/" + tripId,
-				new PlanResponseBody<>("locker out", response));
+				new SocketResponseBody<>("locker out", response));
 
 		return ResponseEntity.ok("moved");
 	}

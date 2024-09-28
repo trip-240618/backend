@@ -6,7 +6,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.trip.location.response.PlanResponseBody;
+import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
 
 import lombok.Getter;
@@ -30,7 +30,7 @@ public class PlanPEditService {
 		if (uuid != null && uuid.equals(username)) {
 			activeEditTopicsAndUuid.remove(tripId);
 
-			template.convertAndSend(TOPIC_PREFIX + tripId, new PlanResponseBody<>("edit finish", username));
+			template.convertAndSend(TOPIC_PREFIX + tripId, new SocketResponseBody<>("edit finish", username));
 		}
 	}
 

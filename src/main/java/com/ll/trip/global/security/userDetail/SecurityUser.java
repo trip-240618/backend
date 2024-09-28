@@ -17,22 +17,26 @@ public class SecurityUser extends User implements OAuth2User {
 
     private final String name;// 이름
 
-    private final String profileImage;
+    private final String nickname;
 
-    public SecurityUser(Long id, String uuid, String name, String providerId, String profileImage, Collection<? extends GrantedAuthority> authorities) {
+    private final String thumbnail;
+
+    public SecurityUser(Long id, String uuid, String name, String nickname, String providerId, String thumbnail, Collection<? extends GrantedAuthority> authorities) {
         super(uuid, providerId, authorities); //username = uuid, password = providerId
         this.id = id;
         this.uuid = uuid;
         this.name = name;
-        this.profileImage = profileImage;
+        this.nickname = nickname;
+        this.thumbnail = thumbnail;
     }
 
-    public SecurityUser(Long id, String uuid, String name, String providerId, String profileImage, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
+    public SecurityUser(Long id, String uuid, String name, String nickname, String providerId, String thumbnail, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
         super(uuid, providerId, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.id = id;
         this.uuid = uuid;
         this.name = name;
-        this.profileImage = profileImage;
+        this.nickname = nickname;
+        this.thumbnail = thumbnail;
     }
 
     @Override

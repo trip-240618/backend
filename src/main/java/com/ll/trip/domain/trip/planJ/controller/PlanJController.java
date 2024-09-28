@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ll.trip.domain.trip.location.response.PlanResponseBody;
+import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJEditorRegisterDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
@@ -73,7 +73,7 @@ public class PlanJController {
 
 		template.convertAndSend(
 			"/topic/api/trip/j/" + tripId,
-			new PlanResponseBody<>("create", response)
+			new SocketResponseBody<>("create", response)
 		);
 
 		return ResponseEntity.ok("created");
@@ -131,7 +131,7 @@ public class PlanJController {
 
 		template.convertAndSend(
 			"/topic/api/trip/j/" + tripId,
-			new PlanResponseBody<>("modify", response)
+			new SocketResponseBody<>("modify", response)
 		);
 
 		return ResponseEntity.ok("modified");
@@ -161,7 +161,7 @@ public class PlanJController {
 
 		template.convertAndSend(
 			"/topic/api/trip/j/" + tripId,
-			new PlanResponseBody<>("modify", requestBody)
+			new SocketResponseBody<>("modify", requestBody)
 		);
 
 		return ResponseEntity.ok("swapped");
@@ -183,7 +183,7 @@ public class PlanJController {
 
 		template.convertAndSend(
 			"/topic/api/trip/j/" + tripId,
-			new PlanResponseBody<>("delete", planId)
+			new SocketResponseBody<>("delete", planId)
 		);
 
 		return ResponseEntity.ok("deleted");
@@ -201,7 +201,7 @@ public class PlanJController {
 		String uuid = planJEditService.getEditorByTripIdAndDay(tripId, day);
 		if (uuid != null) {
 			template.convertAndSendToUser(username, "/topic/api/trip/j/" + tripId,
-				new PlanResponseBody<>("wait", new PlanJEditorRegisterDto(day, username))
+				new SocketResponseBody<>("wait", new PlanJEditorRegisterDto(day, username))
 			);
 			return;
 		}
@@ -209,7 +209,7 @@ public class PlanJController {
 		planJEditService.addEditor(tripId, username, day);
 
 		template.convertAndSend("/topic/api/trip/j/" + tripId,
-			new PlanResponseBody<>("edit start", new PlanJEditorRegisterDto(day, username))
+			new SocketResponseBody<>("edit start", new PlanJEditorRegisterDto(day, username))
 		);
 	}
 
@@ -222,11 +222,11 @@ public class PlanJController {
 				@ExampleObject(name = "편집중인 사람이 존재할 경우", value = "{\"command\": \"wait\", \"data\": \"223e4567-e89b-12d3-a456-426614174001\"}")
 			},
 			schema = @Schema(implementation = PlanJEditorRegisterDto.class))})
-	public PlanResponseBody<String> addEditor(
+	public SocketResponseBody<String> addEditor(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@PathVariable @Parameter(description = "day", example = "1", in = ParameterIn.PATH) int day
 	) {
-		return new PlanResponseBody<>("edit start", "uuid");
+		return new SocketResponseBody<>("edit start", "uuid");
 	}
 
 	@GetMapping("/{tripId}/{day}/edit/finish")
@@ -248,7 +248,7 @@ public class PlanJController {
 		planJEditService.removeEditor(tripId, day, username);
 
 		template.convertAndSend("/topic/api/trip/j/" + tripId,
-			new PlanResponseBody<>("edit finish", new PlanJEditorRegisterDto(day, username))
+			new SocketResponseBody<>("edit finish", new PlanJEditorRegisterDto(day, username))
 		);
 	}
 

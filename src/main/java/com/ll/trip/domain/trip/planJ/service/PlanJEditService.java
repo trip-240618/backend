@@ -8,7 +8,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.trip.location.response.PlanResponseBody;
+import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.repository.PlanJRepository;
 
@@ -77,7 +77,7 @@ public class PlanJEditService {
 	public void editorClosedSubscription(long tripId, String uuid) {
 		ConcurrentHashMap<String, Integer> map = activeEditTopicsAndUuidAndDay.getOrDefault(tripId, null);
 		map.remove(uuid);
-		template.convertAndSend(TOPIC_PREFIX + tripId, new PlanResponseBody<>("edit finish", uuid));
+		template.convertAndSend(TOPIC_PREFIX + tripId, new SocketResponseBody<>("edit finish", uuid));
 	}
 
 	public void removeEditor(long tripId, int day, String uuid) {

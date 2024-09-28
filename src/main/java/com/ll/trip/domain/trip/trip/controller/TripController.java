@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ll.trip.domain.file.file.service.AwsAuthService;
+import com.ll.trip.domain.trip.trip.dto.TripCreateResponseDto;
+import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
 import com.ll.trip.domain.trip.trip.entity.Trip;
@@ -44,13 +47,14 @@ public class TripController {
 	private final TripService tripService;
 	private final AwsAuthService awsAuthService;
 	private final EntityManager entityManager;
+	private final SimpMessagingTemplate template;
 
 	@PostMapping("/create")
 	@Operation(summary = "여행방 생성")
 	@ApiResponse(responseCode = "200", description = "여행방 생성", content = {
 		@Content(mediaType = "application/json",
 			examples = @ExampleObject(value = "1A2B3C4D"),
-			schema = @Schema(implementation = String.class)
+			schema = @Schema(implementation = TripCreateResponseDto.class)
 		)})
 	public ResponseEntity<?> createTrip(
 		@RequestBody TripCreateDto tripCreateDto,
@@ -62,7 +66,7 @@ public class TripController {
 
 		tripService.joinTripById(trip, user, true);
 
-		return ResponseEntity.ok(invitationCode);
+		return ResponseEntity.ok(new TripCreateResponseDto(trip.getId(), invitationCode));
 	}
 
 	@PostMapping("/join")
@@ -77,9 +81,15 @@ public class TripController {
 		Trip trip = entityManager.getReference(Trip.class, tripId);
 		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 
-		tripService.joinTripById(trip, user, false);
+		boolean isNewMember = tripService.joinTripById(trip, user, false);
 
 		TripInfoDto response = new TripInfoDto(tripService.findTripDetailByTripId(tripId));
+
+		if (isNewMember)
+			template.convertAndSend(
+				"/topic/api/trip/" + Character.toLowerCase(response.getType()) + "/" + response.getId(),
+				new SocketResponseBody<>("member add",
+					response.getTripMemberDtoList().get(response.getTripMemberDtoList().size() - 1)));
 
 		return ResponseEntity.ok(response);
 	}

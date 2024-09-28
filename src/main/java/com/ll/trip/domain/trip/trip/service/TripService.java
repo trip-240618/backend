@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ll.trip.domain.history.history.entity.History;
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
+import com.ll.trip.domain.trip.trip.dto.TripMemberDto;
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
 import com.ll.trip.domain.trip.trip.entity.BookmarkId;
 import com.ll.trip.domain.trip.trip.entity.Trip;
@@ -19,6 +20,7 @@ import com.ll.trip.domain.trip.trip.repository.BookmarkRepository;
 import com.ll.trip.domain.trip.trip.repository.TripMemberRepository;
 import com.ll.trip.domain.trip.trip.repository.TripRepository;
 import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import lombok.RequiredArgsConstructor;
 
@@ -55,7 +57,7 @@ public class TripService {
 	}
 
 	@Transactional
-	public void joinTripById(Trip trip, UserEntity user, boolean isLeader) {
+	public boolean joinTripById(Trip trip, UserEntity user, boolean isLeader) {
 
 		TripMemberId tripMemberId = TripMemberId.builder()
 			.tripId(trip.getId())
@@ -63,7 +65,7 @@ public class TripService {
 			.build();
 
 		if (tripMemberRepository.existsById(tripMemberId)) {
-			return;
+			return false;
 		}
 
 		TripMember tripMember = TripMember.builder()
@@ -74,6 +76,7 @@ public class TripService {
 			.build();
 
 		tripMemberRepository.save(tripMember);
+		return true;
 	}
 
 	public boolean existTripMemberByTripIdAndUserId(long tripId, long userId) {
@@ -162,5 +165,10 @@ public class TripService {
 
 	public long findTripIdByInvitationCode(String invitationCode) {
 		return tripRepository.findTrip_idByInvitationCode(invitationCode);
+	}
+
+	public TripMemberDto makeTripMemberDto(SecurityUser securityUser) {
+		return new TripMemberDto(securityUser.getUuid(), securityUser.getNickname(), securityUser.getThumbnail(),
+			false);
 	}
 }
