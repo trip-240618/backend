@@ -126,8 +126,8 @@ public class HistoryService {
 		return historyReplyRepository.findByHistoryId(historyId);
 	}
 
-	public boolean isWriterOfReply(long historyId, long userId) {
-		return historyReplyRepository.existsByHistoryIdAndUserId(historyId, userId);
+	public boolean isWriterOfReply(long replyId, long userId) {
+		return historyReplyRepository.existsByReplyIdAndUserId(replyId, userId);
 	}
 
 	@Transactional

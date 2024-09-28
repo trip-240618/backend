@@ -182,7 +182,7 @@ public class HistoryController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "히스토리 id", example = "1") long replyId
 	) {
-		if (!historyService.isWriterOfReply(historyId, securityUser.getId()))
+		if (!historyService.isWriterOfReply(replyId, securityUser.getId()))
 			return ResponseEntity.badRequest().body("권한이 없습니다.");
 		historyService.deleteHistoryReply(replyId);
 

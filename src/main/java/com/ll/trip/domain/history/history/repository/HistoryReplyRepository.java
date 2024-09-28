@@ -24,7 +24,7 @@ public interface HistoryReplyRepository extends JpaRepository<HistoryReply, Long
 	@Query("""
 			SELECT CASE WHEN COUNT(r) > 0 THEN TRUE ELSE FALSE END
 		     FROM HistoryReply r
-		     WHERE r.history.id = :historyId AND r.user.id = :userId
+		     WHERE r.id = :replyId AND r.user.id = :userId
 		""")
-	boolean existsByHistoryIdAndUserId(long historyId, long userId);
+	boolean existsByReplyIdAndUserId(long replyId, long userId);
 }
