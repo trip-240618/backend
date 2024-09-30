@@ -45,7 +45,6 @@ public class OAuthController {
 		@RequestParam String fcmToken
 	) {
 		log.info("token = {}", kakaoToken);
-		//TODO code가 아니라 token을 사용하기 때문에 프론트와 함께 파라미터명을 수정해야함
 		return kakaoOAuth2Service.getUserInfo(kakaoToken)
 			.publishOn(Schedulers.boundedElastic())
 			.map(userInfo -> {

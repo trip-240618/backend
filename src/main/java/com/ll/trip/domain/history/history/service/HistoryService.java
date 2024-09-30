@@ -120,6 +120,7 @@ public class HistoryService {
 			.build();
 
 		historyReplyRepository.save(reply);
+		historyRepository.updateReplyCntById(history.getId(), 1);
 	}
 
 	public List<HistoryReplyDto> showHistoryReplyList(long historyId) {
@@ -131,8 +132,9 @@ public class HistoryService {
 	}
 
 	@Transactional
-	public void deleteHistoryReply(long replyId) {
+	public void deleteHistoryReply(long historyId, long replyId) {
 		historyReplyRepository.deleteById(replyId);
+		historyRepository.updateReplyCntById(historyId, 1);
 	}
 
 	public boolean isWriterOfHistory(long historyId, long userId) {

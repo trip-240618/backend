@@ -47,4 +47,10 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 	""")
 	int updateLikeCntById(long historyId, int i);
 
+	@Query("""
+			update History h
+		 	set h.replyCnt = h.replyCnt + :i
+		 	where h.id = :historyId
+	""")
+	int updateReplyCntById(long historyId, int i);
 }

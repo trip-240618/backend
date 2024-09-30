@@ -3,6 +3,7 @@ package com.ll.trip.domain.trip.trip.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.aop.AopInvocationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -77,14 +78,19 @@ public class TripController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "초대코드", example = "1A2B3C4D") String invitationCode
 	) {
-		long tripId = tripService.findTripIdByInvitationCode(invitationCode);
+		Long tripId = null;
+		try {
+			tripId = tripService.findTripIdByInvitationCode(invitationCode);
+		} catch (AopInvocationException ae) {
+			return ResponseEntity.badRequest().body(ae.getMessage());
+		}
 		Trip trip = entityManager.getReference(Trip.class, tripId);
 		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 
 		boolean isNewMember = tripService.joinTripById(trip, user, false);
 
 		TripInfoDto response = new TripInfoDto(tripService.findTripDetailByTripId(tripId));
-		notificationService.tripJoinNotifictaion(trip, trip.getName(), user.getId(), securityUser.getNickname());
+		notificationService.tripJoinNotifictaion(trip, response.getName(), user.getId(), securityUser.getNickname());
 
 		if (isNewMember)
 			template.convertAndSend(

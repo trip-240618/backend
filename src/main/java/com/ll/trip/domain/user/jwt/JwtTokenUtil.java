@@ -51,7 +51,6 @@ public class JwtTokenUtil {
 	private final UserDetailsServiceImpl userDetailsService;
 
 	public String createRefreshToken(String uuid, List<String> roles) {
-		//TODO claim 최신화
 		return getString(uuid, roles, refreshTokenValidityInMilliseconds);
 	}
 

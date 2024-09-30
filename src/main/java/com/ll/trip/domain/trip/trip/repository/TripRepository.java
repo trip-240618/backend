@@ -47,7 +47,7 @@ public interface TripRepository extends JpaRepository<Trip, Long>{
 		    FROM Trip t
 		    join fetch t.tripMembers tm
 		    join fetch tm.user u
-		    WHERE t IN (SELECT b.trip FROM Bookmark b WHERE b.user.id = :userId)
+		    WHERE t IN (SELECT b.trip FROM Bookmark b WHERE b.user.id = :userId and b.toggle = true)
 		""")
 	List<Trip> findAllBookmarkTrip(Long userId);
 

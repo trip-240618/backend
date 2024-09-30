@@ -67,6 +67,8 @@ public class History extends BaseEntity {
 
 	private int likeCnt;
 
+	private int replyCnt;
+
 	@OneToMany(mappedBy = "history",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<HistoryReply> historyReplies = new ArrayList<>();

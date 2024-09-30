@@ -184,7 +184,7 @@ public class HistoryController {
 	) {
 		if (!historyService.isWriterOfReply(replyId, securityUser.getId()))
 			return ResponseEntity.badRequest().body("권한이 없습니다.");
-		historyService.deleteHistoryReply(replyId);
+		historyService.deleteHistoryReply(historyId, replyId);
 
 		List<HistoryReplyDto> response = historyService.showHistoryReplyList(historyId);
 

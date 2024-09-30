@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJEditorRegisterDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
@@ -27,7 +26,7 @@ import com.ll.trip.domain.trip.planJ.dto.PlanJSwapRequestDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.service.PlanJEditService;
 import com.ll.trip.domain.trip.planJ.service.PlanJService;
-import com.ll.trip.domain.trip.trip.service.TripService;
+import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,14 +47,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/trip/j")
 @Tag(name = "Plan J", description = "J타입 플랜 API")
 public class PlanJController {
-	private final TripService tripService;
 	private final PlanJService planJService;
 	private final PlanJEditService planJEditService;
 	private final SimpMessagingTemplate template;
 
 	@PostMapping("/{tripId}/plan/create")
 	@Operation(summary = "J형 Plan 생성")
-	@ApiResponse(responseCode = "200", description = "J형 Plan생성, 응답데이터는 websocket으로 전송", content = {
+	@ApiResponse(responseCode = "200", description = "J형 Plan생성, 응답데이터는 websocket으로 전송 (/topic/api/trip/j/{tripId})", content = {
 		@Content(mediaType = "application/json",
 			examples = {
 				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"create\", \"data\": \"PlanJInfoDto\"}"),

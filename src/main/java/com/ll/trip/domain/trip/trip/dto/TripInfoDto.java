@@ -79,7 +79,7 @@ public class TripInfoDto {
 		this.endDate = trip.getEndDate();
 		this.thumbnail = trip.getThumbnail();
 		this.labelColor = trip.getLabelColor();
-		this.bookmark = false;
+		this.bookmark = !trip.getBookmarks().isEmpty() && trip.getBookmarks().get(0).isToggle();
 		this.tripMemberDtoList = trip.getTripMembers().stream().map(TripMemberDto::new).toList();
 	}
 }
