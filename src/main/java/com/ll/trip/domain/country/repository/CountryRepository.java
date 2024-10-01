@@ -15,4 +15,6 @@ public interface CountryRepository extends JpaRepository<Country, Long> {
 	@Modifying
 	@Query("UPDATE Country c SET c.flagImage = :file WHERE c.countryCode = :code")
 	void updateFlagImageByCountryCode(String code, byte[] file);
+
+	Optional<Country> findByCountryName(String countryName);
 }
