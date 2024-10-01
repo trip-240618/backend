@@ -59,7 +59,7 @@ public class PlanPService {
 		);
 	}
 
-	public List<PlanPInfoDto> findAllByTripId(Long tripId, boolean locker) {
+	public List<PlanPInfoDto> findAllByTripId(long tripId, boolean locker) {
 		return planPRepository.findAllByTripIdOrderByDayAfterStartAndOrderByDate(tripId, locker);
 	}
 

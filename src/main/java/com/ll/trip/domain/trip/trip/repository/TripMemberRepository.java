@@ -5,14 +5,13 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.ll.trip.domain.trip.trip.entity.TripMember;
 import com.ll.trip.domain.trip.trip.entity.TripMemberId;
-import com.ll.trip.domain.user.user.entity.UserEntity;
 
 import lombok.NonNull;
 
 public interface TripMemberRepository extends JpaRepository<TripMember, TripMemberId> {
 	boolean existsById(@NonNull TripMemberId tripMemberId);
 
-	int countByUser(UserEntity user);
+	int countByUser_Id(long userId);
 
 	boolean existsTripMemberByTripIdAndUserId(long tripId, long userId);
 
@@ -23,4 +22,6 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 		and tm.trip.id = :tripId
 		""")
 	boolean isLeaderOfTrip(long userId, long tripId);
+
+	int countTripMemberByTrip_Id(long tripId);
 }

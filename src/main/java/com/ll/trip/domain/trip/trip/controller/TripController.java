@@ -167,8 +167,30 @@ public class TripController {
 
 		List<String> urls = tripService.findImageByTripId(tripId);
 		List<String> keys = awsAuthService.extractKeyFromUrl(urls);
-
 		awsAuthService.deleteObjectByKey(keys);
+
+		tripService.deleteTripById(tripId);
+
+		return ResponseEntity.ok("deleted");
+	}
+
+	@DeleteMapping("/leave")
+	@Operation(summary = "Trip 여행방 나가기")
+	@ApiResponse(responseCode = "200", description = "Trip 여행방 나가기")
+	public ResponseEntity<?> leaveTrip(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId
+	) {
+		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
+			return ResponseEntity.badRequest().body("해당 여행방의 멤버가 아닙니다.");
+
+		tripService.deleteTripMember(tripId, securityUser.getId());
+
+		if(tripService.countTripMember(tripId) == 0) {
+			List<String> urls = tripService.findImageByTripId(tripId);
+			List<String> keys = awsAuthService.extractKeyFromUrl(urls);
+			awsAuthService.deleteObjectByKey(keys);
+		}
 
 		tripService.deleteTripById(tripId);
 

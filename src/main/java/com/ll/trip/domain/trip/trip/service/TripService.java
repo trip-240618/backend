@@ -172,4 +172,17 @@ public class TripService {
 	public long findTripIdByInvitationCode(String invitationCode) {
 		return tripRepository.findTrip_idByInvitationCode(invitationCode);
 	}
+
+	public void deleteTripMember(long tripId, long userId) {
+		tripMemberRepository.deleteById(
+			TripMemberId.builder()
+				.tripId(tripId)
+				.userId(userId)
+				.build()
+		);
+	}
+
+	public int countTripMember(long tripId) {
+		return tripMemberRepository.countTripMemberByTrip_Id(tripId);
+	}
 }

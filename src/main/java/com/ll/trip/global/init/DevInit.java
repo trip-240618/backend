@@ -53,7 +53,7 @@ public class DevInit {
 
 			UserEntity user = userService.findUserByUserId(1);
 
-			if (tripMemberRepository.countByUser(user) == 0) {
+			if (tripMemberRepository.countByUser_Id(user.getId()) == 0) {
 				String invitationCode = tripService.generateInvitationCode();
 				Trip trip = tripService.createTrip(
 					new TripCreateDto("testTrip1", 'j', LocalDate.of(2024, 9, 14), LocalDate.of(2024, 9, 20), "일본",
