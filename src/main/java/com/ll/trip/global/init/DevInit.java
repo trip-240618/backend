@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.country.service.CountryService;
 import com.ll.trip.domain.history.history.dto.HistoryCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryTagDto;
 import com.ll.trip.domain.history.history.repository.HistoryRepository;
@@ -41,11 +42,14 @@ public class DevInit {
 	private final TripMemberRepository tripMemberRepository;
 	private final HistoryRepository historyRepository;
 	private final HistoryService historyService;
+	private final CountryService countryService;
 
 	@Bean
 	@Transactional
 	public ApplicationRunner initNotProd() {
 		return args -> {
+			// countryService.saveCountryImages(); 국기 이미지 저장할 때
+
 			if (userRepository.count() == 0) {
 				oAuth2Service.registerUser("test", "https://avatars.githubusercontent.com/u/109726278?v=4",
 					"KAKAO3607862190", null, null);
