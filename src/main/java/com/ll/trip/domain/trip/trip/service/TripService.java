@@ -2,14 +2,17 @@ package com.ll.trip.domain.trip.trip.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.history.history.entity.History;
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
+import com.ll.trip.domain.trip.trip.dto.TripImageDeleteDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
+import com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto;
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
 import com.ll.trip.domain.trip.trip.entity.BookmarkId;
 import com.ll.trip.domain.trip.trip.entity.Trip;
@@ -82,15 +85,38 @@ public class TripService {
 	}
 
 	public List<TripInfoDto> findAllIncomingByUserId(Long userId, LocalDate date) {
-		return tripRepository.findTripIncommingByUserIdAndDate(userId, date).stream().map(TripInfoDto::new).toList();
+		List<TripInfoServiceDto> serviceDtos = tripRepository.findTripIncommingByUserIdAndDate(userId, date);
+		return convertToTripInfoDto(serviceDtos);
 	}
 
 	public List<TripInfoDto> findAllLastByUserIdAndDate(Long userId, LocalDate date) {
-		return tripRepository.findTripLastByUserIdAndDate(userId, date).stream().map(TripInfoDto::new).toList();
+		List<TripInfoServiceDto> serviceDtos = tripRepository.findTripLastByUserIdAndDate(userId, date);
+		return convertToTripInfoDto(serviceDtos);
 	}
 
 	public List<TripInfoDto> findBookmarkByUserId(Long userId) {
-		return tripRepository.findAllBookmarkTrip(userId).stream().map(TripInfoDto::new).toList();
+		List<TripInfoServiceDto> serviceDtos = tripRepository.findAllBookmarkTrip(userId);
+		return convertToTripInfoDto(serviceDtos);
+	}
+
+	public List<TripInfoDto> convertToTripInfoDto(List<TripInfoServiceDto> serviceDtos) {
+		List<TripInfoDto> tripInfoDtoList = new ArrayList<>();
+		Map<Long, Integer> tripIdxMap = new HashMap<>();
+
+		for (TripInfoServiceDto dto : serviceDtos) {
+			long tripId = dto.getId();
+			if (tripIdxMap.containsKey(tripId)) {
+				tripInfoDtoList.get(tripIdxMap.get(tripId))
+					.getTripMemberDtoList().add(
+						dto.getTripMemberDto());
+			} else {
+				tripIdxMap.put(tripId, tripInfoDtoList.size());
+				TripInfoDto tripInfoDto = new TripInfoDto(dto);
+				tripInfoDtoList.add(tripInfoDto);
+			}
+		}
+
+		return tripInfoDtoList;
 	}
 
 	@Transactional
@@ -146,15 +172,15 @@ public class TripService {
 	}
 
 	public List<String> findImageByTripId(long tripId) {
-		List<Trip> trips = tripRepository.findTripAndHistoryByTripId(tripId);
-
+		List<TripImageDeleteDto> dtos = tripRepository.findTripAndHistoryByTripId(tripId);
 		List<String> urls = new ArrayList<>();
 
-		for (Trip trip : trips) {
-			urls.add(trip.getThumbnail());
-			for (History history : trip.getHistories()) {
-				urls.add(history.getImageUrl());
-				urls.add(history.getThumbnail());
+		if (dtos != null) {
+			urls.add(dtos.get(0).getTripThumbnail());
+
+			for (TripImageDeleteDto dto : dtos) {
+				urls.add(dto.getHistoryThumbnail());
+				urls.add(dto.getHistoryImage());
 			}
 		}
 

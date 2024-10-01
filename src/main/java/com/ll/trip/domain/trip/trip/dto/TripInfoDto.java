@@ -82,4 +82,18 @@ public class TripInfoDto {
 		this.bookmark = false;
 		this.tripMemberDtoList = trip.getTripMembers().stream().map(TripMemberDto::new).toList();
 	}
+
+	public TripInfoDto(TripInfoServiceDto dto) {
+		this.id = dto.getId();
+		this.name = dto.getName();
+		this.type = dto.getType();
+		this.invitationCode = dto.getInvitationCode();
+		this.country = dto.getCountry();
+		this.startDate = dto.getStartDate();
+		this.endDate = dto.getEndDate();
+		this.thumbnail = dto.getThumbnail();
+		this.labelColor = dto.getLabelColor();
+		this.bookmark = dto.isBookmark();
+		this.tripMemberDtoList.add(dto.getTripMemberDto());
+	}
 }
