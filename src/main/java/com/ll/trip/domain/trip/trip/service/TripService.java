@@ -13,6 +13,7 @@ import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
 import com.ll.trip.domain.trip.trip.dto.TripImageDeleteDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto;
+import com.ll.trip.domain.trip.trip.dto.TripModifyDto;
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
 import com.ll.trip.domain.trip.trip.entity.BookmarkId;
 import com.ll.trip.domain.trip.trip.entity.Trip;
@@ -60,21 +61,13 @@ public class TripService {
 	@Transactional
 	public boolean joinTripById(Trip trip, UserEntity user, boolean isLeader) {
 
-		TripMemberId tripMemberId = TripMemberId.builder()
-			.tripId(trip.getId())
-			.userId(user.getId())
-			.build();
+		TripMemberId tripMemberId = TripMemberId.builder().tripId(trip.getId()).userId(user.getId()).build();
 
 		if (tripMemberRepository.existsById(tripMemberId)) {
 			return false;
 		}
 
-		TripMember tripMember = TripMember.builder()
-			.id(tripMemberId)
-			.user(user)
-			.trip(trip)
-			.isLeader(isLeader)
-			.build();
+		TripMember tripMember = TripMember.builder().id(tripMemberId).user(user).trip(trip).isLeader(isLeader).build();
 
 		tripMemberRepository.save(tripMember);
 		return true;
@@ -85,7 +78,7 @@ public class TripService {
 	}
 
 	public List<TripInfoDto> findAllIncomingByUserId(Long userId, LocalDate date) {
-		List<TripInfoServiceDto> serviceDtos = tripRepository.findTripIncommingByUserIdAndDate(userId, date);
+		List<TripInfoServiceDto> serviceDtos = tripRepository.findTripIncomingByUserIdAndDate(userId, date);
 		return convertToTripInfoDto(serviceDtos);
 	}
 
@@ -106,9 +99,7 @@ public class TripService {
 		for (TripInfoServiceDto dto : serviceDtos) {
 			long tripId = dto.getId();
 			if (tripIdxMap.containsKey(tripId)) {
-				tripInfoDtoList.get(tripIdxMap.get(tripId))
-					.getTripMemberDtoList().add(
-						dto.getTripMemberDto());
+				tripInfoDtoList.get(tripIdxMap.get(tripId)).getTripMemberDtoList().add(dto.getTripMemberDto());
 			} else {
 				tripIdxMap.put(tripId, tripInfoDtoList.size());
 				TripInfoDto tripInfoDto = new TripInfoDto(dto);
@@ -131,28 +122,19 @@ public class TripService {
 
 	@Transactional
 	public void createTripBookmark(UserEntity user, Trip trip) {
-		BookmarkId bookmarkId = BookmarkId.builder().
-			tripId(trip.getId())
-			.userId(user.getId())
-			.build();
+		BookmarkId bookmarkId = BookmarkId.builder().tripId(trip.getId()).userId(user.getId()).build();
 
-		Bookmark bookmark = Bookmark.builder()
-			.id(bookmarkId)
-			.trip(trip)
-			.user(user)
-			.toggle(true)
-			.build();
+		Bookmark bookmark = Bookmark.builder().id(bookmarkId).trip(trip).user(user).toggle(true).build();
 
 		bookmarkRepository.save(bookmark);
 	}
 
 	public boolean getIsToggleByUserIdAndScrapId(long userId, long tripId) {
-		return bookmarkRepository.getIsToggleByUserIdAndTripId(userId, tripId)
-			.orElseThrow(NullPointerException::new);
+		return bookmarkRepository.getIsToggleByUserIdAndTripId(userId, tripId).orElseThrow(NullPointerException::new);
 	}
 
 	@Transactional
-	public TripInfoDto modifyTripByDto(Trip trip, TripInfoDto requestBody) {
+	public TripInfoDto modifyTripByDto(Trip trip, TripModifyDto requestBody) {
 		trip.setName(requestBody.getName());
 		trip.setThumbnail(requestBody.getThumbnail());
 		trip.setStartDate(requestBody.getStartDate());
@@ -163,7 +145,7 @@ public class TripService {
 		return new TripInfoDto(modifiedTrip);
 	}
 
-	public Trip findTripDetailByTripId(long tripId) {
+	public Trip findTripByTripId(long tripId) {
 		return tripRepository.findTripDetailById(tripId).orElseThrow(NullPointerException::new);
 	}
 

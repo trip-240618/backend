@@ -18,7 +18,7 @@ public interface TripRepository extends JpaRepository<Trip, Long>{
 	boolean existsByInvitationCode(String invitationCode);
 
 	@Query("""
-		    SELECT DISTINCT t
+		    SELECT t
 		    FROM Trip t
 		    JOIN fetch t.tripMembers tm
 		    LEFT JOIN fetch tm.user u
@@ -30,19 +30,19 @@ public interface TripRepository extends JpaRepository<Trip, Long>{
 		    SELECT new com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto(t.id, t.name, t.type, t.startDate, t.endDate, t.country,
 		    t.thumbnail, t.invitationCode, t.labelColor, COALESCE(b.toggle, false), u.uuid, u.nickname, u.thumbnail, tm.isLeader)
 		    FROM TripMember tm
-		    inner join tm.trip t on tm.user.id =: userId and t.endDate >= :date and t.id = tm.trip.id
-		    left join t.bookmarks b on b.trip.id = t.id and b.user.id = :userId
-		    left join tm.user u on u.id = tm.trip.id
+		    inner join tm.trip t on tm.user.id =: userId and t.endDate >= :date
+		    left join t.bookmarks b on b.user.id = :userId
+		    left join tm.user u
 		""")
-	List<TripInfoServiceDto> findTripIncommingByUserIdAndDate(Long userId, LocalDate date);
+	List<TripInfoServiceDto> findTripIncomingByUserIdAndDate(Long userId, LocalDate date);
 
 	@Query("""
 		    SELECT new com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto(t.id, t.name, t.type, t.startDate, t.endDate, t.country,
 		    t.thumbnail, t.invitationCode, t.labelColor, COALESCE(b.toggle, false), u.uuid, u.nickname, u.thumbnail, tm.isLeader)
 		    FROM TripMember tm
-		    inner join tm.trip t on tm.user.id =: userId and t.endDate < :date and t.id = tm.trip.id
-		    left join t.bookmarks b on b.trip.id = t.id and b.user.id = :userId
-		    left join tm.user u on u.id = tm.trip.id
+		    inner join tm.trip t on tm.user.id =: userId and t.endDate < :date
+		    left join t.bookmarks b on b.user.id = :userId
+		    left join tm.user u
 		""")
 	List<TripInfoServiceDto> findTripLastByUserIdAndDate(Long userId, LocalDate date);
 
@@ -50,8 +50,8 @@ public interface TripRepository extends JpaRepository<Trip, Long>{
 			SELECT new com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto(t.id, t.name, t.type, t.startDate, t.endDate, t.country,
 			t.thumbnail, t.invitationCode, t.labelColor, b.toggle, u.uuid, u.nickname, u.thumbnail, tm.isLeader)
 			FROM Bookmark b
-			inner join b.trip t on b.user.id =: userId and b.toggle = true and t.id = b.trip.id
-			left join TripMember tm on tm.trip.id = t.id
+			inner join b.trip t on b.user.id =: userId and b.toggle = true
+			left join t.tripMembers tm
 			left join tm.user u on u.id = tm.trip.id
 		""")
 	List<TripInfoServiceDto> findAllBookmarkTrip(Long userId);
@@ -59,8 +59,7 @@ public interface TripRepository extends JpaRepository<Trip, Long>{
 	@Query("""
 			select new com.ll.trip.domain.trip.trip.dto.TripImageDeleteDto(t.thumbnail, h.thumbnail, h.imageUrl)
 			from Trip t
-			left join History h on h.trip.id = t.id
-			where t.id = :tripId
+			inner join t.histories h on t.id = :tripId
 		""")
 	List<TripImageDeleteDto> findTripAndHistoryByTripId(long tripId);
 

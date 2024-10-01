@@ -39,8 +39,6 @@ public class HistoryReply extends BaseEntity {
 	@JoinColumn(name = "user_id")
 	private UserEntity user;
 
-	private String writerUuid;
-
 	@NotBlank
 	@Lob
 	private String content;

@@ -1,6 +1,5 @@
 package com.ll.trip.domain.history.history.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,17 +9,18 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ll.trip.domain.history.history.dto.HistoryCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryDetailDto;
 import com.ll.trip.domain.history.history.dto.HistoryListDto;
-import com.ll.trip.domain.history.history.dto.HistoryTagDto;
-import com.ll.trip.domain.history.history.entity.History;
-import com.ll.trip.domain.history.history.entity.HistoryReply;
-import com.ll.trip.domain.history.history.entity.HistoryTag;
-import com.ll.trip.domain.history.history.repository.HistoryTagRepository;
 import com.ll.trip.domain.history.history.dto.HistoryReplyCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
+import com.ll.trip.domain.history.history.dto.HistoryServiceDto;
+import com.ll.trip.domain.history.history.dto.HistoryTagDto;
+import com.ll.trip.domain.history.history.entity.History;
 import com.ll.trip.domain.history.history.entity.HistoryLike;
+import com.ll.trip.domain.history.history.entity.HistoryReply;
+import com.ll.trip.domain.history.history.entity.HistoryTag;
 import com.ll.trip.domain.history.history.repository.HistoryLikeRepository;
 import com.ll.trip.domain.history.history.repository.HistoryReplyRepository;
 import com.ll.trip.domain.history.history.repository.HistoryRepository;
+import com.ll.trip.domain.history.history.repository.HistoryTagRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 
@@ -42,9 +42,8 @@ public class HistoryService {
 
 	@Transactional
 	public History createHistory(HistoryCreateRequestDto requestDto, UserEntity user, Trip trip) {
-		History history = saveHistory(requestDto, user, trip);
-		history.setHistoryTags(createHistoryTags(requestDto.getTags(), trip, history));
-
+		History history = historyRepository.save(buildHistory(requestDto, user, trip));
+		createHistoryTags(requestDto.getTags(), trip, history);
 		return history;
 	}
 
@@ -74,30 +73,27 @@ public class HistoryService {
 	}
 
 	@Transactional
-	public History saveHistory(HistoryCreateRequestDto requestDto, UserEntity user, Trip trip) {
-		return historyRepository.save(
-			History.builder()
-				.imageUrl(requestDto.getImageUrl())
-				.thumbnail(requestDto.getThumbnail())
-				.latitude(requestDto.getLatitude())
-				.longitude(requestDto.getLongitude())
-				.memo(requestDto.getMemo())
-				.photoDate(requestDto.getPhotoDate())
-				.user(user)
-				.trip(trip)
-				.build()
-		);
+	public History buildHistory(HistoryCreateRequestDto requestDto, UserEntity user, Trip trip) {
+		return History.builder()
+			.imageUrl(requestDto.getImageUrl())
+			.thumbnail(requestDto.getThumbnail())
+			.latitude(requestDto.getLatitude())
+			.longitude(requestDto.getLongitude())
+			.memo(requestDto.getMemo())
+			.photoDate(requestDto.getPhotoDate())
+			.user(user)
+			.trip(trip)
+			.build();
 	}
 
-	public List<HistoryListDto> createManyHistories(List<HistoryCreateRequestDto> dtos, UserEntity user, Trip trip) {
-		List<HistoryListDto> historyListDtos = new ArrayList<>();
+	public int createManyHistories(List<HistoryCreateRequestDto> dtos, UserEntity user, Trip trip) {
+		int successCnt = 0;
 
 		for (HistoryCreateRequestDto dto : dtos) {
 			History history = createHistory(dto, user, trip);
-			historyListDtos.add(new HistoryListDto(history));
+			if(history != null) successCnt++;
 		}
-
-		return historyListDtos;
+		return successCnt;
 	}
 
 	@Transactional
@@ -105,9 +101,17 @@ public class HistoryService {
 		historyRepository.deleteById(historyId);
 	}
 
-	public HistoryDetailDto showHistoryDetail(long historyId) {
-		History history = historyRepository.findHistoryById(historyId);
-		return new HistoryDetailDto(history);
+	public HistoryDetailDto showHistoryDetail(long historyId, long userId) {
+		List<HistoryServiceDto> dtos = historyRepository.findHistoryById(historyId, userId);
+		return convertToHistoryDetailDto(dtos);
+	}
+
+	public HistoryDetailDto convertToHistoryDetailDto(List<HistoryServiceDto> dtos) {
+		HistoryDetailDto historyDetailDto = new HistoryDetailDto(dtos.remove(0));
+		for (HistoryServiceDto dto : dtos) {
+			historyDetailDto.getTags().add(dto.getTag());
+		}
+		return historyDetailDto;
 	}
 
 	@Transactional
@@ -115,7 +119,6 @@ public class HistoryService {
 		HistoryReply reply = HistoryReply.builder()
 			.user(user)
 			.history(history)
-			.writerUuid(user.getUuid())
 			.content(requestDto.getContent())
 			.build();
 
@@ -134,7 +137,7 @@ public class HistoryService {
 	@Transactional
 	public void deleteHistoryReply(long historyId, long replyId) {
 		historyReplyRepository.deleteById(replyId);
-		historyRepository.updateReplyCntById(historyId, 1);
+		historyRepository.updateReplyCntById(historyId, -1);
 	}
 
 	public boolean isWriterOfHistory(long historyId, long userId) {

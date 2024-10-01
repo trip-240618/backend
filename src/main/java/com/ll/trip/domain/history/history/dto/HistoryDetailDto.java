@@ -1,9 +1,8 @@
 package com.ll.trip.domain.history.history.dto;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
-
-import com.ll.trip.domain.history.history.entity.History;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -22,7 +21,7 @@ public class HistoryDetailDto {
 	private String writerUuid;
 
 	@Schema(
-		description = "프로필 축소버전",
+		description = "작성자 프로필 축소버전",
 		example = "https://trip-story.s3.ap-northeast-2.amazonaws.com/photoTest/c3396416-1e2e-4d0d-9a82-788831e5ac1f")
 	private String profileImage;
 
@@ -40,29 +39,39 @@ public class HistoryDetailDto {
 		example = "-122.08532419999999")
 	private BigDecimal longitude; //경도
 
+	@Schema(description = "메모",
+		example = "검암역을 기억해")
 	private String memo;
 
-	private List<HistoryReplyDto> replyDtos;
-
+	@Schema(description = "좋아요 수",
+		example = "1")
 	private int likeCnt;
+
+	@Schema(description = "댓글 수",
+		example = "3")
+	private int replyCnt;
+
+	@Schema(description = "좋아요 여부",
+		example = "false")
+	private boolean like;
 
 	@Schema(
 		description = "태그 리스트",
 		example = "[\"tag1\", \"tag2\", \"tag3\"]"
 	)
-	private List<HistoryTagDto> tags;
+	private List<HistoryTagDto> tags = new ArrayList<>();
 
-	public HistoryDetailDto(History history) {
-		this.id = history.getId();
-		this.writerUuid = history.getUser().getUuid();
-		this.profileImage = history.getUser().getThumbnail();
-		this.imageUrl = history.getImageUrl();
-		this.latitude = history.getLatitude();
-		this.longitude = history.getLongitude();
-		this.memo = history.getMemo();
-		this.likeCnt = history.getLikeCnt();
-		this.replyDtos = history.getHistoryReplies().stream().map(HistoryReplyDto::new).toList();
-		this.tags = history.getHistoryTags().stream().map(HistoryTagDto::new).toList();
+	public HistoryDetailDto(HistoryServiceDto dto) {
+		this.id = dto.getId();
+		this.writerUuid = dto.getWriterUuid();
+		this.profileImage = dto.getProfileImage();
+		this.imageUrl = dto.getImageUrl();
+		this.latitude = dto.getLatitude();
+		this.longitude = dto.getLongitude();
+		this.memo = dto.getMemo();
+		this.likeCnt = dto.getLikeCnt();
+		this.replyCnt = dto.getReplyCnt();
+		this.like = dto.isLike();
+		this.tags.add(dto.getTag());
 	}
-
 }

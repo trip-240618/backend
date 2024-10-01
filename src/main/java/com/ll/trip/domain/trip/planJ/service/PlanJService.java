@@ -80,4 +80,9 @@ public class PlanJService {
 		return planJRepository.findById(planId).orElseThrow(NullPointerException::new);
 	}
 
+	@Transactional
+	public void updatePlanJDay(Long tripId, int dayDiffer, int duration) {
+		planJRepository.updateDayByTripId(tripId, dayDiffer);
+		planJRepository.deleteByTripIdAndDuration(tripId, duration);
+	}
 }

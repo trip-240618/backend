@@ -1,6 +1,7 @@
 package com.ll.trip.domain.trip.trip.controller;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.aop.AopInvocationException;
@@ -18,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.notification.notification.service.NotificationService;
+import com.ll.trip.domain.trip.planJ.service.PlanJService;
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
 import com.ll.trip.domain.trip.trip.dto.TripCreateResponseDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
+import com.ll.trip.domain.trip.trip.dto.TripModifyDto;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.service.TripService;
 import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
@@ -46,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TripController {
 
 	private final TripService tripService;
+	private final PlanJService planJService;
 	private final AwsAuthService awsAuthService;
 	private final EntityManager entityManager;
 	private final SimpMessagingTemplate template;
@@ -89,7 +93,7 @@ public class TripController {
 
 		boolean isNewMember = tripService.joinTripById(trip, user, false);
 
-		TripInfoDto response = new TripInfoDto(tripService.findTripDetailByTripId(tripId));
+		TripInfoDto response = new TripInfoDto(tripService.findTripByTripId(tripId));
 		notificationService.tripJoinNotifictaion(trip, response.getName(), user.getId(), securityUser.getNickname());
 
 		if (isNewMember)
@@ -112,7 +116,7 @@ public class TripController {
 		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
 			return ResponseEntity.badRequest().body("입장 권한이 없습니다.");
 
-		TripInfoDto response = new TripInfoDto(tripService.findTripDetailByTripId(tripId));
+		TripInfoDto response = new TripInfoDto(tripService.findTripByTripId(tripId));
 
 		return ResponseEntity.ok(response);
 	}
@@ -178,11 +182,18 @@ public class TripController {
 	public ResponseEntity<?> modifyTrip(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId,
-		@RequestBody TripInfoDto requestBody
+		@RequestBody TripModifyDto requestBody
 	) {
 		if (!tripService.isLeaderOfTrip(securityUser.getId(), tripId))
 			return ResponseEntity.badRequest().body("해당 여행방에 대한 수정/삭제 권한이 없습니다.");
-		TripInfoDto response = tripService.modifyTripByDto(entityManager.getReference(Trip.class, tripId), requestBody);
+		Trip trip = tripService.findTripByTripId(tripId);
+
+		planJService.updatePlanJDay(trip.getId(),
+			(int)ChronoUnit.DAYS.between(trip.getStartDate(), requestBody.getStartDate()),
+			(int)ChronoUnit.DAYS.between(requestBody.getStartDate(), requestBody.getEndDate()) + 1
+		);
+
+		TripInfoDto response = tripService.modifyTripByDto(trip, requestBody);
 
 		return ResponseEntity.ok(response);
 	}

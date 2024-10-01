@@ -9,15 +9,10 @@ import com.ll.trip.domain.history.history.entity.HistoryReply;
 import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
 
 public interface HistoryReplyRepository extends JpaRepository<HistoryReply, Long> {
-
 	@Query("""
-		select new com.ll.trip.domain.history.history.dto.HistoryReplyDto(
-			r.id,
-			r.writerUuid,
-			r.createDate,
-			r.content
-		) from HistoryReply r
-		where r.history.id = :historyId
+		select new com.ll.trip.domain.history.history.dto.HistoryReplyDto(r.id, u.uuid, r.createDate, r.content)
+		from HistoryReply r
+		left join r.user u on r.history.id = :historyId
 		""")
 	List<HistoryReplyDto> findByHistoryId(long historyId);
 

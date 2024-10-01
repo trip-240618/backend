@@ -16,16 +16,8 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 
 	@Query("""
 		select new com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto(
-				p.id,
-				p.dayAfterStart,
-				p.orderByDate,
-				p.startTime,
-				p.writerUuid,
-				p.title,
-				p.memo,
-				p.latitude,
-				p.longitude,
-				p.locker
+		p.id, p.dayAfterStart, p.orderByDate, p.startTime, p.writerUuid, p.title, p.memo,
+		p.latitude, p.longitude, p.locker
 		) from PlanJ p
 		where p.trip.id = :tripId and
 		p.dayAfterStart = :day and
@@ -36,16 +28,8 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 
 	@Query("""
 		select new com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto(
-				p.id,
-				p.dayAfterStart,
-				p.orderByDate,
-				p.startTime,
-				p.writerUuid,
-				p.title,
-				p.memo,
-				p.latitude,
-				p.longitude,
-				p.locker
+		p.id, p.dayAfterStart, p.orderByDate, p.startTime, p.writerUuid, p.title, p.memo,
+		p.latitude, p.longitude, p.locker
 		) from PlanJ p
 		where p.trip.id = :tripId and
 		p.locker = :locker
@@ -61,4 +45,18 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 		where p.id = :planId
 		""")
 	int updateStartTimeAndOrder(long planId, LocalTime startTime, int orderByDate);
+
+	@Modifying
+	@Query("""
+		update PlanJ p
+		set p.dayAfterStart = p.dayAfterStart + :dayDiffer
+		where p.trip.id = :tripId
+		""")
+	int updateDayByTripId(Long tripId, int dayDiffer);
+
+	@Query("""
+		delete PlanJ p
+		where p.trip.id = :tripId and (p.dayAfterStart < 1 or p.dayAfterStart > :duration)
+		""")
+	void deleteByTripIdAndDuration(Long tripId, int duration);
 }
