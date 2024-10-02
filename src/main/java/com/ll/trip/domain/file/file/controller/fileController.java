@@ -34,8 +34,9 @@ public class fileController {
 
 	@GetMapping("/request/url")
 	@Operation(summary = "s3 버킷 오브젝트 권한 요청")
-	@ApiResponse(responseCode = "200", description = "권한이 부여된 url을 리턴 해당 url에 이미지를 업로드할 수 있음"
-													 + "prefix는 파일의 경로(plan 또는 profile 등), photoCnt는 업로드할 파일의 수", content = {
+	@ApiResponse(responseCode = "200",
+		description = "권한이 부여된 url을 리턴 해당 url에 이미지를 업로드할 수 있음, "
+					  + "prefix는 파일의 경로(plan 또는 profile 등), photoCnt는 업로드할 파일의 수", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = PreSignedUrlResponseDto.class))})
 	public ResponseEntity<PreSignedUrlResponseDto> getPreSignedUrl(
 		@RequestParam @Parameter(description = "경로", example = "profile or history ..") String prefix,
@@ -53,14 +54,14 @@ public class fileController {
 	public ResponseEntity<?> deleteObject(
 		@RequestBody DeleteObjectByUrlRequestBody requestBody
 	) {
-		if(requestBody.getUrls() == null) return ResponseEntity.badRequest().body("null");
+		if (requestBody.getUrls() == null)
+			return ResponseEntity.badRequest().body("null");
 
-		List<String> urls = awsAuthService.abstractUrlFromPresignedUrl(requestBody.getUrls());
-		List<String> keys = awsAuthService.abstractKeyFromUrl(urls);
+		List<String> urls = awsAuthService.extractUrlFromPresignedUrl(requestBody.getUrls());
+		List<String> keys = awsAuthService.extractKeyFromUrl(urls);
 		awsAuthService.deleteObjectByKey(keys);
 
 		return ResponseEntity.ok("deleted");
 	}
-
 
 }

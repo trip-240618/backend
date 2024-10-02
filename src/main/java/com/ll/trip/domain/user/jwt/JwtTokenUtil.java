@@ -2,12 +2,15 @@ package com.ll.trip.domain.user.jwt;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -50,18 +53,27 @@ public class JwtTokenUtil {
 
 	private final UserDetailsServiceImpl userDetailsService;
 
-	public String createRefreshToken(String uuid, List<String> roles) {
-		//TODO claim 최신화
-		return getString(uuid, roles, refreshTokenValidityInMilliseconds);
+	public String createRefreshToken(long userId, String uuid, String nickname,
+		Collection<? extends GrantedAuthority> authorities) {
+		List<String> roles = authorities.stream()
+			.map(GrantedAuthority::getAuthority)  // 권한 정보(ROLE_XXX) 추출
+			.collect(Collectors.toList());
+		return getString(userId, uuid, nickname, roles, refreshTokenValidityInMilliseconds);
 	}
 
-	public String createAccessToken(String uuid, List<String> roles) {
-
-		return getString(uuid, roles, 6000);
+	public String createAccessToken(long userId, String uuid, String nickname,
+		Collection<? extends GrantedAuthority> authorities) {
+		List<String> roles = authorities.stream()
+			.map(GrantedAuthority::getAuthority)  // 권한 정보(ROLE_XXX) 추출
+			.collect(Collectors.toList());
+		return getString(userId, uuid, nickname, roles, accessTokenValidityInMilliseconds);
 	}
 
-	private String getString(String uuid, List<String> roles, long tokenValidityInMilliseconds) {
+	private String getString(long id, String uuid, String nickname, List<String> roles,
+		long tokenValidityInMilliseconds) {
 		Claims claims = Jwts.claims().setSubject(uuid);
+		claims.put("id", id);  // 사용자 ID 추가
+		claims.put("nickname", nickname);  // 닉네임 추가
 		claims.put("roles", roles);
 
 		Date now = new Date();
@@ -75,13 +87,14 @@ public class JwtTokenUtil {
 			.compact();
 	}
 
-	public Authentication getAuthentication(String token) {
-		UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUuid(token));
+	public Authentication buildAuthentication(long id, String uuid, String nickname,
+		Collection<? extends GrantedAuthority> authorities) {
+		UserDetails userDetails = userDetailsService.buildUserByClaims(id, uuid, nickname, authorities);
 		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
 	}
 
-	public String getUuid(String token) {
-		return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
+	public Claims getClaims(String token) {
+		return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
 	}
 
 	public boolean validateToken(String token) {

@@ -1,7 +1,6 @@
 package com.ll.trip.domain.trip.planJ.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -19,17 +18,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ll.trip.domain.flight.dto.ScheduleResponseDto;
-import com.ll.trip.domain.trip.location.response.PlanResponseBody;
 import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
+import com.ll.trip.domain.trip.planJ.dto.PlanJEditorRegisterDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJModifyRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJSwapRequestDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.service.PlanJEditService;
 import com.ll.trip.domain.trip.planJ.service.PlanJService;
-import com.ll.trip.domain.trip.trip.entity.Trip;
-import com.ll.trip.domain.trip.trip.service.TripService;
+import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,56 +45,56 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/trip/j")
-@Tag(name = "Plan J", description = "J타입 플랜의 CRUD 기능")
+@Tag(name = "Plan J", description = "J타입 플랜 API")
 public class PlanJController {
-	private final TripService tripService;
 	private final PlanJService planJService;
 	private final PlanJEditService planJEditService;
 	private final SimpMessagingTemplate template;
 
-	@PostMapping("/{invitationCode}/plan/create")
+	@PostMapping("/{tripId}/plan/create")
 	@Operation(summary = "J형 Plan 생성")
-	@ApiResponse(responseCode = "200", description = "J형 Plan생성, 응답데이터는 websocket으로 전송", content = {
+	@ApiResponse(responseCode = "200", description = "J형 Plan생성, 응답데이터는 websocket으로 전송 (/topic/api/trip/j/{tripId})", content = {
 		@Content(mediaType = "application/json",
 			examples = {
 				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"create\", \"data\": \"PlanJInfoDto\"}"),
 				@ExampleObject(name = "http 응답", value = "created")},
 			schema = @Schema(implementation = PlanJInfoDto.class))})
 	public ResponseEntity<?> createPlanJ(
-		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestBody PlanJCreateRequestDto requestDto
 	) {
-		Trip trip = tripService.findByInvitationCode(invitationCode);
-		int order = planJEditService.getLastOrderByTripId(trip.getId(), requestDto.getDayAfterStart());
+		int order = planJEditService.getLastOrderByTripId(tripId);
 
-		PlanJ plan = planJService.createPlan(trip, requestDto, order, securityUser.getUuid());
+		PlanJ plan = planJService.createPlan(tripId, requestDto, order, securityUser.getUuid());
 		PlanJInfoDto response = planJService.convertPlanJToDto(plan);
 
 		template.convertAndSend(
-			"/topic/api/trip/j/" + invitationCode,
-			new PlanResponseBody<>("create", response)
+			"/topic/api/trip/j/" + tripId,
+			new SocketResponseBody<>("create", response)
 		);
 
 		return ResponseEntity.ok("created");
 	}
 
-	@GetMapping("/{invitationCode}/plan/list")
-	@Operation(summary = "Plan 리스트 요청")
+	@GetMapping("/{tripId}/plan/list")
+	@Operation(summary = "PlanJ 리스트 요청")
 	@ApiResponse(responseCode = "200", description = "Plan 리스트 요청", content = {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanJInfoDto.class)))})
 	public ResponseEntity<?> showPlanJList(
-		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam @Parameter(description = "day", example = "1") int day,
-		@AuthenticationPrincipal SecurityUser securityUser
+		@RequestParam @Parameter(description = "보관함 여부", example = "false") boolean locker
 	) {
-		Trip trip = tripService.findByInvitationCode(invitationCode);
-		List<PlanJInfoDto> response = planJService.findAllByTripIdAndDay(trip.getId(), day);
-
+		List<PlanJInfoDto> response;
+		if (!locker)
+			response = planJService.findAllPlanAByTripIdAndDay(tripId, day);
+		else
+			response = planJService.findAllPlanBByTripId(tripId);
 		return ResponseEntity.ok(response);
 	}
 
-	@PutMapping("/{invitationCode}/plan/edit/modify")
+	@PutMapping("/{tripId}/plan/edit/modify")
 	@Operation(summary = "PlanJ 수정")
 	@ApiResponse(responseCode = "200", description = "PlanJ 수정", content = {
 		@Content(
@@ -108,37 +105,37 @@ public class PlanJController {
 			schema = @Schema(implementation = PlanJInfoDto.class))})
 	public ResponseEntity<?> modifyPlanJ(
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody PlanJModifyRequestDto requestBody
 	) {
 		PlanJ plan = planJService.findPlanJById(requestBody.getPlanId());
 		int order = plan.getOrderByDate();
-		int dayFrom = plan.getDayAfterStart();
-		int dayTo = requestBody.getDayAfterStart();
+		Integer dayFrom = plan.getDayAfterStart();
+		Integer dayTo = requestBody.getDayAfterStart();
 
-		if (plan.getStartTime() != requestBody.getStartTime() || dayFrom != dayTo) {
-			if (!planJEditService.isEditor(invitationCode, securityUser.getUuid(), dayFrom))
-				return ResponseEntity.badRequest().body("day" + dayFrom + "의 편집자가 아닙니다.");
-			if (dayTo != dayFrom && !planJEditService.isEditor(invitationCode, securityUser.getUuid(), dayTo))
-				return ResponseEntity.badRequest().body("day" + dayTo + "의 편집자가 아닙니다.");
-
-			Trip trip = tripService.findByInvitationCode(invitationCode);
-			order = planJEditService.getLastOrderByTripId(trip.getId(), requestBody.getDayAfterStart());
-
+		if ((plan.getStartTime() != requestBody.getStartTime()) || !dayFrom.equals(dayTo)) {
+			if (!requestBody.isLocker()) {
+				if (!planJEditService.isEditor(tripId, securityUser.getUuid(), dayFrom))
+					return ResponseEntity.badRequest().body("day" + dayFrom + "의 편집자가 아닙니다.");
+				if (!requestBody.isLocker() && !dayTo.equals(dayFrom) && !planJEditService.isEditor(tripId,
+					securityUser.getUuid(), dayTo))
+					return ResponseEntity.badRequest().body("day" + dayTo + "의 편집자가 아닙니다.");
+			}
+			order = planJEditService.getLastOrderByTripId(tripId);
 		}
 
 		plan = planJService.updatePlanJByPlanId(plan, requestBody, order);
 		PlanJInfoDto response = planJService.convertPlanJToDto(plan);
 
 		template.convertAndSend(
-			"/topic/api/trip/j/" + invitationCode,
-			new PlanResponseBody<>("modify", response)
+			"/topic/api/trip/j/" + tripId,
+			new SocketResponseBody<>("modify", response)
 		);
 
 		return ResponseEntity.ok("modified");
 	}
 
-	@PutMapping("/{invitationCode}/plan/edit/swap")
+	@PutMapping("/{tripId}/plan/edit/swap")
 	@Operation(summary = "PlanJ 스왑")
 	@ApiResponse(responseCode = "200", description = "PlanJ 스왑", content = {
 		@Content(
@@ -149,27 +146,26 @@ public class PlanJController {
 			schema = @Schema(implementation = PlanJSwapRequestDto.class))})
 	public ResponseEntity<?> swapPlanJ(
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody PlanJSwapRequestDto requestBody
 	) {
 		int day = requestBody.getDayAfterStart();
 
-		if (!planJEditService.isEditor(invitationCode, securityUser.getUuid(), day))
+		if (!planJEditService.isEditor(tripId, securityUser.getUuid(), day))
 			return ResponseEntity.badRequest().body("day" + day + "의 편집자가 아닙니다.");
 
-		if(planJEditService.swapPlanJByIds(requestBody.getPlanId1(), requestBody.getPlanId2()) != 2)
+		if (planJEditService.swapPlanJByIds(requestBody.getPlanId1(), requestBody.getPlanId2()) != 2)
 			return ResponseEntity.internalServerError().body("swap 실패");
 
-
 		template.convertAndSend(
-			"/topic/api/trip/j/" + invitationCode,
-			new PlanResponseBody<>("modify", requestBody)
+			"/topic/api/trip/j/" + tripId,
+			new SocketResponseBody<>("modify", requestBody)
 		);
 
 		return ResponseEntity.ok("swapped");
 	}
 
-	@DeleteMapping("/{invitationCode}/plan/delete")
+	@DeleteMapping("/{tripId}/plan/delete")
 	@Operation(summary = "PlanJ 삭제")
 	@ApiResponse(responseCode = "200", description = "PlanJ 삭제", content = {
 		@Content(mediaType = "application/json",
@@ -178,107 +174,87 @@ public class PlanJController {
 				@ExampleObject(name = "http 응답", value = "삭제로 인해 순서가 수정된 plan 수")}
 		)})
 	public ResponseEntity<?> deletePlanJ(
-		@AuthenticationPrincipal SecurityUser securityUser,
-		@PathVariable @Parameter(description = "초대코드", example = "1A2B3C4D", in = ParameterIn.PATH) String invitationCode,
+		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId
 	) {
 		planJService.deletePlanJById(planId);
 
 		template.convertAndSend(
-			"/topic/api/trip/j/" + invitationCode,
-			new PlanResponseBody<>("delete", planId)
+			"/topic/api/trip/j/" + tripId,
+			new SocketResponseBody<>("delete", planId)
 		);
 
 		return ResponseEntity.ok("deleted");
 	}
 
-	@MessageMapping("/j/{invitationCode}/{day}/edit/register")
+	@MessageMapping("/{tripId}/{day}/edit/register")
 	public void addEditor(
 		SimpMessageHeaderAccessor headerAccessor,
-		@DestinationVariable String invitationCode,
+		@DestinationVariable long tripId,
 		@DestinationVariable int day
 	) {
 		String username = headerAccessor.getUser().getName();
 		log.info("uuid : " + username);
 
-		String uuid = planJEditService.getEditorByInvitationCodeAndDay(invitationCode, day);
+		String uuid = planJEditService.getEditorByTripIdAndDay(tripId, day);
 		if (uuid != null) {
-			template.convertAndSendToUser(username, "/topic/api/trip/j/" + invitationCode,
-				new PlanResponseBody<>("wait", uuid)
+			template.convertAndSendToUser(username, "/topic/api/trip/j/" + tripId,
+				new SocketResponseBody<>("wait", new PlanJEditorRegisterDto(day, username))
 			);
 			return;
 		}
 
-		planJEditService.addEditor(invitationCode, username, day);
+		planJEditService.addEditor(tripId, username, day);
 
-		template.convertAndSend("/topic/api/trip/j/" + invitationCode,
-			new PlanResponseBody<>("edit start", username)
+		template.convertAndSend("/topic/api/trip/j/" + tripId,
+			new SocketResponseBody<>("edit start", new PlanJEditorRegisterDto(day, username))
 		);
 	}
 
-	@GetMapping("/j/{invitationCode}/{day}/edit/register")
+	@GetMapping("/{tripId}/{day}/edit/register")
 	@Operation(summary = "(웹소켓 설명용) 편집자 등록")
 	@ApiResponse(responseCode = "200", description = "웹소켓으로 요청해야함, 편집자가 없을 시 편집자로 등록", content = {
 		@Content(mediaType = "application/json",
 			examples = {
 				@ExampleObject(name = "편집자로 등록된 경우", value = "{\"command\": \"edit start\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}"),
 				@ExampleObject(name = "편집중인 사람이 존재할 경우", value = "{\"command\": \"wait\", \"data\": \"223e4567-e89b-12d3-a456-426614174001\"}")
-			}
-		)})
-	public PlanResponseBody<String> addEditor(
-		@PathVariable String invitationCode,
-		@PathVariable int day
+			},
+			schema = @Schema(implementation = PlanJEditorRegisterDto.class))})
+	public SocketResponseBody<String> addEditor(
+		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
+		@PathVariable @Parameter(description = "day", example = "1", in = ParameterIn.PATH) int day
 	) {
-		return new PlanResponseBody<>("edit start", "uuid");
+		return new SocketResponseBody<>("edit start", "uuid");
 	}
 
-	@GetMapping("j/{inviationCode}/{day}/edit/finish")
+	@GetMapping("/{tripId}/{day}/edit/finish")
+	@Operation(summary = "편집자 해제")
+	@ApiResponse(responseCode = "200", description = "편집자 목록에서 제거", content = {
+		@Content(mediaType = "application/json",
+			examples = {
+				@ExampleObject(value = "{\"command\": \"edit finish\", \"data\": PlanJEditorRegisterDto"),
+			},
+			schema = @Schema(implementation = PlanJEditorRegisterDto.class))})
 	public void removeEditor(
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@DestinationVariable String invitationCode,
-		@DestinationVariable int day
+		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
+		@PathVariable int day
 	) {
 		String username = securityUser.getUuid();
 		log.info("uuid : " + username);
 
-		planJEditService.removeEditor(invitationCode, day, username);
+		planJEditService.removeEditor(tripId, day, username);
 
-		template.convertAndSend("/topic/api/trip/j/" + invitationCode,
-			new PlanResponseBody<>("edit finish", username)
+		template.convertAndSend("/topic/api/trip/j/" + tripId,
+			new SocketResponseBody<>("edit finish", new PlanJEditorRegisterDto(day, username))
 		);
 	}
 
-	@PostMapping("j/{invitationCode}/flight/create")
-	@Operation(summary = "항공편 플랜 등록")
-	@ApiResponse(responseCode = "200", description = "항공편 플랜 등록", content = {
-		@Content(mediaType = "application/json", schema = @Schema(implementation = ScheduleResponseDto.class))})
-	public ResponseEntity<?> showFlightSchedule(
-		@PathVariable String invitationCode,
-		@AuthenticationPrincipal SecurityUser securityUser,
-		@RequestBody ScheduleResponseDto requestBody
-		)
-	{
-		//출발지: 서울 (한국 표준시, UTC+09:00)
-		// 도착지: 두바이 (아랍 표준시, UTC+04:00) 도착시간이 더 빠를 수 있음
-		Trip trip = tripService.findByInvitationCode(invitationCode);
-
-		Map<String,PlanJ> map = planJService.createPlanJFromScheduledResponseDto(trip, requestBody, securityUser.getUuid());
-
-		PlanJInfoDto departure = planJService.convertPlanJToDto(map.get("departure"));
-		PlanJInfoDto arrival = planJService.convertPlanJToDto(map.get("arrival"));
-
-		template.convertAndSend(
-			"/topic/api/trip/j/" + invitationCode,
-			new PlanResponseBody<>("create", departure)
-		);
-
-		template.convertAndSend(
-			"/topic/api/trip/j/" + invitationCode,
-			new PlanResponseBody<>("create", arrival)
-		);
-
-		return ResponseEntity.ok("created");
-
+	@GetMapping("/show/editors")
+	@Operation(summary = "플랜j editor권한 목록")
+	@ApiResponse(responseCode = "200", description = "플랜j editor권한 목록")
+	public ResponseEntity<?> showEditors() {
+		return ResponseEntity.ok(planJEditService.getActiveEditTopicsAndUuidAndDay());
 	}
 
 }

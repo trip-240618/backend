@@ -5,15 +5,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
+import com.ll.trip.domain.trip.trip.dto.TripImageDeleteDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
-import com.ll.trip.domain.trip.trip.dto.TripMemberDto;
-import com.ll.trip.domain.trip.trip.dto.TripMemberServiceDto;
+import com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto;
+import com.ll.trip.domain.trip.trip.dto.TripModifyDto;
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
 import com.ll.trip.domain.trip.trip.entity.BookmarkId;
 import com.ll.trip.domain.trip.trip.entity.Trip;
@@ -22,8 +22,8 @@ import com.ll.trip.domain.trip.trip.entity.TripMemberId;
 import com.ll.trip.domain.trip.trip.repository.BookmarkRepository;
 import com.ll.trip.domain.trip.trip.repository.TripMemberRepository;
 import com.ll.trip.domain.trip.trip.repository.TripRepository;
+import com.ll.trip.domain.user.user.dto.VisitedCountryDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
-import com.ll.trip.domain.user.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,7 +38,6 @@ public class TripService {
 
 	//bookmark
 	private final BookmarkRepository bookmarkRepository;
-	private final UserRepository userRepository;
 
 	@Transactional
 	public Trip createTrip(TripCreateDto tripCreateDto, String invitationCode) {
@@ -53,7 +52,7 @@ public class TripService {
 			.labelColor(tripCreateDto.getLabelColor())
 			.build();
 
-		return trip = tripRepository.save(trip);
+		return tripRepository.save(trip);
 	}
 
 	public String generateInvitationCode() {
@@ -61,78 +60,55 @@ public class TripService {
 	}
 
 	@Transactional
-	public void joinTripById(Trip trip, UserEntity user, boolean isLeader) {
-		TripMemberId tripMemberId = TripMemberId.builder()
-			.tripId(trip.getId())
-			.userId(user.getId())
-			.build();
+	public boolean joinTripById(Trip trip, UserEntity user, boolean isLeader) {
+
+		TripMemberId tripMemberId = TripMemberId.builder().tripId(trip.getId()).userId(user.getId()).build();
 
 		if (tripMemberRepository.existsById(tripMemberId)) {
-			return;
+			return false;
 		}
 
-		TripMember tripMember = TripMember.builder()
-			.id(tripMemberId)
-			.user(user)
-			.trip(trip)
-			.isLeader(isLeader)
-			.build();
+		TripMember tripMember = TripMember.builder().id(tripMemberId).user(user).trip(trip).isLeader(isLeader).build();
 
 		tripMemberRepository.save(tripMember);
-	}
-
-	public Trip findByInvitationCode(String invitationCode) {
-		return tripRepository.findByInvitationCode(invitationCode).orElseThrow(NullPointerException::new);
-	}
-
-	public List<TripMemberDto> findTripMemberUserByTripId(Long tripId) {
-		return tripMemberRepository.findTripMemberUserByTripId(tripId);
+		return true;
 	}
 
 	public boolean existTripMemberByTripIdAndUserId(long tripId, long userId) {
 		return tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId);
 	}
 
-	public boolean existTripMemberByTripInvitationCodeAndUserId(String invitationCode, long userId) {
-		return tripMemberRepository.existsTripMemberByTrip_InvitationCodeAndUserId(invitationCode, userId);
+	public List<TripInfoDto> findAllIncomingByUserId(Long userId, LocalDate date) {
+		List<TripInfoServiceDto> serviceDtos = tripRepository.findTripIncomingByUserIdAndDate(userId, date);
+		return convertToTripInfoDto(serviceDtos);
 	}
 
-	public List<TripInfoDto> findAllByUserId(Long userId, LocalDate date, String type, String sortDirection,
-		String sortField) {
-
-		return tripRepository.findTripInfosWithDynamicSort(userId, LocalDate.now(), sortField, sortDirection, type);
+	public List<TripInfoDto> findAllLastByUserIdAndDate(Long userId, LocalDate date) {
+		List<TripInfoServiceDto> serviceDtos = tripRepository.findTripLastByUserIdAndDate(userId, date);
+		return convertToTripInfoDto(serviceDtos);
 	}
 
-	public void fillTripMemberToTripInfo(List<TripInfoDto> tripInfoDtoList) {
-		Map<Long, TripInfoDto> tripMap = new HashMap<>();
-		List<Long> idList = new ArrayList<>();
+	public List<TripInfoDto> findBookmarkByUserId(Long userId) {
+		List<TripInfoServiceDto> serviceDtos = tripRepository.findAllBookmarkTrip(userId);
+		return convertToTripInfoDto(serviceDtos);
+	}
 
-		for (TripInfoDto tripInfoDto : tripInfoDtoList) {
-			long tripId = tripInfoDto.getId();
-			idList.add(tripId);
-			tripMap.put(tripId, tripInfoDto);
+	public List<TripInfoDto> convertToTripInfoDto(List<TripInfoServiceDto> serviceDtos) {
+		List<TripInfoDto> tripInfoDtoList = new ArrayList<>();
+		Map<Long, Integer> tripIdxMap = new HashMap<>();
+
+		for (TripInfoServiceDto dto : serviceDtos) {
+			long tripId = dto.getId();
+			if (tripIdxMap.containsKey(tripId)) {
+				tripInfoDtoList.get(tripIdxMap.get(tripId)).getTripMemberDtoList().add(dto.getTripMemberDto());
+			} else {
+				tripIdxMap.put(tripId, tripInfoDtoList.size());
+				TripInfoDto tripInfoDto = new TripInfoDto(dto);
+				tripInfoDtoList.add(tripInfoDto);
+			}
 		}
 
-		List<TripMemberServiceDto> tripMemberServiceDtoList = tripMemberRepository
-			.findAllTripMemberDtosByTripIds(idList);
-
-		for (TripMemberServiceDto tripMemberServiceDto : tripMemberServiceDtoList) {
-			long id = tripMemberServiceDto.getId();
-
-			TripMemberDto tripMemberDto = new TripMemberDto(
-				tripMemberServiceDto.getUuid(),
-				tripMemberServiceDto.getNickname(),
-				tripMemberServiceDto.getThumbnail(),
-				tripMemberServiceDto.getProfileImg(),
-				tripMemberServiceDto.isLeader()
-			);
-
-			tripMap.get(id).getTripMemberDtoList().add(tripMemberDto);
-		}
-	}
-
-	public List<TripInfoDto> findBookmarkByUserId(Long userId, String sortDirection, String sortField) {
-		return tripRepository.findBookmarkTripInfosWithDynamicSort(userId, sortField, sortDirection);
+		return tripInfoDtoList;
 	}
 
 	@Transactional
@@ -141,46 +117,78 @@ public class TripService {
 	}
 
 	@Transactional
-	public boolean toggleBookmarkByTripAndUserId(Trip trip, Long userId) {
-		BookmarkId bookmarkId = BookmarkId.builder().
-			tripId(trip.getId())
-			.userId(userId)
-			.build();
-
-		Optional<Bookmark> optBookmark = bookmarkRepository.findById(bookmarkId);
-
-		if (optBookmark.isEmpty()) {
-			UserEntity user = userRepository.findById(userId).orElseThrow(NullPointerException::new);
-
-			Bookmark bookmark = Bookmark.builder()
-				.id(bookmarkId)
-				.trip(trip)
-				.user(user)
-				.toggle(true)
-				.build();
-
-			return true;
-		}
-
-		Bookmark bookmark = optBookmark.get();
-		boolean toggle = bookmark.isToggle();
-
-		if (bookmarkRepository.updateToggleById(bookmarkId, !toggle) > 0)
-			return !toggle; //수정됨
-		else
-			return toggle;
+	public int toggleBookmarkByTripAndUserId(long userId, long tripId) {
+		return bookmarkRepository.toggleTripBookmarkByTripIdAndUserId(userId, tripId);
 	}
 
 	@Transactional
-	public TripInfoDto modifyTripByDto(Trip trip, TripInfoDto requestBody) {
+	public void createTripBookmark(UserEntity user, Trip trip) {
+		BookmarkId bookmarkId = BookmarkId.builder().tripId(trip.getId()).userId(user.getId()).build();
+
+		Bookmark bookmark = Bookmark.builder().id(bookmarkId).trip(trip).user(user).toggle(true).build();
+
+		bookmarkRepository.save(bookmark);
+	}
+
+	public boolean getIsToggleByUserIdAndScrapId(long userId, long tripId) {
+		return bookmarkRepository.getIsToggleByUserIdAndTripId(userId, tripId).orElseThrow(NullPointerException::new);
+	}
+
+	@Transactional
+	public TripInfoDto modifyTripByDto(Trip trip, TripModifyDto requestBody) {
 		trip.setName(requestBody.getName());
 		trip.setThumbnail(requestBody.getThumbnail());
 		trip.setStartDate(requestBody.getStartDate());
 		trip.setEndDate(requestBody.getEndDate());
+		trip.setLabelColor(requestBody.getLabelColor());
 
 		Trip modifiedTrip = tripRepository.save(trip);
 
 		return new TripInfoDto(modifiedTrip);
 	}
 
+	public Trip findTripByTripId(long tripId) {
+		return tripRepository.findTripDetailById(tripId).orElseThrow(NullPointerException::new);
+	}
+
+	public boolean isLeaderOfTrip(long userId, long tripId) {
+		return tripMemberRepository.isLeaderOfTrip(userId, tripId);
+	}
+
+	public List<String> findImageByTripId(long tripId) {
+		List<TripImageDeleteDto> dtos = tripRepository.findTripAndHistoryByTripId(tripId);
+		List<String> urls = new ArrayList<>();
+
+		if (dtos != null) {
+			urls.add(dtos.get(0).getTripThumbnail());
+
+			for (TripImageDeleteDto dto : dtos) {
+				urls.add(dto.getHistoryThumbnail());
+				urls.add(dto.getHistoryImage());
+			}
+		}
+
+		return urls;
+	}
+
+	public long findTripIdByInvitationCode(String invitationCode) {
+		return tripRepository.findTrip_idByInvitationCode(invitationCode);
+	}
+
+	public void deleteTripMember(long tripId, long userId) {
+		tripMemberRepository.deleteById(
+			TripMemberId.builder()
+				.tripId(tripId)
+				.userId(userId)
+				.build()
+		);
+	}
+
+	public int countTripMember(long tripId) {
+		return tripMemberRepository.countTripMemberByTrip_Id(tripId);
+	}
+
+	public List<VisitedCountryDto> findVisitedCountry(long userId) {
+		return tripRepository.findVisitedCountry(userId, LocalDate.now());
+	}
 }

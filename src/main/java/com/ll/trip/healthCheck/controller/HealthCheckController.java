@@ -11,8 +11,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
+@Slf4j
 public class HealthCheckController {
 	@Value("${server.env}")
 	private String env;
@@ -38,6 +40,7 @@ public class HealthCheckController {
 	@ApiResponse(responseCode = "200", description = "도커에서 blue, green중 실행중인 컨테이너의 이름을 반환", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})
 	public ResponseEntity<?> getEnv() {
+		log.info(env);
 		return ResponseEntity.ok(env);
 	}
 }

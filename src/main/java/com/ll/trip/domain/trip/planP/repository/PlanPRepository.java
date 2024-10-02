@@ -7,14 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import com.ll.trip.domain.trip.planP.dto.PlanPEditDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPDeleteDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
 
 public interface PlanPRepository extends JpaRepository<PlanP, Long> {
-	@Query("select max(p.orderByDate) from PlanP p where p.trip.id = :tripId and p.dayAfterStart = :dayAfterStart")
-	Integer findMaxOrder(Long tripId, int dayAfterStart);
+	@Query("select max(p.orderByDate) from PlanP p where p.trip.id = :tripId and p.dayAfterStart = :day")
+	Integer findMaxOrder(Long tripId, Integer day);
 
 	@Query("""
 		SELECT new com.ll.trip.domain.trip.planP.dto.PlanPInfoDto(
@@ -26,10 +24,11 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 			p.checkbox
 		)
 		FROM PlanP p
-		WHERE p.trip.id = :tripId
+		WHERE p.trip.id = :tripId and
+		p.locker = :locker
 		order by p.dayAfterStart asc, p.orderByDate asc
 		""")
-	List<PlanPInfoDto> findAllByTripIdOrderByDayAfterStartAndOrderByDate(long tripId);
+	List<PlanPInfoDto> findAllByTripIdOrderByDayAfterStartAndOrderByDate(long tripId, boolean locker);
 
 	@Modifying
 	@Query("""
@@ -41,41 +40,6 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 
 	Optional<PlanP> findPlanPById(long planId);
 
-	@Query("""
-			select new com.ll.trip.domain.trip.planP.dto.PlanPDeleteDto(
-				p.trip.id,
-				p.id,
-				p.dayAfterStart,
-				p.orderByDate
-			)
-			from PlanP p
-			where p.id = :planId
-		"""
-	)
-	Optional<PlanPDeleteDto> findPlanPDeleteDtoByPlanId(long planId);
-
-	@Modifying
-	@Query("""
-					update PlanP p
-					set p.orderByDate = p.orderByDate - 1
-					where p.trip.id = :tripId and
-					p.dayAfterStart = :dayAfterStart and
-					p.orderByDate > :orderByDate
-		"""
-	)
-	int reduceOrderBiggerThanOrder(long tripId, int dayAfterStart, int orderByDate);
-
-	@Query("""
-			select new com.ll.trip.domain.trip.planP.dto.PlanPEditDto(
-				p.id,
-				p.trip.id,
-				p.dayAfterStart,
-				p.orderByDate
-			)
-			from PlanP p
-			where p.id = :planId
-		""")
-	Optional<PlanPEditDto> findPlanEditDtoById(long planId);
 
 	@Modifying
 	@Query("""
@@ -111,16 +75,6 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 	@Modifying
 	@Query("""
 		update PlanP p
-		set p.orderByDate = p.orderByDate - 1
-		where p.trip.id = :tripId and
-		p.dayAfterStart = :day and
-		p.orderByDate >= :from
-		""")
-	int reduceOrderFromByTripIdAndDay(long tripId, int day, int from);
-
-	@Modifying
-	@Query("""
-		update PlanP p
 		set p.orderByDate = p.orderByDate + 1
 		where p.trip.id = :tripId and
 		p.dayAfterStart = :day and
@@ -134,4 +88,14 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		where p.id = :planId
 	""")
 	boolean findIsCheckBoxByPlanId(Long planId);
+
+	@Modifying
+	@Query("""
+		update PlanP p
+		set p.orderByDate = :order,
+		p.dayAfterStart = :dayTo,
+		p.locker = :locker
+		where p.id = :planId
+		""")
+	int updatePlanPDayAndLockerByPlanId(long planId, Integer dayTo, int order, boolean locker);
 }

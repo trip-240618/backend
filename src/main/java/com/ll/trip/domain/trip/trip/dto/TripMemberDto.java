@@ -1,5 +1,8 @@
 package com.ll.trip.domain.trip.trip.dto;
 
+import com.ll.trip.domain.trip.trip.entity.TripMember;
+import com.ll.trip.domain.user.user.entity.UserEntity;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,12 +28,15 @@ public class TripMemberDto {
 	private String thumbnail;
 
 	@Schema(
-		description = "프로필 url",
-		example = "https://trip-story.s3.ap-northeast-2.amazonaws.com/photoTest/c3396416-1e2e-4d0d-9a82-788831e5ac1f")
-	private String profileImg;
-
-	@Schema(
 		description = "방장여부",
 		example = "true")
 	private boolean isLeader;
+
+	public TripMemberDto(TripMember tripMember) {
+		UserEntity user = tripMember.getUser();
+		this.uuid = user.getUuid();
+		this.nickname = user.getNickname();
+		this.thumbnail = user.getThumbnail();
+		this.isLeader = tripMember.isLeader();
+	}
 }

@@ -111,3 +111,16 @@ jobs:
           script_stop: true
           script: |
             sudo docker exec -i nginxserver bash -c 'echo "set \$service_url ${{ env.TARGET_UPSTREAM }};" > /etc/nginx/conf.d/service-env.inc && nginx -s reload' 
+
+      - name: Clean up Docker unused resources
+        uses: appleboy/ssh-action@master
+        with:
+          username: ubuntu
+          host: ${{ secrets.TRIP_PROD_IP }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            docker container prune -f
+            docker image prune -f
+            docker volume prune -f
+            docker network prune -f

@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ import reactor.core.scheduler.Schedulers;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/user/oauth2")
+@Tag(name = "OAuth", description = "로그인, 회원가입 API")
 public class OAuthController {
 	private final KakaoOAuth2Service kakaoOAuth2Service;
 	private final OAuth2Service oAuth2Service;
@@ -43,7 +45,6 @@ public class OAuthController {
 		@RequestParam String fcmToken
 	) {
 		log.info("token = {}", kakaoToken);
-		//TODO code가 아니라 token을 사용하기 때문에 프론트와 함께 파라미터명을 수정해야함
 		return kakaoOAuth2Service.getUserInfo(kakaoToken)
 			.publishOn(Schedulers.boundedElastic())
 			.map(userInfo -> {

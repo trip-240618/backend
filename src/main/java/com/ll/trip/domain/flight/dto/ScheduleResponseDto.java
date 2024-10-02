@@ -22,7 +22,7 @@ public class ScheduleResponseDto {
 	private int airlineNumber;
 
 	@Schema(
-		description = "출발 시간 STD (아마도) 해당 지역의 시차가 적용됨",
+		description = "출발 시간 STD 해당 지역의 시차가 적용됨",
 		example = "2024-09-16T10:15+09:00")
 	private String departureDate;
 
@@ -37,7 +37,7 @@ public class ScheduleResponseDto {
 	private String departureAirport_kr;
 
 	@Schema(
-		description = "도착 시간 STA (아마도) 해당 지역의 시차가 적용됨",
+		description = "도착 시간 STA 해당 지역의 시차가 적용됨",
 		example = "2024-09-16T11:45+08:00")
 	private String arrivalDate;
 

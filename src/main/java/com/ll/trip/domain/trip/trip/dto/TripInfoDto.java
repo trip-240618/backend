@@ -52,11 +52,11 @@ public class TripInfoDto {
 
 	@Schema(
 		description = "초대코드",
-		example = "일본")
+		example = "1A2B3C4D")
 	private String invitationCode;
 
 	@Schema(
-		description = "여행방 라벨 색상",
+		description = "여행방 라벨 컬러",
 		example = "#FFEFF3")
 	private String labelColor;
 
@@ -80,19 +80,20 @@ public class TripInfoDto {
 		this.thumbnail = trip.getThumbnail();
 		this.labelColor = trip.getLabelColor();
 		this.bookmark = false;
+		this.tripMemberDtoList = trip.getTripMembers().stream().map(TripMemberDto::new).toList();
 	}
 
-	public TripInfoDto(long id, String name, char type, LocalDate startDate, LocalDate endDate, String country, String thumbnail,
-		String invitationCode, String labelColor, boolean bookmark) {
-		this.id = id;
-		this.name = name;
-		this.type = type;
-		this.startDate = startDate;
-		this.endDate = endDate;
-		this.country = country;
-		this.thumbnail = thumbnail;
-		this.invitationCode = invitationCode;
-		this.labelColor = labelColor;
-		this.bookmark = bookmark;
+	public TripInfoDto(TripInfoServiceDto dto) {
+		this.id = dto.getId();
+		this.name = dto.getName();
+		this.type = dto.getType();
+		this.invitationCode = dto.getInvitationCode();
+		this.country = dto.getCountry();
+		this.startDate = dto.getStartDate();
+		this.endDate = dto.getEndDate();
+		this.thumbnail = dto.getThumbnail();
+		this.labelColor = dto.getLabelColor();
+		this.bookmark = dto.isBookmark();
+		this.tripMemberDtoList.add(dto.getTripMemberDto());
 	}
 }

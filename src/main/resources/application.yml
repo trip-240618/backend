@@ -85,7 +85,6 @@ spring:
           kakao:
             client-name: Kakao
             authorization-grant-type: authorization_code
-            #TODO 나중에 모바일앱 redirect-uri로 바꿔야함 (카카오에서 사용자에게 카카오로그인을 요청할 uri)
             redirect-uri: '${server.url}/user/oauth2/callback/kakao'
             client-authentication-method: POST
             scope:
@@ -100,7 +99,7 @@ spring:
             user-name-attribute: id
 
 firebase:
-  secret-path: /src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
+  secret-path: tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
 
 springdoc:
   swagger-ui:

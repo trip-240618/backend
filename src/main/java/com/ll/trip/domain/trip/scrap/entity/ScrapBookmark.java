@@ -36,4 +36,6 @@ public class ScrapBookmark {
 	@ManyToOne
 	@JoinColumn(name = "trip_id")
 	private Trip trip;
+
+	private boolean toggle;
 }

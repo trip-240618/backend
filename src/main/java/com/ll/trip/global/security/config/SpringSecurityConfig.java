@@ -19,7 +19,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.ll.trip.domain.user.jwt.JwtAuthenticationFilter;
 import com.ll.trip.domain.user.jwt.JwtTokenUtil;
-import com.ll.trip.global.security.service.UserDetailsServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 public class SpringSecurityConfig {
 
 	private final JwtTokenUtil jwtTokenUtil;
-	private final UserDetailsServiceImpl userDetailsService;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -38,7 +36,6 @@ public class SpringSecurityConfig {
 			.cors(withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.authorizeHttpRequests(a -> a
 				.requestMatchers(
 					"/user/oauth2/**",
@@ -50,7 +47,9 @@ public class SpringSecurityConfig {
 					"/trip/location/**"
 				).permitAll()
 				.anyRequest().authenticated()
-			);
+			)
+			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+		;
 		return http.build();
 	}
 

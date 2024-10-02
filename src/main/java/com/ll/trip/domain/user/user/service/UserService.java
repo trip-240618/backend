@@ -1,17 +1,20 @@
 package com.ll.trip.domain.user.user.service;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.user.mypage.repository.NotificationConfigRepository;
-import com.ll.trip.domain.user.user.dto.UserInfoDto;
+import com.ll.trip.domain.notification.notification.repository.NotificationConfigRepository;
+import com.ll.trip.domain.user.jwt.JwtTokenUtil;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
+import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class UserService {
 	private final UserRepository userRepository;
-	private final PasswordEncoder passwordEncoder;
+	private final JwtTokenUtil jwtTokenUtil;
 	private final NotificationConfigRepository notificationConfigRepository;
 
 	public Optional<UserEntity> findUserByUuid(String uuid) {
@@ -30,6 +33,15 @@ public class UserService {
 
 	public String generateUUID() {
 		return UUID.randomUUID().toString();
+	}
+
+	public void createAndSetTokens(long userId, String uuid, String nickname,
+		Collection<? extends GrantedAuthority> authorities, HttpServletResponse response) {
+		String refreshToken = jwtTokenUtil.createRefreshToken(userId, uuid, nickname,
+			authorities);
+		String newAccessToken = jwtTokenUtil.createAccessToken(userId, uuid, nickname,
+			authorities);
+		setTokenInCookie(newAccessToken, refreshToken, response);
 	}
 
 	public void setTokenInCookie(String accessToken, String refreshToken, HttpServletResponse response) {
@@ -52,18 +64,16 @@ public class UserService {
 	}
 
 	@Transactional
-	public UserInfoDto modifyUserInfo(UserEntity user, String nickname, String profileImage, String thumbnail,
+	public UserEntity modifyUserInfo(UserEntity userRef, String nickname, String profileImage, String thumbnail,
 		String memo) {
 		if (nickname != null)
-			user.setNickname(nickname);
+			userRef.setNickname(nickname);
 
-		user.setProfileImg(profileImage);
-		user.setThumbnail(thumbnail);
-		user.setMemo(memo);
+		userRef.setProfileImg(profileImage);
+		userRef.setThumbnail(thumbnail);
+		userRef.setMemo(memo);
 
-		user = userRepository.save(user);
-
-		return new UserInfoDto(user, "modify");
+		return userRepository.save(userRef);
 	}
 
 	public UserEntity findUserByUserId(long userId) {
@@ -76,10 +86,22 @@ public class UserService {
 	}
 
 	@Transactional
-	public UserInfoDto registerUserInfo(UserEntity user, String nickname, String profileImg, String thumbnail,
+	public UserEntity registerUserInfo(UserEntity userRef, String nickname, String profileImg, String thumbnail,
 		String memo, boolean marketing) {
-		UserInfoDto userInfoDto = modifyUserInfo(user, nickname, profileImg, thumbnail, memo);
+		UserEntity user = modifyUserInfo(userRef, nickname, profileImg, thumbnail, memo);
 		notificationConfigRepository.updateMarketingAgree(user.getId(), marketing);
-		return userInfoDto;
+		return user;
+	}
+
+	public boolean validateUser(SecurityUser securityUser) {
+		UserEntity user = userRepository.findById(securityUser.getId()).orElseThrow(NullPointerException::new);
+		return securityUser.getUuid().equals(user.getUuid())
+			   && securityUser.getNickname().equals(user.getNickname())
+			   && new HashSet<>(securityUser.getAuthorities()).equals(new HashSet<>(user.getAuthorities()));
+	}
+
+	@Transactional
+	public void deleteUserById(long userId) {
+		userRepository.deleteById(userId);
 	}
 }

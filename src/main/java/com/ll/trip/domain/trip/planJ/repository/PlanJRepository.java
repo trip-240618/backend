@@ -11,37 +11,31 @@ import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 
 public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
-	@Query("select max(p.orderByDate) from PlanJ p where p.trip.id = :tripId and p.dayAfterStart = :dayAfterStart")
-	Integer findMaxOrder(Long tripId, int dayAfterStart);
+	@Query("select max(p.orderByDate) from PlanJ p where p.trip.id = :tripId")
+	Integer findMaxOrder(Long tripId);
 
 	@Query("""
 		select new com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto(
-				p.id,
-				p.dayAfterStart,
-				p.orderByDate,
-				p.startTime,
-				p.writerUuid,
-				p.title,
-				p.memo,
-				p.flightId,
-				p.latitude,
-				p.longitude
+		p.id, p.dayAfterStart, p.orderByDate, p.startTime, p.writerUuid, p.title, p.memo,
+		p.latitude, p.longitude, p.locker
 		) from PlanJ p
 		where p.trip.id = :tripId and
-		p.dayAfterStart = :day
+		p.dayAfterStart = :day and
+		p.locker = :locker
 		order by p.startTime asc, p.orderByDate asc
 		""")
-	List<PlanJInfoDto> findAllByTripIdAndDay(long tripId, int day);
+	List<PlanJInfoDto> findAllPlanAByTripIdAndDay(long tripId, int day, boolean locker);
 
-	@Modifying
 	@Query("""
-		update PlanJ p
-		set p.orderByDate = :orderByDate,
-		p.startTime = :startTime,
-		p.dayAfterStart = :dayAfterStart
-		where p.id = :planId
+		select new com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto(
+		p.id, p.dayAfterStart, p.orderByDate, p.startTime, p.writerUuid, p.title, p.memo,
+		p.latitude, p.longitude, p.locker
+		) from PlanJ p
+		where p.trip.id = :tripId and
+		p.locker = :locker
+		order by p.startTime asc, p.orderByDate asc
 		""")
-	int updateStartTimeAndDayAfterStartAndOrderByPlanId(LocalTime startTime, int dayAfterStart, long planId, int orderByDate);
+	List<PlanJInfoDto> findAllPlanBByTripIdAndDay(long tripId, boolean locker);
 
 	@Modifying
 	@Query("""
@@ -54,9 +48,16 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 
 	@Modifying
 	@Query("""
-		update Trip t
-		set t.flightCnt = t.flightCnt + 1
-		where t.id = :tripId
+		update PlanJ p
+		set p.dayAfterStart = p.dayAfterStart + :dayDiffer
+		where p.trip.id = :tripId
 		""")
-	int updateFlightCntByTripId(Long tripId);
+	int updateDayByTripId(Long tripId, int dayDiffer);
+
+	@Modifying
+	@Query("""
+		delete PlanJ p
+		where p.trip.id = :tripId and (p.dayAfterStart < 1 or p.dayAfterStart > :duration)
+		""")
+	void deleteByTripIdAndDuration(Long tripId, int duration);
 }

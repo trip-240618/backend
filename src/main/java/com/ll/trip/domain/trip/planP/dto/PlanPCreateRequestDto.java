@@ -17,7 +17,12 @@ public class PlanPCreateRequestDto {
 	private String content;
 
 	@Schema(
-		description = "시작일 기준 몇일째인지",
+		description = "시작일 기준 몇일째인지, 보관함일 경우 null",
 		example = "1")
-	private int dayAfterStart;
+	private Integer dayAfterStart;
+
+	@Schema(
+		description = "보관함 여부",
+		example = "false")
+	private boolean locker;
 }

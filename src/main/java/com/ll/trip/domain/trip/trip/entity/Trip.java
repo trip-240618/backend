@@ -6,8 +6,9 @@ import java.util.List;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.ll.trip.domain.trip.history.entity.History;
-import com.ll.trip.domain.trip.history.entity.HistoryTag;
+import com.ll.trip.domain.flight.entity.Flight;
+import com.ll.trip.domain.history.history.entity.History;
+import com.ll.trip.domain.history.history.entity.HistoryTag;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
 import com.ll.trip.domain.trip.scrap.entity.Scrap;
@@ -61,15 +62,12 @@ public class Trip extends BaseEntity {
 	@NotBlank
 	private String country;
 
-	@NotBlank
 	@Setter
 	private String thumbnail;
 
 	@NotBlank
 	@Setter
 	private String labelColor;
-
-	private int flightCnt = 0; //PlanJ의 flightId를 계산할 때 사용
 
 	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
@@ -98,4 +96,8 @@ public class Trip extends BaseEntity {
 	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<HistoryTag> historyTags = new ArrayList<>();
+
+	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Flight> flights = new ArrayList<>();
 }

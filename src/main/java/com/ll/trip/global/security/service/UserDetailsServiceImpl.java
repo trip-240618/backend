@@ -1,5 +1,8 @@
 package com.ll.trip.global.security.service;
 
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,10 +28,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		return new SecurityUser(
 			user.getId(),
 			user.getUuid(),
-			user.getName(),
-			user.getProviderId(),
-			user.getProfileImg(),
+			user.getNickname(),
 			user.getAuthorities()
 		);
+	}
+
+	public UserDetails buildUserByClaims(long id, String uuid, String nickname, Collection<? extends GrantedAuthority> authorities) {
+		return new SecurityUser(id, uuid, nickname, authorities);
 	}
 }

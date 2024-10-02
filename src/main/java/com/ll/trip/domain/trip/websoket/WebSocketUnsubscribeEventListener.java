@@ -9,8 +9,10 @@ import com.ll.trip.domain.trip.planJ.service.PlanJEditService;
 import com.ll.trip.domain.trip.planP.service.PlanPEditService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class WebSocketUnsubscribeEventListener implements ApplicationListener<SessionUnsubscribeEvent> {
 
@@ -23,11 +25,13 @@ public class WebSocketUnsubscribeEventListener implements ApplicationListener<Se
 		String destination = accessor.getDestination();
 
 		if (destination != null) {
-			String invitationCode = destination.substring(18);
+			log.info("destination: " + destination);
+			long tripId = Long.parseLong(destination.substring(18));
+			log.info("tripId: " + tripId);
 			if (destination.startsWith("/topic/api/trip/p"))
-				planPEditService.editorClosedSubscription(invitationCode, accessor.getUser().getName());
+				planPEditService.editorClosedSubscription(tripId, accessor.getUser().getName());
 			else if (destination.startsWith("/topic/api/trip/j"))
-				planJEditService.editorClosedSubscription(invitationCode, accessor.getUser().getName());
+				planJEditService.editorClosedSubscription(tripId, accessor.getUser().getName());
 		}
 	}
 }

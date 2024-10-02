@@ -3,7 +3,6 @@ package com.ll.trip.domain.user.user.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +20,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,9 +30,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/user")
+@Tag(name = "User", description = "유저정보 API")
 public class UserController {
 
 	private final UserService userService;
+	private final EntityManager entityManager;
 
 	@GetMapping("/info")
 	@Operation(summary = "유저 정보 반환")
@@ -47,43 +51,51 @@ public class UserController {
 		return ResponseEntity.ok(userInfoDto);
 	}
 
-	@PostMapping("/modify")
+	@PutMapping("/modify")
 	@Operation(summary = "유저 정보 수정")
-	@ApiResponse(responseCode = "200", description = "유저정보 수정", content = {
+	@ApiResponse(responseCode = "200", description = "유저정보 수정, 토큰이 변경된 유저정보로 재발급됨", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
 	public ResponseEntity<?> modifyUserInfo(
 		@AuthenticationPrincipal SecurityUser securityUser,
+		HttpServletResponse response,
 		@RequestBody UserModifyDto modifyDto
 	) {
 		log.info("uuid : " + securityUser.getUsername());
-		UserEntity user = userService.findUserByUserId(securityUser.getId());
+		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 
-		UserInfoDto userInfoDto = userService.modifyUserInfo(
+		user = userService.modifyUserInfo(
 			user, modifyDto.getNickname(), modifyDto.getProfileImg(), modifyDto.getThumbnail(),
 			modifyDto.getMemo());
 
-		return ResponseEntity.ok(userInfoDto);
+		userService.createAndSetTokens(user.getId(), user.getUuid(), user.getNickname(),
+			user.getAuthorities(), response);
+
+		return ResponseEntity.ok(new UserInfoDto(user, "modify"));
 	}
 
-	@PostMapping("/register")
-	@Operation(summary = "유저 정보 수정")
-	@ApiResponse(responseCode = "200", description = "유저정보 수정", content = {
+	@PutMapping("/register")
+	@Operation(summary = "회원가입시 정보 기입")
+	@ApiResponse(responseCode = "200", description = "UserInfo의 type이 register일 때 요청, 토큰이 변경된 유저정보로 재발급됨", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = UserInfoDto.class))})
 	public ResponseEntity<?> registerUserInfo(
 		@AuthenticationPrincipal SecurityUser securityUser,
+		HttpServletResponse response,
 		@RequestBody UserRegisterDto registerDto
 	) {
 		log.info("uuid : " + securityUser.getUsername());
-		UserEntity user = userService.findUserByUserId(securityUser.getId());
+		UserEntity userRef = entityManager.getReference(UserEntity.class, securityUser.getId());
 
-		UserInfoDto userInfoDto = userService.registerUserInfo(
-			user, registerDto.getNickname(),
+		UserEntity user = userService.registerUserInfo(
+			userRef, registerDto.getNickname(),
 			registerDto.getProfileImg(),
 			registerDto.getThumbnail(),
 			registerDto.getMemo(),
 			registerDto.isMarketing());
 
-		return ResponseEntity.ok(userInfoDto);
+		userService.createAndSetTokens(user.getId(), user.getUuid(), user.getNickname(),
+			user.getAuthorities(), response);
+
+		return ResponseEntity.ok(new UserInfoDto(user, "modify"));
 	}
 
 	@PutMapping("/update/fcmToken")
@@ -99,4 +111,18 @@ public class UserController {
 		return ResponseEntity.ok(updated);
 	}
 
+	@PutMapping("/delete/account")
+	@Operation(summary = "회원 탈퇴")
+	@ApiResponse(responseCode = "200", description = "회원 탈퇴, 토큰을 삭제해야함", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = Integer.class))})
+	public ResponseEntity<?> deleteAccount(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		HttpServletResponse response
+	) {
+		if (!userService.validateUser(securityUser))
+			return ResponseEntity.badRequest().body("너 누구야");
+		userService.deleteUserById(securityUser.getId());
+		userService.setTokenInCookie("", "", response);
+		return ResponseEntity.ok("deleted");
+	}
 }

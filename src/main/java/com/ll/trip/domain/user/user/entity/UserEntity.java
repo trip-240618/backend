@@ -9,13 +9,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import com.ll.trip.domain.alarm.alarm.entity.Notification;
-import com.ll.trip.domain.trip.history.entity.History;
-import com.ll.trip.domain.trip.history.entity.HistoryReply;
-import com.ll.trip.domain.trip.scrap.entity.Scrap;
+import com.ll.trip.domain.notification.notification.entity.Notification;
+import com.ll.trip.domain.history.history.entity.History;
+import com.ll.trip.domain.history.history.entity.HistoryLike;
+import com.ll.trip.domain.history.history.entity.HistoryReply;
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
 import com.ll.trip.domain.trip.trip.entity.TripMember;
-import com.ll.trip.domain.user.mypage.entity.NotificationConfig;
+import com.ll.trip.domain.notification.notification.entity.NotificationConfig;
 import com.ll.trip.global.base.entity.BaseEntity;
 
 import jakarta.persistence.CascadeType;
@@ -99,15 +99,15 @@ public class UserEntity extends BaseEntity {
 
 	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
-	private List<Scrap> scraps = new ArrayList<>();
-
-	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
-	@Builder.Default
 	private List<History> histories = new ArrayList<>();
 
 	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<HistoryReply> historyReplies = new ArrayList<>();
+
+	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<HistoryLike> historyLikes = new ArrayList<>();
 
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> authorities = new ArrayList<>();

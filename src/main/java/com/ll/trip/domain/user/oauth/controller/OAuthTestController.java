@@ -12,6 +12,7 @@ import com.ll.trip.domain.user.oauth.service.KakaoOAuth2Service;
 import com.ll.trip.domain.user.oauth.service.OAuth2Service;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import reactor.core.scheduler.Schedulers;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("user/oauth2")
+@Tag(name = "Test", description = "백엔드용 로그인 테스트 API")
 public class OAuthTestController {
 	@Value("${spring.security.oauth2.client.registration.kakao.client-id}")
 	private String kakaoClientId; // 카카오 클라이언트 ID

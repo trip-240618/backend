@@ -11,9 +11,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.trip.history.dto.HistoryCreateRequestDto;
-import com.ll.trip.domain.trip.history.repository.HistoryRepository;
-import com.ll.trip.domain.trip.history.service.HistoryService;
+import com.ll.trip.domain.country.service.CountryService;
+import com.ll.trip.domain.history.history.dto.HistoryCreateRequestDto;
+import com.ll.trip.domain.history.history.dto.HistoryTagDto;
+import com.ll.trip.domain.history.history.repository.HistoryRepository;
+import com.ll.trip.domain.history.history.service.HistoryService;
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.repository.TripMemberRepository;
@@ -40,11 +42,14 @@ public class DevInit {
 	private final TripMemberRepository tripMemberRepository;
 	private final HistoryRepository historyRepository;
 	private final HistoryService historyService;
+	private final CountryService countryService;
 
 	@Bean
 	@Transactional
 	public ApplicationRunner initNotProd() {
 		return args -> {
+			// countryService.saveCountryImages(); 국기 이미지 저장할 때
+
 			if (userRepository.count() == 0) {
 				oAuth2Service.registerUser("test", "https://avatars.githubusercontent.com/u/109726278?v=4",
 					"KAKAO3607862190", null, null);
@@ -52,7 +57,7 @@ public class DevInit {
 
 			UserEntity user = userService.findUserByUserId(1);
 
-			if (tripMemberRepository.countByUser(user) == 0) {
+			if (tripMemberRepository.countByUser_Id(user.getId()) == 0) {
 				String invitationCode = tripService.generateInvitationCode();
 				Trip trip = tripService.createTrip(
 					new TripCreateDto("testTrip1", 'j', LocalDate.of(2024, 9, 14), LocalDate.of(2024, 9, 20), "일본",
@@ -81,7 +86,7 @@ public class DevInit {
 						new BigDecimal("-122.08532419999999"), // longitude
 						LocalDateTime.of(2024, 9, 14, 14, 15), // photoDate
 						"오사카에서 찍은 사진", // memo
-						Arrays.asList("tag1", "tag2", "tag3") // tags 리스트
+						Arrays.asList(new HistoryTagDto("##FFEFF3","tag1"), new HistoryTagDto("##FFEFF3","tag2")) // tags 리스트
 					),user, trip);
 
 				historyService.createHistory(
@@ -94,7 +99,7 @@ public class DevInit {
 						new BigDecimal("-122.08532419999999"), // longitude
 						LocalDateTime.of(2024, 9, 15, 15, 15), // photoDate
 						"오사카에서 찍은 사진", // memo
-						Arrays.asList("tag1", "tag2", "tag3") // tags 리스트
+						Arrays.asList(new HistoryTagDto("##FFEFF3","tag1"), new HistoryTagDto("##FFEFF3","tag2")) // tags 리스트
 					),user, trip);
 			}
 

@@ -8,13 +8,23 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
-import com.ll.trip.domain.trip.trip.entity.BookmarkId;
 
 @Transactional
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
-	Optional<Bookmark> findById(BookmarkId id);
-
 	@Modifying
-	@Query("UPDATE Bookmark b SET b.toggle = :toggle WHERE b.id = :id")
-	int updateToggleById(BookmarkId id, boolean toggle);
+	@Query("""
+		UPDATE Bookmark b
+		SET b.toggle = CASE WHEN b.toggle = true THEN false ELSE true END
+		WHERE b.user.id = :userId and
+		b.trip.id = :tripId
+		""")
+	int toggleTripBookmarkByTripIdAndUserId(long userId, long tripId);
+
+	@Query("""
+		select b.toggle
+		from Bookmark b
+		where b.user.id = :userId and
+		b.trip.id = :tripId
+		""")
+	Optional<Boolean> getIsToggleByUserIdAndTripId(long userId, long tripId);
 }
