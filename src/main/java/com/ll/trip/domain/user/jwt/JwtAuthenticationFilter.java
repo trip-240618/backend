@@ -33,7 +33,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String refreshToken = jwtTokenUtil.resolveToken(request, "refreshToken");
 		Claims claims = null;
 
-		if (accessToken != null && jwtTokenUtil.validateToken(accessToken))
+		boolean accessTokenVaild = accessToken != null && jwtTokenUtil.validateToken(accessToken);
+		if (accessTokenVaild)
 			claims = jwtTokenUtil.getClaims(accessToken);
 		else if (refreshToken != null) {
 			log.info("유효하지 않은 액세스토큰: " + accessToken);
@@ -56,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			exClaims.getNickname(), exClaims.getAuthorities());
 
 		SecurityContextHolder.getContext().setAuthentication(auth);
-		if (accessToken == null) {
+		if (!accessTokenVaild) {
 			String newAccessToken = jwtTokenUtil.createAccessToken(exClaims.getUserId(), exClaims.getUuid(),
 				exClaims.getNickname(), exClaims.getAuthorities());
 			ResponseCookie newAccessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)

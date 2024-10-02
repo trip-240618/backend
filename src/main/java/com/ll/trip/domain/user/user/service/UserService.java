@@ -4,7 +4,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class UserService {
 	private final UserRepository userRepository;
-	private final PasswordEncoder passwordEncoder;
 	private final NotificationConfigRepository notificationConfigRepository;
 
 	public Optional<UserEntity> findUserByUuid(String uuid) {

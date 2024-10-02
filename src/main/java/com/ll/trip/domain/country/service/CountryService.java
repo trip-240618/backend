@@ -1,5 +1,7 @@
 package com.ll.trip.domain.country.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,5 +41,9 @@ public class CountryService {
 
 	public Country findCountryByName(String countryName) throws NullPointerException{
 		return countryRepository.findByCountryName(countryName).orElseThrow(NullPointerException::new);
+	}
+
+	public List<String> findAllCountryNameLike(String keyword) {
+		return countryRepository.findCountryNameLike(keyword);
 	}
 }

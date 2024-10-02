@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.ll.trip.domain.trip.trip.dto.TripImageDeleteDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto;
 import com.ll.trip.domain.trip.trip.entity.Trip;
+import com.ll.trip.domain.user.user.dto.VisitedCountryDto;
 
 @Repository
 public interface TripRepository extends JpaRepository<Trip, Long>{
@@ -70,4 +71,12 @@ public interface TripRepository extends JpaRepository<Trip, Long>{
 		""")
 	long findTrip_idByInvitationCode(String invitationCode);
 
+	@Query("""
+		 select new com.ll.trip.domain.user.user.dto.VisitedCountryDto(t.country, count(t.id))
+		 from TripMember tm
+		 left join tm.trip t on t.startDate <= :date
+		 where tm.user.id = :userId
+		 group by t.country
+		""")
+	List<VisitedCountryDto> findVisitedCountry(long userId, LocalDate date);
 }

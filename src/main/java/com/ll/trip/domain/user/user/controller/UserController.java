@@ -99,5 +99,4 @@ public class UserController {
 
 		return ResponseEntity.ok(updated);
 	}
-
 }

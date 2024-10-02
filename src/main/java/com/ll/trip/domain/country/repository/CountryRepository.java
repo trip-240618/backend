@@ -1,5 +1,6 @@
 package com.ll.trip.domain.country.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +18,11 @@ public interface CountryRepository extends JpaRepository<Country, Long> {
 	void updateFlagImageByCountryCode(String code, byte[] file);
 
 	Optional<Country> findByCountryName(String countryName);
+
+	@Query("""
+			select c.countryName
+			from Country c
+			where c.countryName like %:keyword%
+		""")
+	List<String> findCountryNameLike(String keyword);
 }

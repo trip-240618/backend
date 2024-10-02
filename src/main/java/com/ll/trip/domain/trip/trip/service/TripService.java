@@ -22,6 +22,7 @@ import com.ll.trip.domain.trip.trip.entity.TripMemberId;
 import com.ll.trip.domain.trip.trip.repository.BookmarkRepository;
 import com.ll.trip.domain.trip.trip.repository.TripMemberRepository;
 import com.ll.trip.domain.trip.trip.repository.TripRepository;
+import com.ll.trip.domain.user.user.dto.VisitedCountryDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 
 import lombok.RequiredArgsConstructor;
@@ -185,5 +186,9 @@ public class TripService {
 
 	public int countTripMember(long tripId) {
 		return tripMemberRepository.countTripMemberByTrip_Id(tripId);
+	}
+
+	public List<VisitedCountryDto> findVisitedCountry(long userId) {
+		return tripRepository.findVisitedCountry(userId, LocalDate.now());
 	}
 }
