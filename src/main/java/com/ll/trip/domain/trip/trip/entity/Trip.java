@@ -62,7 +62,6 @@ public class Trip extends BaseEntity {
 	@NotBlank
 	private String country;
 
-	@NotBlank
 	@Setter
 	private String thumbnail;
 

@@ -45,7 +45,6 @@ public class TripCreateDto {
 	@Schema(
 		description = "여행방 썸네일(화질 축소해서)",
 		example = "https://trip-story.s3.ap-northeast-2.amazonaws.com/photoTest/c3396416-1e2e-4d0d-9a82-788831e5ac1f")
-	@NotBlank
 	private String thumbnail;
 
 	@Schema(

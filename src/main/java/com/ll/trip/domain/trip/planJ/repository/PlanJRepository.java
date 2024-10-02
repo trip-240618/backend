@@ -54,6 +54,7 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 		""")
 	int updateDayByTripId(Long tripId, int dayDiffer);
 
+	@Modifying
 	@Query("""
 		delete PlanJ p
 		where p.trip.id = :tripId and (p.dayAfterStart < 1 or p.dayAfterStart > :duration)

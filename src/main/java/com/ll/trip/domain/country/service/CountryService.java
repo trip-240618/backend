@@ -1,6 +1,7 @@
 package com.ll.trip.domain.country.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.country.entity.Country;
 import com.ll.trip.domain.country.repository.CountryRepository;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Slf4j
 public class CountryService {
 	private final CountryRepository countryRepository;
