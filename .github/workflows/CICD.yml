@@ -42,9 +42,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Reload Nginx
-        run: sudo nginx -s reload
-
       - name: Set target IP
         run: |
           STATUS=$(curl -o /dev/null -w "%{http_code}" "https://trip-story.site/env")
