@@ -11,41 +11,31 @@ import lombok.Getter;
 
 @Getter
 public class SecurityUser extends User implements OAuth2User {
-    private final Long id;
+	private final Long id;
 
-    private final String uuid;
+	private final String uuid;
 
-    private final String name;// 이름
+	private final String nickname;
 
-    private final String nickname;
+	public SecurityUser(Long id, String uuid, String nickname,
+		Collection<? extends GrantedAuthority> authorities) {
+		super(uuid, "N/A", authorities); //username = uuid, password = providerId
+		this.id = id;
+		this.uuid = uuid;
+		this.nickname = nickname;
+	}
 
-    private final String thumbnail;
+	@Override
+	public Map<String, Object> getAttributes() {
+		return Map.of(
+			"id", id,
+			"uuid", uuid,
+			"nickname", nickname
+		);
+	}
 
-    public SecurityUser(Long id, String uuid, String name, String nickname, String providerId, String thumbnail, Collection<? extends GrantedAuthority> authorities) {
-        super(uuid, providerId, authorities); //username = uuid, password = providerId
-        this.id = id;
-        this.uuid = uuid;
-        this.name = name;
-        this.nickname = nickname;
-        this.thumbnail = thumbnail;
-    }
-
-    public SecurityUser(Long id, String uuid, String name, String nickname, String providerId, String thumbnail, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
-        super(uuid, providerId, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
-        this.id = id;
-        this.uuid = uuid;
-        this.name = name;
-        this.nickname = nickname;
-        this.thumbnail = thumbnail;
-    }
-
-    @Override
-    public Map<String, Object> getAttributes() {
-        return Map.of();
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
+	@Override
+	public String getName() {
+		return this.uuid;
+	}
 }

@@ -36,7 +36,6 @@ public class SpringSecurityConfig {
 			.cors(withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.authorizeHttpRequests(a -> a
 				.requestMatchers(
 					"/user/oauth2/**",
@@ -48,7 +47,9 @@ public class SpringSecurityConfig {
 					"/trip/location/**"
 				).permitAll()
 				.anyRequest().authenticated()
-			);
+			)
+			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+		;
 		return http.build();
 	}
 

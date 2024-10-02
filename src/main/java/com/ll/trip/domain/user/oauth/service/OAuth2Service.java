@@ -1,6 +1,5 @@
 package com.ll.trip.domain.user.oauth.service;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -29,29 +28,29 @@ public class OAuth2Service {
 		String fcmToken, HttpServletResponse response) {
 		String providerId = provider + oauthId;
 		Optional<UserEntity> optUser = userRepository.findByProviderId(providerId);
+		UserEntity user;
 		String refreshToken;
 		String uuid;
 		UserInfoDto userInfoDto;
 
 		if (optUser.isEmpty()) {
-			UserEntity user = registerUser(name, profileImg, providerId, email, fcmToken);
+			user = registerUser(name, profileImg, providerId, email, fcmToken);
 			notificationService.createNotificationConfig(user);
 			uuid = user.getUuid();
-			refreshToken = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
 			userInfoDto = new UserInfoDto(user, "register");
 		} else {
-			UserEntity user = optUser.get();
+			user = optUser.get();
 			uuid = user.getUuid();
 
 			userService.updateFcmTokenByUserId(user.getId(), fcmToken);
-			refreshToken = jwtTokenUtil.createRefreshToken(uuid, List.of("USER"));
 
 			if (user.getNickname() == null)
 				userInfoDto = new UserInfoDto(user, "register");
 			else
 				userInfoDto = new UserInfoDto(user, "login");
 		}
-		String newAccessToken = jwtTokenUtil.createAccessToken(uuid, List.of("USER"));
+		refreshToken = jwtTokenUtil.createRefreshToken(user.getId(), uuid, user.getNickname(), user.getAuthorities());
+		String newAccessToken = jwtTokenUtil.createAccessToken(user.getId(), uuid, user.getNickname(), user.getAuthorities());
 
 		userService.setTokenInCookie(newAccessToken, refreshToken, response);
 

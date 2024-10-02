@@ -139,6 +139,7 @@ public class TripService {
 		trip.setThumbnail(requestBody.getThumbnail());
 		trip.setStartDate(requestBody.getStartDate());
 		trip.setEndDate(requestBody.getEndDate());
+		trip.setLabelColor(requestBody.getLabelColor());
 
 		Trip modifiedTrip = tripRepository.save(trip);
 
