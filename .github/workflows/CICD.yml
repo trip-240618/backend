@@ -45,6 +45,12 @@ jobs:
       - name: Clear GitHub Actions Cache
         run: sudo rm -rf /usr/local/share/ca-certificates
 
+      - name: Reinstall CA certificates
+        run: sudo apt-get install --reinstall ca-certificates
+
+      - name: Reload Nginx
+        run: sudo docker exec nginxserver nginx -s reload
+
       - name: Set target IP
         run: |
           STATUS=$(curl -o /dev/null -w "%{http_code}" "https://trip-story.site/env")
