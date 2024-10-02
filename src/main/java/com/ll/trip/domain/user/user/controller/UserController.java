@@ -113,7 +113,7 @@ public class UserController {
 
 	@PutMapping("/delete/account")
 	@Operation(summary = "회원 탈퇴")
-	@ApiResponse(responseCode = "200", description = "회원 탈퇴", content = {
+	@ApiResponse(responseCode = "200", description = "회원 탈퇴, 토큰을 삭제해야함", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = Integer.class))})
 	public ResponseEntity<?> deleteAccount(
 		@AuthenticationPrincipal SecurityUser securityUser,
