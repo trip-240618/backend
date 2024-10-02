@@ -2,6 +2,7 @@ package com.ll.trip.domain.user.user.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -111,7 +112,7 @@ public class UserController {
 		return ResponseEntity.ok(updated);
 	}
 
-	@PutMapping("/delete/account")
+	@DeleteMapping("/delete/account")
 	@Operation(summary = "회원 탈퇴")
 	@ApiResponse(responseCode = "200", description = "회원 탈퇴, 토큰을 삭제해야함", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = Integer.class))})

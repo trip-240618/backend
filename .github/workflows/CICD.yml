@@ -42,11 +42,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Update package lists
-        run: sudo apt-get update
-
-      - name: Update CA certificates
-        run: sudo apt-get install --reinstall ca-certificates
+      - name: Clear GitHub Actions Cache
+        run: sudo rm -rf /usr/local/share/ca-certificates
 
       - name: Set target IP
         run: |
