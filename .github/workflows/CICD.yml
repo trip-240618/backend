@@ -42,12 +42,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Clear GitHub Actions Cache
-        run: sudo rm -rf /usr/local/share/ca-certificates
-
-      - name: Reinstall CA certificates
-        run: sudo apt-get install --reinstall ca-certificates
-
       - name: Reload Nginx
         run: sudo docker exec nginxserver nginx -s reload
 
