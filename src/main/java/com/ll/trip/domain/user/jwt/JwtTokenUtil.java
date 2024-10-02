@@ -53,21 +53,24 @@ public class JwtTokenUtil {
 
 	private final UserDetailsServiceImpl userDetailsService;
 
-	public String createRefreshToken(long id, String uuid, String nickname, Collection<? extends GrantedAuthority> authorities) {
+	public String createRefreshToken(long userId, String uuid, String nickname,
+		Collection<? extends GrantedAuthority> authorities) {
 		List<String> roles = authorities.stream()
 			.map(GrantedAuthority::getAuthority)  // 권한 정보(ROLE_XXX) 추출
 			.collect(Collectors.toList());
-		return getString(id, uuid, nickname, roles, refreshTokenValidityInMilliseconds);
+		return getString(userId, uuid, nickname, roles, refreshTokenValidityInMilliseconds);
 	}
 
-	public String createAccessToken(long id, String uuid, String nickname, Collection<? extends GrantedAuthority> authorities) {
+	public String createAccessToken(long userId, String uuid, String nickname,
+		Collection<? extends GrantedAuthority> authorities) {
 		List<String> roles = authorities.stream()
 			.map(GrantedAuthority::getAuthority)  // 권한 정보(ROLE_XXX) 추출
 			.collect(Collectors.toList());
-		return getString(id, uuid, nickname, roles, accessTokenValidityInMilliseconds);
+		return getString(userId, uuid, nickname, roles, accessTokenValidityInMilliseconds);
 	}
 
-	private String getString(long id, String uuid, String nickname, List<String> roles, long tokenValidityInMilliseconds) {
+	private String getString(long id, String uuid, String nickname, List<String> roles,
+		long tokenValidityInMilliseconds) {
 		Claims claims = Jwts.claims().setSubject(uuid);
 		claims.put("id", id);  // 사용자 ID 추가
 		claims.put("nickname", nickname);  // 닉네임 추가
@@ -84,7 +87,8 @@ public class JwtTokenUtil {
 			.compact();
 	}
 
-	public Authentication buildAuthentication(long id, String uuid, String nickname, Collection<? extends GrantedAuthority> authorities) {
+	public Authentication buildAuthentication(long id, String uuid, String nickname,
+		Collection<? extends GrantedAuthority> authorities) {
 		UserDetails userDetails = userDetailsService.buildUserByClaims(id, uuid, nickname, authorities);
 		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
 	}

@@ -29,7 +29,6 @@ public class OAuth2Service {
 		String providerId = provider + oauthId;
 		Optional<UserEntity> optUser = userRepository.findByProviderId(providerId);
 		UserEntity user;
-		String refreshToken;
 		String uuid;
 		UserInfoDto userInfoDto;
 
@@ -49,10 +48,8 @@ public class OAuth2Service {
 			else
 				userInfoDto = new UserInfoDto(user, "login");
 		}
-		refreshToken = jwtTokenUtil.createRefreshToken(user.getId(), uuid, user.getNickname(), user.getAuthorities());
-		String newAccessToken = jwtTokenUtil.createAccessToken(user.getId(), uuid, user.getNickname(), user.getAuthorities());
 
-		userService.setTokenInCookie(newAccessToken, refreshToken, response);
+		userService.createAndSetTokens(user.getId(), uuid, user.getNickname(), user.getAuthorities(), response);
 
 		return userInfoDto;
 	}

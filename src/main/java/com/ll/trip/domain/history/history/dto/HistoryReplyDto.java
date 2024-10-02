@@ -16,5 +16,7 @@ public class HistoryReplyDto {
 
 	private LocalDateTime createDate;
 
+	private LocalDateTime modifiedDate;
+
 	private String content;
 }

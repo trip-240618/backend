@@ -20,8 +20,10 @@ import com.ll.trip.domain.history.history.dto.HistoryDetailDto;
 import com.ll.trip.domain.history.history.dto.HistoryListDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
+import com.ll.trip.domain.history.history.dto.HistoryReplyModifyDto;
 import com.ll.trip.domain.history.history.dto.HistoryTagDto;
 import com.ll.trip.domain.history.history.entity.History;
+import com.ll.trip.domain.history.history.entity.HistoryReply;
 import com.ll.trip.domain.history.history.service.HistoryService;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.service.TripService;
@@ -168,6 +170,29 @@ public class HistoryController {
 		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 		History history = entityManager.getReference(History.class, historyId);
 		historyService.createHistoryReply(history, user, requestDto);
+
+		List<HistoryReplyDto> response = historyService.showHistoryReplyList(historyId);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PutMapping("/{tripId}/history/{historyId}/reply/modify")
+	@Operation(summary = "History 댓글 수정")
+	@ApiResponse(responseCode = "200", description = "History 댓글 수정 후 댓글목록 반환", content = {
+		@Content(mediaType = "application/json",
+			array = @ArraySchema(schema = @Schema(implementation = HistoryReplyDto.class)))})
+	public ResponseEntity<?> modifyHistoryReply(
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
+		@PathVariable @Parameter(description = "히스토리 id", example = "1", in = ParameterIn.PATH) long historyId,
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestBody HistoryReplyModifyDto requestDto
+	) {
+		if (!historyService.isWriterOfReply(requestDto.getReplyId(), securityUser.getId()))
+			return ResponseEntity.badRequest().body("권한이 없습니다.");
+
+		historyService.modifyHistoryReply(
+			entityManager.getReference(HistoryReply.class, requestDto.getReplyId()),
+			requestDto.getContent());
 
 		List<HistoryReplyDto> response = historyService.showHistoryReplyList(historyId);
 

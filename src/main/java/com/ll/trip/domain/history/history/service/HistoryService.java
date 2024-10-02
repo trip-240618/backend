@@ -171,4 +171,10 @@ public class HistoryService {
 	public void deleteHistoryTag(long tagId) {
 		historyTagRepository.deleteById(tagId);
 	}
+
+	@Transactional
+	public void modifyHistoryReply(HistoryReply replyRef, String content) {
+		replyRef.setContent(content);
+		historyReplyRepository.save(replyRef);
+	}
 }

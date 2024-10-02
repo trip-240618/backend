@@ -5,12 +5,12 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.ll.trip.domain.history.history.entity.HistoryReply;
 import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
+import com.ll.trip.domain.history.history.entity.HistoryReply;
 
 public interface HistoryReplyRepository extends JpaRepository<HistoryReply, Long> {
 	@Query("""
-		select new com.ll.trip.domain.history.history.dto.HistoryReplyDto(r.id, u.uuid, r.createDate, r.content)
+		select new com.ll.trip.domain.history.history.dto.HistoryReplyDto(r.id, u.uuid, r.createDate, r.modifyDate, r.content)
 		from HistoryReply r
 		left join r.user u on r.history.id = :historyId
 		""")
@@ -22,4 +22,5 @@ public interface HistoryReplyRepository extends JpaRepository<HistoryReply, Long
 		     WHERE r.id = :replyId AND r.user.id = :userId
 		""")
 	boolean existsByReplyIdAndUserId(long replyId, long userId);
+
 }

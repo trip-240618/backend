@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -41,5 +42,6 @@ public class HistoryReply extends BaseEntity {
 
 	@NotBlank
 	@Lob
+	@Setter
 	private String content;
 }
