@@ -67,10 +67,10 @@ public class TripController {
 	) {
 		String invitationCode = tripService.generateInvitationCode();
 		Trip trip = tripService.createTrip(tripCreateDto, invitationCode);
-		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
+		UserEntity userRef = entityManager.getReference(UserEntity.class, securityUser.getId());
 
-		tripService.joinTripById(trip, user, true);
-		notificationService.tripCreateNotifictaion(trip, user);
+		tripService.joinTripById(trip, userRef, true);
+		notificationService.tripCreateNotifictaion(trip, userRef);
 		return ResponseEntity.ok(new TripCreateResponseDto(trip.getId(), invitationCode));
 	}
 

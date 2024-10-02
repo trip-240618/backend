@@ -62,7 +62,7 @@ public class UserController {
 		@RequestBody UserModifyDto modifyDto
 	) {
 		log.info("uuid : " + securityUser.getUsername());
-		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
+		UserEntity user = userService.findUserByUserId(securityUser.getId());
 
 		user = userService.modifyUserInfo(
 			user, modifyDto.getNickname(), modifyDto.getProfileImg(), modifyDto.getThumbnail(),
