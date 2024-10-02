@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Reload Nginx
-        run: sudo docker exec nginxserver nginx -s reload
+        run: sudo nginx -s reload
 
       - name: Set target IP
         run: |
