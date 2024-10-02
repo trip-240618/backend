@@ -83,12 +83,12 @@ public class TripService {
 		return convertToTripInfoDto(serviceDtos);
 	}
 
-	public List<TripInfoDto> findAllLastByUserIdAndDate(Long userId, LocalDate date) {
+	public List<TripInfoDto> findAllLastByUserIdAndDate(long userId, LocalDate date) {
 		List<TripInfoServiceDto> serviceDtos = tripRepository.findTripLastByUserIdAndDate(userId, date);
 		return convertToTripInfoDto(serviceDtos);
 	}
 
-	public List<TripInfoDto> findBookmarkByUserId(Long userId) {
+	public List<TripInfoDto> findBookmarkByUserId(long userId) {
 		List<TripInfoServiceDto> serviceDtos = tripRepository.findAllBookmarkTrip(userId);
 		return convertToTripInfoDto(serviceDtos);
 	}
