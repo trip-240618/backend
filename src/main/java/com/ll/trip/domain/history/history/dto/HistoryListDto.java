@@ -2,7 +2,6 @@ package com.ll.trip.domain.history.history.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import com.ll.trip.domain.history.history.entity.History;
 
@@ -46,11 +45,13 @@ public class HistoryListDto {
 		example = "2024-08-22T14:05")
 	private LocalDateTime photoDate;
 
-	@Schema(
-		description = "태그 리스트",
-		example = "[\"tag1\", \"tag2\", \"tag3\"]"
-	)
-	private List<HistoryTagDto> tags;
+	@Schema(description = "좋아요 수",
+		example = "1")
+	private int likeCnt;
+
+	@Schema(description = "댓글 수",
+		example = "3")
+	private int replyCnt;
 
 	public HistoryListDto(History history) {
 		this.id = history.getId();
@@ -60,6 +61,7 @@ public class HistoryListDto {
 		this.latitude = history.getLatitude();
 		this.longitude = history.getLongitude();
 		this.photoDate = history.getPhotoDate();
-		this.tags = history.getHistoryTags().stream().map(HistoryTagDto::new).toList();
+		this.likeCnt = history.getLikeCnt();
+		this.replyCnt = history.getReplyCnt();
 	}
 }

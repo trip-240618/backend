@@ -15,9 +15,8 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 		    SELECT h
 		    FROM History h
 		    JOIN fetch h.user u
-		    LEFT JOIN fetch h.historyTags ht
 		    WHERE h.trip.id = :tripId
-		    ORDER BY h.id, ht.id ASC
+		    ORDER BY h.photoDate asc, h.id desc
 		""")
 	List<History> findAllByTripId(Long tripId);
 
