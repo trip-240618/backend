@@ -30,6 +30,11 @@ public class PlanJCreateRequestDto {
 	private String title;
 
 	@Schema(
+		description = "일정 장소",
+		example = "도쿄 디즈니")
+	private String place;
+
+	@Schema(
 		description = "메모",
 		example = "3시 이후에 체크인 가능")
 	private String memo;

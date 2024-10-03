@@ -40,6 +40,11 @@ public class PlanJModifyRequestDto {
 				  + "항공편의 경우 jsonString 항공편 정보")
 	private String memo;
 
+	@Schema(
+		description = "일정 장소",
+		example = "도쿄 디즈니")
+	private String place;
+
 	@Schema(description = "위도",
 		example = "37.4220541")
 	private BigDecimal latitude;

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import org.springframework.aop.AopInvocationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -82,12 +82,7 @@ public class TripController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "초대코드", example = "1A2B3C4D") String invitationCode
 	) {
-		Long tripId = null;
-		try {
-			tripId = tripService.findTripIdByInvitationCode(invitationCode);
-		} catch (AopInvocationException ae) {
-			return ResponseEntity.badRequest().body(ae.getMessage());
-		}
+		long tripId = tripService.findTripIdByInvitationCode(invitationCode);
 		Trip trip = entityManager.getReference(Trip.class, tripId);
 		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 
@@ -114,7 +109,7 @@ public class TripController {
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId
 	) {
 		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("입장 권한이 없습니다.");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("입장 권한이 없습니다.");
 
 		TripInfoDto response = new TripInfoDto(tripService.findTripByTripId(tripId));
 
@@ -186,7 +181,7 @@ public class TripController {
 
 		tripService.deleteTripMember(tripId, securityUser.getId());
 
-		if(tripService.countTripMember(tripId) == 0) {
+		if (tripService.countTripMember(tripId) == 0) {
 			List<String> urls = tripService.findImageByTripId(tripId);
 			List<String> keys = awsAuthService.extractKeyFromUrl(urls);
 			awsAuthService.deleteObjectByKey(keys);

@@ -17,7 +17,7 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 	@Query("""
 		select new com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto(
 		p.id, p.dayAfterStart, p.orderByDate, p.startTime, p.writerUuid, p.title, p.memo,
-		p.latitude, p.longitude, p.locker
+		p.place, p.latitude, p.longitude, p.locker
 		) from PlanJ p
 		where p.trip.id = :tripId and
 		p.dayAfterStart = :day and
@@ -29,7 +29,7 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 	@Query("""
 		select new com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto(
 		p.id, p.dayAfterStart, p.orderByDate, p.startTime, p.writerUuid, p.title, p.memo,
-		p.latitude, p.longitude, p.locker
+		p.place, p.latitude, p.longitude, p.locker
 		) from PlanJ p
 		where p.trip.id = :tripId and
 		p.locker = :locker

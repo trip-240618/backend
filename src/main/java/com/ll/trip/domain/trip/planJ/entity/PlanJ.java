@@ -57,6 +57,9 @@ public class PlanJ extends BaseEntity {
 	private String writerUuid;
 
 	@Setter
+	private String place;
+
+	@Setter
 	@Column(precision = 10, scale = 8)
 	private BigDecimal latitude; //위도
 

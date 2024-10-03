@@ -69,7 +69,7 @@ public interface TripRepository extends JpaRepository<Trip, Long>{
 		from Trip t
 		where t.invitationCode = :invitationCode
 		""")
-	long findTrip_idByInvitationCode(String invitationCode);
+	Optional<Long> findTrip_idByInvitationCode(String invitationCode);
 
 	@Query("""
 		 select new com.ll.trip.domain.user.user.dto.VisitedCountryDto(t.country, count(t.id))

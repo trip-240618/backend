@@ -40,13 +40,8 @@ public class CountryController {
 		@RequestParam String countryName
 	){
 		log.info("검색 국가: " + countryName);
-		Country response;
-		try {
-			 response = countryService.findCountryByName(countryName);
-			 log.info(response.getCountryCode());
-		} catch (NullPointerException n) {
-			return ResponseEntity.badRequest().body("국가를 찾을 수 없습니다.");
-		}
+		Country response = countryService.findCountryByName(countryName);
+
 		return ResponseEntity.ok(response);
 	}
 

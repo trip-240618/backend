@@ -42,6 +42,7 @@ public class PlanJService {
 			.startTime(startTime == null ? LocalTime.now() : startTime)
 			.latitude(requestDto.getLatitude())
 			.longitude(requestDto.getLongitude())
+			.place(requestDto.getPlace())
 			.memo(requestDto.getMemo())
 			.title(requestDto.getTitle())
 			.locker(requestDto.isLocker())
@@ -70,6 +71,7 @@ public class PlanJService {
 		plan.setStartTime(requestBody.getStartTime());
 		plan.setLatitude(requestBody.getLatitude());
 		plan.setLongitude(requestBody.getLongitude());
+		plan.setPlace(requestBody.getPlace());
 		plan.setOrderByDate(order);
 		plan.setLocker(requestBody.isLocker());
 
