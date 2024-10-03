@@ -2,6 +2,7 @@ package com.ll.trip.domain.history.history.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,6 +29,7 @@ import com.ll.trip.domain.history.history.service.HistoryService;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.service.TripService;
 import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.global.handler.dto.ErrorResponseDto;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -299,19 +301,37 @@ public class HistoryController {
 		return ResponseEntity.ok("deleted");
 	}
 
+	@GetMapping("/{tripId}/history/tags")
+	@Operation(summary = "History 모든 태그 목록")
+	@ApiResponse(responseCode = "200", description = "여행방에 등록된 모든 태그를 반환", content = {
+		@Content(mediaType = "application/json",
+			array = @ArraySchema(schema = @Schema(implementation = HistoryListDto.class)))})
+	public ResponseEntity<?> searchHistoryTags(
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId
+	) {
+		List<HistoryTagDto> response = historyService.showAllTagsByTripId(tripId);
+		return ResponseEntity.ok(response);
+	}
+
 	@GetMapping("/{tripId}/history/search")
 	@Operation(summary = "History 검색")
-	@ApiResponse(responseCode = "200", description = "주어진 파라미터로 검색", content = {
+	@ApiResponse(responseCode = "200", description = "주어진 파라미터로 검색 (uuid가 있으면 uuid만 검색)", content = {
 		@Content(mediaType = "application/json",
 			array = @ArraySchema(schema = @Schema(implementation = HistoryListDto.class)))})
 	public ResponseEntity<?> searchHistory(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
-		@RequestParam(required = false) @Parameter(description = "작성자 이름", example = "요루시카", in = ParameterIn.PATH) String nickname,
-		@RequestParam(required = false) @Parameter(description = "태그명", example = "# 일본", in = ParameterIn.PATH) String tagName,
+		@RequestParam(required = false) @Parameter(description = "작성자 uuid", example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4", in = ParameterIn.PATH) String uuid,
+		@RequestParam(required = false) @Parameter(description = "태그명", example = "# 긴자", in = ParameterIn.PATH) String tagName,
 		@RequestParam(required = false) @Parameter(description = "태그 컬러", example = "#FFEFF3", in = ParameterIn.PATH) String tagColor
 	) {
+		List<HistoryListDto> response = null;
+		if(uuid != null) {
+			response = historyService.searchHistoryByUuid(tripId, uuid);
+		} else if(tagName != null) {
+			response = historyService.searchHistoryByTagNameAndColor(tripId, tagName,tagColor);
+		} else ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDto("Parameter is missing"));
 
-		return ResponseEntity.ok("deleted");
+		return ResponseEntity.ok(response);
 	}
 
 }

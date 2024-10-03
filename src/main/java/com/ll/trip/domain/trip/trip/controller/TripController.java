@@ -197,7 +197,7 @@ public class TripController {
 		return ResponseEntity.ok("deleted");
 	}
 
-	@DeleteMapping("/leave")
+	@DeleteMapping("/kick")
 	@Operation(summary = "Trip 여행방 강퇴")
 	@ApiResponse(responseCode = "200", description = "Trip 여행방 강퇴")
 	public ResponseEntity<?> kickTripMember(

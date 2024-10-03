@@ -3,6 +3,8 @@ package com.ll.trip.domain.history.history.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,8 +38,8 @@ public class HistoryService {
 	private final HistoryLikeRepository historyLikeRepository;
 
 	public List<HistoryListDto> findAllByTripId(long tripId) {
-		return historyRepository.findAllByTripId(tripId).stream()
-			.map(HistoryListDto::new).toList();
+		Pageable pageable = PageRequest.of(0, 50);
+		return historyRepository.findAllByTripId(tripId, pageable);
 	}
 
 	@Transactional
@@ -176,5 +178,20 @@ public class HistoryService {
 	public void modifyHistoryReply(HistoryReply replyRef, String content) {
 		replyRef.setContent(content);
 		historyReplyRepository.save(replyRef);
+	}
+
+	public List<HistoryTagDto> showAllTagsByTripId(long tripId) {
+		return historyTagRepository.findAllTagsByTripId(tripId);
+	}
+
+	public List<HistoryListDto> searchHistoryByUuid(long tripId, String uuid) {
+		Pageable pageable = PageRequest.of(0, 50);
+		return historyRepository.findHistoryByTripIdAndUuid(tripId, uuid, pageable);
+	}
+
+	public List<HistoryListDto> searchHistoryByTagNameAndColor(long tripId, String tagName, String tagColor) {
+		Pageable pageable = PageRequest.of(0, 50);
+		if(tagColor != null) return historyRepository.findHistoryByTripIdAndTagNameAndColor(tripId, tagName, tagColor, pageable);
+		else return historyRepository.findHistoryByTripIdAndTagName(tripId, tagName, pageable);
 	}
 }
