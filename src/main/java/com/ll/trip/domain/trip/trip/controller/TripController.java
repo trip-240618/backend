@@ -28,6 +28,7 @@ import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.service.TripService;
 import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.global.handler.dto.ErrorResponseDto;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -109,7 +110,7 @@ public class TripController {
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId
 	) {
 		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("입장 권한이 없습니다.");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("입장 권한이 없습니다."));
 
 		TripInfoDto response = new TripInfoDto(tripService.findTripByTripId(tripId));
 
@@ -158,7 +159,7 @@ public class TripController {
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId
 	) {
 		if (!tripService.isLeaderOfTrip(securityUser.getId(), tripId))
-			return ResponseEntity.badRequest().body("해당 여행방에 대한 수정/삭제 권한이 없습니다.");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("해당 여행방에 대한 수정/삭제 권한이 없습니다."));
 
 		List<String> urls = tripService.findImageByTripId(tripId);
 		List<String> keys = awsAuthService.extractKeyFromUrl(urls);
@@ -174,10 +175,11 @@ public class TripController {
 	@ApiResponse(responseCode = "200", description = "Trip 여행방 나가기")
 	public ResponseEntity<?> leaveTrip(
 		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "트립 타입", example = "j") char tripType,
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId
 	) {
 		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("해당 여행방의 멤버가 아닙니다.");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("해당 여행방의 멤버가 아닙니다."));
 
 		tripService.deleteTripMember(tripId, securityUser.getId());
 
@@ -185,9 +187,33 @@ public class TripController {
 			List<String> urls = tripService.findImageByTripId(tripId);
 			List<String> keys = awsAuthService.extractKeyFromUrl(urls);
 			awsAuthService.deleteObjectByKey(keys);
+			tripService.deleteTripById(tripId);
 		}
 
-		tripService.deleteTripById(tripId);
+		template.convertAndSend("/topic/api/trip/" + Character.toLowerCase(tripType) + "/" + tripId,
+			new SocketResponseBody<>("member out",
+				securityUser.getUuid()));
+
+		return ResponseEntity.ok("deleted");
+	}
+
+	@DeleteMapping("/leave")
+	@Operation(summary = "Trip 여행방 강퇴")
+	@ApiResponse(responseCode = "200", description = "Trip 여행방 강퇴")
+	public ResponseEntity<?> kickTripMember(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId,
+		@RequestParam @Parameter(description = "트립 타입", example = "j") char tripType,
+		@RequestParam @Parameter(description = "강퇴 대상의 uuid", example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4") String uuid
+	) {
+		if (!tripService.isLeaderOfTrip(securityUser.getId(), tripId))
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("해당 여행방에 대한 수정/삭제 권한이 없습니다."));
+
+		tripService.deleteTripMemberByUuid(tripId, uuid);
+
+		template.convertAndSend("/topic/api/trip/" + Character.toLowerCase(tripType) + "/" + tripId,
+			new SocketResponseBody<>("member out",
+				securityUser.getUuid()));
 
 		return ResponseEntity.ok("deleted");
 	}
@@ -202,7 +228,7 @@ public class TripController {
 		@RequestBody TripModifyDto requestBody
 	) {
 		if (!tripService.isLeaderOfTrip(securityUser.getId(), tripId))
-			return ResponseEntity.badRequest().body("해당 여행방에 대한 수정/삭제 권한이 없습니다.");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("해당 여행방에 대한 수정/삭제 권한이 없습니다."));
 		Trip trip = tripService.findTripByTripId(tripId);
 
 		planJService.updatePlanJDay(trip.getId(),

@@ -1,6 +1,7 @@
 package com.ll.trip.domain.trip.trip.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.ll.trip.domain.trip.trip.entity.TripMember;
@@ -24,4 +25,11 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 	boolean isLeaderOfTrip(long userId, long tripId);
 
 	int countTripMemberByTrip_Id(long tripId);
+
+	@Modifying
+	@Query("""
+		from TripMember tm
+		left join tm.user u on tm.trip.id = :tripId and u.uuid = :uuid
+		""")
+	void deleteByTripIdAndUuid(long tripId, String uuid);
 }

@@ -62,7 +62,6 @@ public class TripService {
 
 	@Transactional
 	public boolean joinTripById(Trip trip, UserEntity user, boolean isLeader) {
-
 		TripMemberId tripMemberId = TripMemberId.builder().tripId(trip.getId()).userId(user.getId()).build();
 
 		if (tripMemberRepository.existsById(tripMemberId)) {
@@ -191,5 +190,9 @@ public class TripService {
 
 	public List<VisitedCountryDto> findVisitedCountry(long userId) {
 		return tripRepository.findVisitedCountry(userId, LocalDate.now());
+	}
+
+	public void deleteTripMemberByUuid(long tripId, String uuid) {
+		tripMemberRepository.deleteByTripIdAndUuid(tripId, uuid);
 	}
 }
