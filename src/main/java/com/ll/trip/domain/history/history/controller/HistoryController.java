@@ -100,8 +100,7 @@ public class HistoryController {
 	@Operation(summary = "History 일괄 생성")
 	@ApiResponse(responseCode = "200", description = "History 생성", content = {
 		@Content(mediaType = "application/json",
-			examples = @ExampleObject(description = "생성하는데 성공한 history개수", value = "3")
-		)})
+			array = @ArraySchema(schema = @Schema(implementation = HistoryListDto.class)))})
 	public ResponseEntity<?> createManyHistories(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser,
@@ -113,7 +112,7 @@ public class HistoryController {
 		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 		Trip trip = entityManager.getReference(Trip.class, tripId);
 
-		int response = historyService.createManyHistories(requestDto.getHistoryCreateRequestDtos(),
+		List<HistoryListDto> response = historyService.createManyHistories(requestDto.getHistoryCreateRequestDtos(),
 			user, trip);
 
 		return ResponseEntity.ok(response);

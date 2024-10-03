@@ -1,5 +1,6 @@
 package com.ll.trip.domain.history.history.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,19 +84,21 @@ public class HistoryService {
 			.longitude(requestDto.getLongitude())
 			.memo(requestDto.getMemo())
 			.photoDate(requestDto.getPhotoDate())
+			.likeCnt(0)
+			.replyCnt(0)
 			.user(user)
 			.trip(trip)
 			.build();
 	}
 
-	public int createManyHistories(List<HistoryCreateRequestDto> dtos, UserEntity user, Trip trip) {
-		int successCnt = 0;
+	public List<HistoryListDto> createManyHistories(List<HistoryCreateRequestDto> dtos, UserEntity user, Trip trip) {
+		List<HistoryListDto> historyListDtoList = new ArrayList<>();
 
 		for (HistoryCreateRequestDto dto : dtos) {
 			History history = createHistory(dto, user, trip);
-			if(history != null) successCnt++;
+			if(history != null) historyListDtoList.add(new HistoryListDto(history));
 		}
-		return successCnt;
+		return historyListDtoList;
 	}
 
 	@Transactional

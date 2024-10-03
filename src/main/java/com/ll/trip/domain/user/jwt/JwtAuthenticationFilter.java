@@ -34,9 +34,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		Claims claims = null;
 
 		boolean accessTokenVaild = accessToken != null && jwtTokenUtil.validateToken(accessToken);
-		if (accessTokenVaild)
+		if (accessTokenVaild) {
 			claims = jwtTokenUtil.getClaims(accessToken);
-		else if (refreshToken != null) {
+		} else if (refreshToken != null) {
 			log.info("유효하지 않은 액세스토큰: " + accessToken);
 			if (jwtTokenUtil.validateToken(refreshToken)) {
 				claims = jwtTokenUtil.getClaims(refreshToken);
