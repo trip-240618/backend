@@ -15,6 +15,11 @@ import com.ll.trip.domain.notification.notice.dto.NoticeDetailDto;
 import com.ll.trip.domain.notification.notice.dto.NoticeListDto;
 import com.ll.trip.domain.notification.notice.service.NoticeService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -25,6 +30,9 @@ public class NoticeController {
 
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/notice/create")
+	@Operation(summary = "공지 생성")
+	@ApiResponse(responseCode = "200", description = "공지 생성", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = NoticeDetailDto.class))})
 	public ResponseEntity<?> createNotice(
 		@RequestBody NoticeCreateDto noticeCreateDto
 	) {
@@ -33,6 +41,9 @@ public class NoticeController {
 	}
 
 	@GetMapping("/notice/list")
+	@Operation(summary = "공지 목록")
+	@ApiResponse(responseCode = "200", description = "공지 목록 보기", content = {
+		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = NoticeDetailDto.class)))})
 	public ResponseEntity<?> showNoticeList(
 		@RequestParam(required = false) Boolean normal,
 		@RequestParam(required = false) Boolean update,

@@ -1,4 +1,4 @@
-package com.ll.trip.domain.notification.notice;
+package com.ll.trip.domain.notification.notice.repository;
 
 import java.util.List;
 

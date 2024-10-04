@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.ll.trip.domain.notification.notice.NoticeRepository;
+import com.ll.trip.domain.notification.notice.repository.NoticeRepository;
 import com.ll.trip.domain.notification.notice.dto.NoticeCreateDto;
 import com.ll.trip.domain.notification.notice.dto.NoticeDetailDto;
 import com.ll.trip.domain.notification.notice.dto.NoticeListDto;
