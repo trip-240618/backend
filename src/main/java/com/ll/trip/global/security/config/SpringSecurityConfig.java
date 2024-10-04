@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,13 +18,14 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.ll.trip.domain.user.jwt.JwtAuthenticationFilter;
-import com.ll.trip.domain.user.jwt.JwtTokenUtil;
+import com.ll.trip.global.security.filter.jwt.JwtAuthenticationFilter;
+import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
 
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SpringSecurityConfig {
 
 	private final JwtTokenUtil jwtTokenUtil;

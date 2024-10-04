@@ -6,8 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.notification.notification.dto.HistoryNotificationDto;
-import com.ll.trip.domain.notification.notification.dto.PlanNotificationDto;
+import com.ll.trip.domain.notification.notification.dto.NotificationComponentDto;
 import com.ll.trip.domain.notification.notification.entity.Notification;
 import com.ll.trip.domain.notification.notification.entity.NotificationConfig;
 import com.ll.trip.domain.notification.notification.repository.NotificationConfigRepository;
@@ -27,9 +26,9 @@ public class NotificationService {
 	private final EntityManager entityManager;
 
 	@Transactional
-	public void createNotificationConfig(UserEntity user) {
+	public void createNotificationConfig(UserEntity userRef) {
 		NotificationConfig config = NotificationConfig.builder()
-			.user(user)
+			.user(userRef)
 			.activeHistoryNotification(true)
 			.activeAdNotification(true)
 			.activePlanNotification(true)
@@ -48,28 +47,31 @@ public class NotificationService {
 			Notification.builder()
 				.title("여행 일정")
 				.content(content)
+				.type("trip")
+				.typeValue(trip.getId())
 				.isRead(false)
+				.type("trip")
+				.typeValue(trip.getId())
 				.user(userRef)
 				.build());
 	}
 
 	@Transactional
-	public void tripJoinNotifictaion(Trip tripRef, String tripName, long userId, String nickname) {
-		List<PlanNotificationDto> dtos = getPlanNotificationListByTripId(tripRef.getId());
-
-		String content = "'" + tripName + "' 여행방에 " + nickname + "님이 참가하였습니다.";
-
+	public void tripJoinNotifictaion(Trip tripRef, long userId, String nickname) {
+		List<NotificationComponentDto> dtos = getAllTripNotificationComponentByTripId(tripRef.getId());
+		String content = "'" + dtos.get(0).getTypeName() + "' 여행방에 " + nickname + "님이 참가하였습니다.";
 		List<Notification> notifications = new ArrayList<>();
 
-		for (PlanNotificationDto dto : dtos) {
-			if (!dto.isActive() || dto.getUserId() == userId)
-				continue;
+		for (NotificationComponentDto dto : dtos) {
+			if(userId == dto.getUserId() || !dto.isPlanActive()) continue;
 			notifications.add(
 				Notification.builder()
 					.title("여행 일정")
 					.content(content)
-					.user(entityManager.getReference(UserEntity.class, userId))
+					.user(entityManager.getReference(UserEntity.class, dto.getUserId()))
 					.isRead(false)
+					.type("trip")
+					.typeValue(dto.getTypeId())
 					.build());
 		}
 		notificationRepository.saveAll(notifications);
@@ -79,11 +81,7 @@ public class NotificationService {
 		return notificationConfigRepository.findByUserId(userId).orElseThrow(NullPointerException::new);
 	}
 
-	public List<PlanNotificationDto> getPlanNotificationListByTripId(long tripId) {
-		return notificationConfigRepository.findAllPlanNotificationListByTripId(tripId);
-	}
-
-	public List<HistoryNotificationDto> getHistoryNotificationListByTripId(long tripId) {
-		return notificationConfigRepository.findAllHistoryNotificationListByTripId(tripId);
+	public List<NotificationComponentDto> getAllTripNotificationComponentByTripId(long tripId) {
+		return notificationRepository.findAllTripNotificationComponentByTripId(tripId);
 	}
 }

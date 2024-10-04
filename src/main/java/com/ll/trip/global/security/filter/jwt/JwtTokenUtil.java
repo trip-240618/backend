@@ -1,4 +1,4 @@
-package com.ll.trip.domain.user.jwt;
+package com.ll.trip.global.security.filter.jwt;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;

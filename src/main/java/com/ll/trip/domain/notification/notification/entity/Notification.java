@@ -41,6 +41,10 @@ public class Notification {
 
 	private boolean isRead;
 
+	private String type;
+
+	private long typeValue;
+
 	@NotNull
 	@CreatedDate
 	private LocalDateTime createDate;

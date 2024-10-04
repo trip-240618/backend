@@ -1,6 +1,7 @@
 package com.ll.trip.domain.history.history.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +55,10 @@ public class HistoryDetailDto {
 	@Schema(description = "좋아요 여부",
 		example = "false")
 	private boolean like;
+
+	@Schema(description = "사진 날짜",
+		example = "2024-08-22")
+	private LocalDate photoDate;
 
 	@Schema(
 		description = "태그 리스트",

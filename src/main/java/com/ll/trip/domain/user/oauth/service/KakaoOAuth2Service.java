@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.ll.trip.domain.user.jwt.JwtTokenUtil;
+import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
 import com.ll.trip.domain.user.oauth.dto.KakaoTokenResponseDto;
 import com.ll.trip.domain.user.oauth.dto.KakaoUserInfoDto;
 import com.ll.trip.domain.user.user.repository.UserRepository;

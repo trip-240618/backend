@@ -1,4 +1,4 @@
-package com.ll.trip.domain.user.jwt;
+package com.ll.trip.global.security.filter.jwt;
 
 import java.io.IOException;
 
@@ -7,6 +7,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.ll.trip.global.security.filter.jwt.dto.ExtractedClaims;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;

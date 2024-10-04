@@ -90,7 +90,7 @@ public class TripController {
 		boolean isNewMember = tripService.joinTripById(trip, user, false);
 
 		TripInfoDto response = new TripInfoDto(tripService.findTripByTripId(tripId));
-		notificationService.tripJoinNotifictaion(trip, response.getName(), user.getId(), securityUser.getNickname());
+		notificationService.tripJoinNotifictaion(trip, user.getId(), securityUser.getNickname());
 
 		if (isNewMember)
 			template.convertAndSend(

@@ -1,7 +1,7 @@
 package com.ll.trip.domain.history.history.entity;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +61,7 @@ public class History extends BaseEntity {
 	@Column(precision = 11, scale = 8)
 	private BigDecimal longitude; //경도
 
-	private LocalDateTime photoDate;
+	private LocalDate photoDate;
 
 	private String memo;
 

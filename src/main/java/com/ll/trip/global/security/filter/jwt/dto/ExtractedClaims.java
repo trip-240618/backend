@@ -1,4 +1,4 @@
-package com.ll.trip.domain.user.jwt;
+package com.ll.trip.global.security.filter.jwt.dto;
 
 import java.util.Collection;
 import java.util.List;

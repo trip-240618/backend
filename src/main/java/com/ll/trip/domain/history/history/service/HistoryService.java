@@ -1,6 +1,5 @@
 package com.ll.trip.domain.history.history.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,13 +91,11 @@ public class HistoryService {
 	}
 
 	public List<HistoryListDto> createManyHistories(List<HistoryCreateRequestDto> dtos, UserEntity user, Trip trip) {
-		List<HistoryListDto> historyListDtoList = new ArrayList<>();
 
 		for (HistoryCreateRequestDto dto : dtos) {
-			History history = createHistory(dto, user, trip);
-			if(history != null) historyListDtoList.add(new HistoryListDto(history));
+			createHistory(dto, user, trip);
 		}
-		return historyListDtoList;
+		return findAllByTripId(trip.getId());
 	}
 
 	@Transactional

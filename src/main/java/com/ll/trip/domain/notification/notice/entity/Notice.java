@@ -1,4 +1,4 @@
-package com.ll.trip.domain.notification.notification.entity;
+package com.ll.trip.domain.notification.notice.entity;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -9,6 +9,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -28,7 +29,15 @@ public class Notice extends BaseEntity {
 	private Long id;
 
 	@NotBlank
-	private String title;
+	private String type; //시스템, 업데이트, 일반
+
 	@NotBlank
+	private String title;
+
+	@NotBlank
+	@Lob
 	private String content;
+
+	@Lob
+	private String markdownDetails;
 }

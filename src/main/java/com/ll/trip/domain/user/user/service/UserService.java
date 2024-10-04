@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.notification.notification.repository.NotificationConfigRepository;
-import com.ll.trip.domain.user.jwt.JwtTokenUtil;
+import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
 import com.ll.trip.global.security.userDetail.SecurityUser;
