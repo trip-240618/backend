@@ -38,7 +38,7 @@ public class NoticeController {
 		@RequestParam(required = false) Boolean update,
 		@RequestParam(required = false) Boolean system
 	) {
-		List<NoticeListDto> resposen = noticeService.showNoticeList(normal, update, system);
-		return ResponseEntity.ok(resposen);
+		List<NoticeListDto> response = noticeService.showNoticeList(normal, update, system);
+		return ResponseEntity.ok(response);
 	}
 }

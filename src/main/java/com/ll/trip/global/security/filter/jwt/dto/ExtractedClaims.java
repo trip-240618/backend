@@ -21,6 +21,7 @@ public class ExtractedClaims {
 		this.uuid = claims.getSubject();  // UUID 추출
 		this.userId = ((Number)claims.get("id")).longValue();
 		this.nickname = claims.get("nickname", String.class);
+		@SuppressWarnings("unchecked")
 		List<String> roles = claims.get("roles", List.class);
 		this.authorities = roles.stream()
 			.map(SimpleGrantedAuthority::new)

@@ -2,7 +2,6 @@ package com.ll.trip.global.init;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 
 import org.springframework.boot.ApplicationRunner;
@@ -84,7 +83,7 @@ public class DevInit {
 						// imageUrl
 						new BigDecimal("37.4220541"), // latitude
 						new BigDecimal("-122.08532419999999"), // longitude
-						LocalDateTime.of(2024, 9, 14, 14, 15), // photoDate
+						LocalDate.of(2024, 9, 14), // photoDate
 						"오사카에서 찍은 사진", // memo
 						Arrays.asList(new HistoryTagDto("##FFEFF3","tag1"), new HistoryTagDto("##FFEFF3","tag2")) // tags 리스트
 					),user, trip);
@@ -97,7 +96,7 @@ public class DevInit {
 						// imageUrl
 						new BigDecimal("37.4220541"), // latitude
 						new BigDecimal("-122.08532419999999"), // longitude
-						LocalDateTime.of(2024, 9, 15, 15, 15), // photoDate
+						LocalDate.of(2024, 9, 15), // photoDate
 						"오사카에서 찍은 사진", // memo
 						Arrays.asList(new HistoryTagDto("##FFEFF3","tag1"), new HistoryTagDto("##FFEFF3","tag2")) // tags 리스트
 					),user, trip);

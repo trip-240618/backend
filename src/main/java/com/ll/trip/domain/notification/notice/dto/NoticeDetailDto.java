@@ -27,8 +27,8 @@ public class NoticeDetailDto {
 	private String markdownDetails;
 
 	@Schema(
-		description = "여행 시작일",
-		example = "2024-08-22")
+		description = "생성 날짜",
+		example = "2024-08-22T14:05")
 	private LocalDateTime createDate;
 
 	public NoticeDetailDto(Notice notice) {
