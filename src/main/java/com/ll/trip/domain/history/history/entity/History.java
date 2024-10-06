@@ -63,6 +63,7 @@ public class History extends BaseEntity {
 
 	private LocalDate photoDate;
 
+	@Setter
 	private String memo;
 
 	private int likeCnt;

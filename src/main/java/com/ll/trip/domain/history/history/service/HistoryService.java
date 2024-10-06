@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ll.trip.domain.history.history.dto.HistoryCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryDetailDto;
 import com.ll.trip.domain.history.history.dto.HistoryListDto;
+import com.ll.trip.domain.history.history.dto.HistoryModifyDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
 import com.ll.trip.domain.history.history.dto.HistoryServiceDto;
@@ -24,6 +25,7 @@ import com.ll.trip.domain.history.history.repository.HistoryReplyRepository;
 import com.ll.trip.domain.history.history.repository.HistoryRepository;
 import com.ll.trip.domain.history.history.repository.HistoryTagRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
+import com.ll.trip.domain.trip.trip.repository.TripRepository;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class HistoryService {
+	private final TripRepository tripRepository;
 	private final HistoryRepository historyRepository;
 	private final HistoryTagRepository historyTagRepository;
 	private final HistoryReplyRepository historyReplyRepository;
@@ -92,7 +95,6 @@ public class HistoryService {
 
 	@Transactional
 	public List<HistoryListDto> createManyHistories(List<HistoryCreateRequestDto> dtos, UserEntity user, Trip trip) {
-
 		for (HistoryCreateRequestDto dto : dtos) {
 			createHistory(dto, user, trip);
 		}
@@ -192,7 +194,19 @@ public class HistoryService {
 
 	public List<HistoryListDto> searchHistoryByTagNameAndColor(long tripId, String tagName, String tagColor) {
 		Pageable pageable = PageRequest.of(0, 50);
-		if(tagColor != null) return historyRepository.findHistoryByTripIdAndTagNameAndColor(tripId, tagName, tagColor, pageable);
-		else return historyRepository.findHistoryByTripIdAndTagName(tripId, tagName, pageable);
+		if (tagColor != null)
+			return historyRepository.findHistoryByTripIdAndTagNameAndColor(tripId, tagName, tagColor, pageable);
+		else
+			return historyRepository.findHistoryByTripIdAndTagName(tripId, tagName, pageable);
+	}
+
+	@Transactional
+	public void modifyHistory(long tripId, long historyId, HistoryModifyDto requestDto) {
+		Trip tripRef = tripRepository.getReferenceById(tripId);
+		History historyRef = historyRepository.getReferenceById(historyId);
+		List<HistoryTag> tags = createHistoryTags(requestDto.getTags(), tripRef, historyRef);
+		historyRef.setHistoryTags(tags);
+		historyRef.setMemo(requestDto.getMemo());
+		historyRepository.save(historyRef);
 	}
 }

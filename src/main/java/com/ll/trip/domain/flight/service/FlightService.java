@@ -60,10 +60,10 @@ public class FlightService {
 		String arrivalAirport_kr;
 
 		List<Airport> airports = airportRepository.findByIata(departureAirport, arrivalAirport);
-
 		if (airports.size() == 2) {
-			departureAirport_kr = airports.get(0).getKorName();
-			arrivalAirport_kr = airports.get(1).getKorName();
+			String departIata = airports.get(0).getIata();
+			departureAirport_kr = departIata.equals(departureAirport)? airports.get(0).getKorName() : airports.get(1).getKorName();
+			arrivalAirport_kr = departIata.equals(arrivalAirport)? airports.get(0).getKorName() : airports.get(1).getKorName();
 		} else {
 			departureAirport_kr = null;
 			arrivalAirport_kr = null;

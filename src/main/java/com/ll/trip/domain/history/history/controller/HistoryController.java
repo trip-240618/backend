@@ -19,6 +19,7 @@ import com.ll.trip.domain.history.history.dto.HistoriesCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryDetailDto;
 import com.ll.trip.domain.history.history.dto.HistoryListDto;
+import com.ll.trip.domain.history.history.dto.HistoryModifyDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyModifyDto;
@@ -114,6 +115,26 @@ public class HistoryController {
 
 		List<HistoryListDto> response = historyService.createManyHistories(requestDto.getHistoryCreateRequestDtos(),
 			user, trip);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/{tripId}/history/modify/{historyId}")
+	@Operation(summary = "History 수정")
+	@ApiResponse(responseCode = "200", description = "History 수정", content = {
+		@Content(mediaType = "application/json",
+			array = @ArraySchema(schema = @Schema(implementation = HistoryDetailDto.class)))})
+	public ResponseEntity<?> modifyHistory(
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
+		@PathVariable @Parameter(description = "히스토리 id", example = "1", in = ParameterIn.PATH) long historyId,
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestBody HistoryModifyDto requestDto
+	) {
+		if (!historyService.isWriterOfHistory(historyId, securityUser.getId()))
+			return ResponseEntity.badRequest().body("권한이 없습니다.");
+
+		historyService.modifyHistory(tripId, historyId, requestDto);
+		HistoryDetailDto response = historyService.showHistoryDetail(historyId, securityUser.getId());
 
 		return ResponseEntity.ok(response);
 	}
