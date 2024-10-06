@@ -25,6 +25,7 @@ import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyModifyDto;
 import com.ll.trip.domain.history.history.dto.HistoryTagDto;
 import com.ll.trip.domain.history.history.entity.History;
+import com.ll.trip.domain.history.history.entity.HistoryLike;
 import com.ll.trip.domain.history.history.entity.HistoryReply;
 import com.ll.trip.domain.history.history.service.HistoryService;
 import com.ll.trip.domain.notification.notification.service.NotificationService;
@@ -194,7 +195,8 @@ public class HistoryController {
 		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 		History history = entityManager.getReference(History.class, historyId);
 		historyService.createHistoryReply(history, user, requestDto);
-		notificationService.createHistoryReplyNotification(tripId, history.getId(), securityUser.getNickname(), requestDto.getContent());
+		notificationService.createHistoryReplyNotification(tripId, history.getId(), securityUser.getNickname(),
+			requestDto.getContent());
 		List<HistoryReplyDto> response = historyService.showHistoryReplyList(historyId);
 
 		return ResponseEntity.ok(response);
@@ -276,11 +278,15 @@ public class HistoryController {
 		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
 			return ResponseEntity.badRequest().body("권한이 없습니다.");
 
-		boolean toggle = historyService.toggleHistoryLike(
-			entityManager.getReference(History.class, historyId),
-			entityManager.getReference(UserEntity.class, securityUser.getId()));
-
-		notificationService.createHistoryLikeNotification(tripId, historyId, securityUser.getNickname());
+		HistoryLike optLike = historyService.findHistoryLikeByHistoryIdAndUserId(historyId, securityUser.getId());
+		History historyRef = entityManager.getReference(History.class, historyId);
+		UserEntity userRef = entityManager.getReference(UserEntity.class, securityUser.getId());
+		boolean toggle;
+		if (optLike == null) {
+			notificationService.createHistoryLikeNotification(tripId, historyId, securityUser.getNickname());
+			toggle = historyService.createHistoryLike(historyRef, userRef);
+		} else
+			toggle = historyService.toggleHistoryLike(historyRef, userRef, optLike);
 
 		return ResponseEntity.ok(toggle);
 	}
@@ -349,11 +355,12 @@ public class HistoryController {
 		@RequestParam(required = false) @Parameter(description = "태그 컬러", example = "#FFEFF3", in = ParameterIn.PATH) String tagColor
 	) {
 		List<HistoryListDto> response = null;
-		if(uuid != null) {
+		if (uuid != null) {
 			response = historyService.searchHistoryByUuid(tripId, uuid);
-		} else if(tagName != null) {
-			response = historyService.searchHistoryByTagNameAndColor(tripId, tagName,tagColor);
-		} else ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDto("Parameter is missing"));
+		} else if (tagName != null) {
+			response = historyService.searchHistoryByTagNameAndColor(tripId, tagName, tagColor);
+		} else
+			ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDto("Parameter is missing"));
 
 		return ResponseEntity.ok(response);
 	}

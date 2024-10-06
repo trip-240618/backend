@@ -1,7 +1,6 @@
 package com.ll.trip.domain.history.history.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -150,24 +149,22 @@ public class HistoryService {
 	}
 
 	@Transactional
-	public boolean toggleHistoryLike(History history, UserEntity user) {
-		Optional<HistoryLike> optLike = historyLikeRepository.findByHistoryIdAndUserId(history.getId(), user.getId());
+	public boolean createHistoryLike(History historyRef, UserEntity userRef) {
+		historyLikeRepository.save(
+			HistoryLike.builder()
+				.history(historyRef)
+				.user(userRef)
+				.toggle(true)
+				.build());
+		return true;
+	}
 
-		if (optLike.isEmpty()) {
-			historyLikeRepository.save(
-				HistoryLike.builder()
-					.history(history)
-					.user(user)
-					.toggle(true)
-					.build());
-			return true;
-		}
-
-		HistoryLike like = optLike.get();
+	@Transactional
+	public boolean toggleHistoryLike(History historyRef, UserEntity userRef, HistoryLike like) {
 		boolean toggle = like.isToggle();
 
 		historyLikeRepository.updateToggleById(like.getId(), !toggle);
-		historyRepository.updateLikeCntById(history.getId(), toggle ? -1 : 1);
+		historyRepository.updateLikeCntById(historyRef.getId(), toggle ? -1 : 1);
 
 		return !toggle;
 	}
@@ -208,5 +205,9 @@ public class HistoryService {
 		historyRef.setHistoryTags(tags);
 		historyRef.setMemo(requestDto.getMemo());
 		historyRepository.save(historyRef);
+	}
+
+	public HistoryLike findHistoryLikeByHistoryIdAndUserId(long historyId, long userId) {
+		return historyLikeRepository.findByHistoryIdAndUserId(historyId, userId).orElse(null);
 	}
 }

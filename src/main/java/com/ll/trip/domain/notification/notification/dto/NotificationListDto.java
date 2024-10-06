@@ -1,4 +1,4 @@
-package com.ll.trip.domain.notification.firebase.dto;
+package com.ll.trip.domain.notification.notification.dto;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +14,9 @@ public class NotificationListDto {
 
 	@Schema(description = "알림이 발생한 Trip의 id (이동하는 url에 필요함)", example = "1")
 	private Long tripId;
+
+	@Schema(description = "알림이 발생한 Trip의 type (이동하는 url에 필요할 수 있음)", example = "j")
+	private Character tripType;
 
 	@NotBlank
 	@Schema(description = "알림을 확인하는데 필요한 테이블 이름", example = "trip")

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ll.trip.domain.flight.dto.ScheduleResponseDto;
-import com.ll.trip.domain.notification.firebase.dto.NotificationListDto;
+import com.ll.trip.domain.notification.notification.dto.NotificationListDto;
 import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 

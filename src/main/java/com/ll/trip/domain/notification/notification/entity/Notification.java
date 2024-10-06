@@ -35,6 +35,8 @@ public class Notification {
 
 	private Long tripId;
 
+	private Character tripType;
+
 	@NotBlank
 	private String title;
 

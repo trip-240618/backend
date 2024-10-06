@@ -127,6 +127,7 @@ public class PlanJController {
 					return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("day" + dayTo + "의 편집자가 아닙니다."));
 			}
 			order = planJEditService.getLastOrderByTripId(tripId);
+			notificationService.createPlanMoveNotification(tripId);
 		}
 
 		plan = planJService.updatePlanJByPlanId(plan, requestBody, order);
@@ -167,6 +168,7 @@ public class PlanJController {
 			new SocketResponseBody<>("modify", requestBody)
 		);
 
+		notificationService.createPlanMoveNotification(tripId);
 		return ResponseEntity.ok("swapped");
 	}
 
