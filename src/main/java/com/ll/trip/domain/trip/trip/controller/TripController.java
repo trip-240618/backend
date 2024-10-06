@@ -71,7 +71,6 @@ public class TripController {
 		UserEntity userRef = entityManager.getReference(UserEntity.class, securityUser.getId());
 
 		tripService.joinTripById(trip, userRef, true);
-		notificationService.tripCreateNotifictaion(trip, userRef);
 		return ResponseEntity.ok(new TripCreateResponseDto(trip.getId(), invitationCode));
 	}
 
@@ -90,7 +89,7 @@ public class TripController {
 		boolean isNewMember = tripService.joinTripById(trip, user, false);
 
 		TripInfoDto response = new TripInfoDto(tripService.findTripByTripId(tripId));
-		notificationService.tripJoinNotifictaion(trip, user.getId(), securityUser.getNickname());
+		notificationService.tripJoinNotification(trip, user.getId(), securityUser.getNickname());
 
 		if (isNewMember)
 			template.convertAndSend(

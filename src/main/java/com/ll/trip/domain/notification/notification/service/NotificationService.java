@@ -1,11 +1,13 @@
 package com.ll.trip.domain.notification.notification.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.notification.firebase.dto.NotificationListDto;
 import com.ll.trip.domain.notification.notification.dto.NotificationComponentDto;
 import com.ll.trip.domain.notification.notification.entity.Notification;
 import com.ll.trip.domain.notification.notification.entity.NotificationConfig;
@@ -38,50 +40,56 @@ public class NotificationService {
 	}
 
 	@Transactional
-	public void tripCreateNotifictaion(Trip trip, UserEntity userRef) {
-		if (!getNotificationConfig(userRef.getId()).isActivePlanNotification())
-			return;
-		String content = "'" + trip.getName() + "' 여행방이 생성되었습니다.";
-
-		notificationRepository.save(
-			Notification.builder()
-				.title("여행 일정")
-				.content(content)
-				.type("trip")
-				.typeValue(trip.getId())
-				.isRead(false)
-				.type("trip")
-				.typeValue(trip.getId())
-				.user(userRef)
-				.build());
-	}
-
-	@Transactional
-	public void tripJoinNotifictaion(Trip tripRef, long userId, String nickname) {
+	public void tripJoinNotification(Trip tripRef, long userId, String nickname) {
 		List<NotificationComponentDto> dtos = getAllTripNotificationComponentByTripId(tripRef.getId());
-		String content = "'" + dtos.get(0).getTypeName() + "' 여행방에 " + nickname + "님이 참가하였습니다.";
+		String content = "'" + dtos.get(0).getTypeName() + "' 여행방에 " + nickname + "님이 참여하였습니다.";
 		List<Notification> notifications = new ArrayList<>();
 
 		for (NotificationComponentDto dto : dtos) {
-			if(userId == dto.getUserId() || !dto.isPlanActive()) continue;
-			notifications.add(
-				Notification.builder()
-					.title("여행 일정")
-					.content(content)
-					.user(entityManager.getReference(UserEntity.class, dto.getUserId()))
-					.isRead(false)
-					.type("trip")
-					.typeValue(dto.getTypeId())
-					.build());
+			if (!dto.isPlanActive())
+				continue;
+			notifications.add(buildNotification(tripRef.getId(), "trip", dto.getTypeId(), "여행 일정", content,
+				dto.getLabelColor(), entityManager.getReference(UserEntity.class, dto.getUserId())));
 		}
 		notificationRepository.saveAll(notifications);
 	}
 
-	public NotificationConfig getNotificationConfig(long userId) {
-		return notificationConfigRepository.findByUserId(userId).orElseThrow(NullPointerException::new);
+	public Notification buildAndSaveNotification(Long tripId, String type, Long typeId, String title, String content,
+		String labelColor, UserEntity userRef) {
+		return notificationRepository.save(buildNotification(tripId, type, typeId, title, content, labelColor, userRef));
+	}
+
+	public Notification buildNotification(Long tripId, String type, Long typeId, String title, String content,
+		String labelColor, UserEntity userRef) {
+		return Notification.builder()
+			.title(title)
+			.content(content)
+			.user(userRef)
+			.isRead(false)
+			.type(type)
+			.labelColor(labelColor)
+			.tripId(tripId)
+			.typeId(typeId)
+			.build();
 	}
 
 	public List<NotificationComponentDto> getAllTripNotificationComponentByTripId(long tripId) {
 		return notificationRepository.findAllTripNotificationComponentByTripId(tripId);
+	}
+
+	public NotificationComponentDto getNotificationComponentByTripIdAndUserId(long tripId, long userId) {
+		return notificationRepository.findNotificationComponentByTripIdAndUserId(tripId, userId);
+	}
+
+	public NotificationComponentDto getNotificationComponentByTripIdAndUserUuid(long tripId, String uuid) {
+		return notificationRepository.findNotificationComponentByTripIdAndUserUuId(tripId, uuid);
+	}
+
+	public List<NotificationListDto> getListByUserIdAndTitle(long userId, String title) {
+		return notificationRepository.findAllTypeByUserIdAndDate(userId, title, LocalDateTime.now().minusDays(7));
+	}
+
+	public void userCreateNotification(UserEntity userRef) {
+		Notification notification = buildAndSaveNotification(null, "app", null, "트립스토리", "트립스토리 회원 가입을 환영합니다 :)", "212121", userRef);
 	}
 }

@@ -63,7 +63,7 @@ public class FlightController {
 			return ResponseEntity.internalServerError()
 				.body("Wrong status code: " + flightStatus[0].getResponse().getStatusCode());
 
-		ScheduleResponseDto responseDto = flightService.createFlight(flightStatus, tripId);
+		ScheduleResponseDto responseDto = flightService.createFlight(carrierCode, flightNumber, flightStatus, tripId);
 
 		return ResponseEntity.ok(responseDto);
 	}

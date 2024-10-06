@@ -35,6 +35,7 @@ public class OAuth2Service {
 		if (optUser.isEmpty()) {
 			user = registerUser(name, profileImg, providerId, email, fcmToken);
 			notificationService.createNotificationConfig(user);
+			notificationService.userCreateNotification(user);
 			uuid = user.getUuid();
 			userInfoDto = new UserInfoDto(user, "register");
 		} else {

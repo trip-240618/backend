@@ -33,6 +33,8 @@ public class Notification {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	private Long tripId;
+
 	@NotBlank
 	private String title;
 
@@ -43,7 +45,9 @@ public class Notification {
 
 	private String type;
 
-	private long typeValue;
+	private Long typeId;
+
+	private String labelColor;
 
 	@NotNull
 	@CreatedDate
