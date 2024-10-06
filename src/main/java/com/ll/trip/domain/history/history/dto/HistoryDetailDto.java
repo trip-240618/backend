@@ -60,10 +60,6 @@ public class HistoryDetailDto {
 		example = "2024-08-22")
 	private LocalDate photoDate;
 
-	@Schema(
-		description = "태그 리스트",
-		example = "[\"tag1\", \"tag2\", \"tag3\"]"
-	)
 	private List<HistoryTagDto> tags = new ArrayList<>();
 
 	public HistoryDetailDto(HistoryServiceDto dto) {

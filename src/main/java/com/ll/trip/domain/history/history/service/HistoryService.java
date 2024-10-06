@@ -90,6 +90,7 @@ public class HistoryService {
 			.build();
 	}
 
+	@Transactional
 	public List<HistoryListDto> createManyHistories(List<HistoryCreateRequestDto> dtos, UserEntity user, Trip trip) {
 
 		for (HistoryCreateRequestDto dto : dtos) {
