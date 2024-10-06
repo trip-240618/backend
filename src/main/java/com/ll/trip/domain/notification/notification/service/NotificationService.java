@@ -3,6 +3,7 @@ package com.ll.trip.domain.notification.notification.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +55,7 @@ public class NotificationService {
 		notificationRepository.saveAll(notifications);
 	}
 
+	@Transactional
 	public Notification buildAndSaveNotification(Long tripId, String type, Long typeId, String title, String content,
 		String labelColor, UserEntity userRef) {
 		return notificationRepository.save(
@@ -92,8 +94,21 @@ public class NotificationService {
 			: notificationRepository.findAllTypeByUserIdAndDate(userId, title, LocalDateTime.now().minusDays(7));
 	}
 
+	@Transactional
 	public void userCreateNotification(UserEntity userRef) {
 		Notification notification = buildAndSaveNotification(null, "app", null, "트립스토리", "트립스토리 회원 가입을 환영합니다 :)",
 			"212121", userRef);
+	}
+
+	@Transactional
+	public void updateIsReadByIdAndUserId(long notificationId, long userId) {
+		if (notificationRepository.updateIsReadByIdAndUserID(notificationId, userId) == 0)
+			throw new NoSuchElementException("일치하는 알림이 없습니다.");
+	}
+
+	@Transactional
+	public void updateAllIsReadByUserId(long userId) {
+		if (notificationRepository.updateAllIsReadByIdAndUserID(userId) == 0)
+			throw new NoSuchElementException("일치하는 알림이 없습니다.");
 	}
 }

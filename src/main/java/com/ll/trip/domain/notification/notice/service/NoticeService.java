@@ -30,15 +30,7 @@ public class NoticeService {
 		return new NoticeDetailDto(notice);
 	}
 
-	public List<NoticeListDto> showNoticeList(Boolean normal, Boolean update, Boolean system) {
-		String type = null;
-		if (normal)
-			type = "일반";
-		else if (update)
-			type = "업데이트";
-		else if (system)
-			type = "시스템";
-
+	public List<NoticeListDto> showNoticeList(String type) {
 		return noticeRepository.findNoticeList(type);
 	}
 }

@@ -119,7 +119,7 @@ public class HistoryController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PostMapping("/{tripId}/history/modify/{historyId}")
+	@PutMapping("/{tripId}/history/modify/{historyId}")
 	@Operation(summary = "History 수정")
 	@ApiResponse(responseCode = "200", description = "History 수정", content = {
 		@Content(mediaType = "application/json",

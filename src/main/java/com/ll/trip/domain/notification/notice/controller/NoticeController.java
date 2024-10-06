@@ -16,6 +16,7 @@ import com.ll.trip.domain.notification.notice.dto.NoticeListDto;
 import com.ll.trip.domain.notification.notice.service.NoticeService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -42,14 +43,12 @@ public class NoticeController {
 
 	@GetMapping("/notice/list")
 	@Operation(summary = "공지 목록")
-	@ApiResponse(responseCode = "200", description = "공지 목록 보기", content = {
+	@ApiResponse(responseCode = "200", description = "공지 목록 보기(파라미터가 없으면 전체 공지 반환)", content = {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = NoticeDetailDto.class)))})
 	public ResponseEntity<?> showNoticeList(
-		@RequestParam(required = false) Boolean normal,
-		@RequestParam(required = false) Boolean update,
-		@RequestParam(required = false) Boolean system
+		@RequestParam(required = false) @Parameter(description = "일반, 업데이트, 시스템", example = "업데이트") String type
 	) {
-		List<NoticeListDto> response = noticeService.showNoticeList(normal, update, system);
+		List<NoticeListDto> response = noticeService.showNoticeList(type);
 		return ResponseEntity.ok(response);
 	}
 }

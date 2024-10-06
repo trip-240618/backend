@@ -61,5 +61,17 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 		""")
 	List<NotificationListDto> findAllTypeByUserIdAndDate(long userId, String title, LocalDateTime weekAgo);
 
+	@Query("""
+		update Notification n
+		set n.isRead = true
+		where n.id = :notificationId and n.user.id = :userId
+		""")
+	int updateIsReadByIdAndUserID(long notificationId, long userId);
 
+	@Query("""
+		update Notification n
+		set n.isRead = true
+		where n.user.id = :userId and n.isRead = false
+		""")
+	int updateAllIsReadByIdAndUserID(long userId);
 }
