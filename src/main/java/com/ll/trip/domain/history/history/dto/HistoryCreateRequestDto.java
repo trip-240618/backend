@@ -45,9 +45,5 @@ public class HistoryCreateRequestDto {
 		example = "오사카에서 찍은 사진")
 	private String memo;
 
-	@Schema(
-		description = "태그 리스트",
-		example = "[\"tag1\", \"tag2\", \"tag3\"]"
-	)
 	private List<HistoryTagDto> tags = new ArrayList<>();
 }
