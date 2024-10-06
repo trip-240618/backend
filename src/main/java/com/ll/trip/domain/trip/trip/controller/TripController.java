@@ -83,13 +83,13 @@ public class TripController {
 		@RequestParam @Parameter(description = "초대코드", example = "1A2B3C4D") String invitationCode
 	) {
 		long tripId = tripService.findTripIdByInvitationCode(invitationCode);
-		Trip trip = entityManager.getReference(Trip.class, tripId);
+		Trip tripRef = entityManager.getReference(Trip.class, tripId);
 		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 
-		boolean isNewMember = tripService.joinTripById(trip, user, false);
+		boolean isNewMember = tripService.joinTripById(tripRef, user, false);
 
 		TripInfoDto response = new TripInfoDto(tripService.findTripByTripId(tripId));
-		notificationService.tripJoinNotification(trip, user.getId(), securityUser.getNickname());
+		notificationService.tripJoinNotification(tripId, user.getId(), securityUser.getNickname());
 
 		if (isNewMember)
 			template.convertAndSend(

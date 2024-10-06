@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJEditorRegisterDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
@@ -52,6 +53,7 @@ public class PlanJController {
 	private final PlanJService planJService;
 	private final PlanJEditService planJEditService;
 	private final SimpMessagingTemplate template;
+	private final NotificationService notificationService;
 
 	@PostMapping("/{tripId}/plan/create")
 	@Operation(summary = "J형 Plan 생성")
@@ -76,6 +78,7 @@ public class PlanJController {
 			new SocketResponseBody<>("create", response)
 		);
 
+		notificationService.createPlanCreateNotification(tripId);
 		return ResponseEntity.ok("created");
 	}
 

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
@@ -50,6 +51,7 @@ public class PlanPController {
 	private final PlanPService planPService;
 	private final PlanPEditService planPEditService;
 	private final SimpMessagingTemplate template;
+	private final NotificationService notificationService;
 
 	@PostMapping("/{tripId}/plan/create")
 	@Operation(summary = "P형 Plan 생성")
@@ -72,6 +74,7 @@ public class PlanPController {
 			new SocketResponseBody<>("create", response)
 		);
 
+		notificationService.createPlanCreateNotification(tripId);
 		return ResponseEntity.ok("created");
 	}
 
@@ -242,6 +245,7 @@ public class PlanPController {
 
 		template.convertAndSend("/topic/api/trip/p/" + tripId, new SocketResponseBody<>("move", moveDto));
 
+		notificationService.createPlanMoveNotification(tripId);
 		return ResponseEntity.ok("moved");
 	}
 

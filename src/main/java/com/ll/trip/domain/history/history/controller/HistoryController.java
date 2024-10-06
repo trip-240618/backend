@@ -27,6 +27,7 @@ import com.ll.trip.domain.history.history.dto.HistoryTagDto;
 import com.ll.trip.domain.history.history.entity.History;
 import com.ll.trip.domain.history.history.entity.HistoryReply;
 import com.ll.trip.domain.history.history.service.HistoryService;
+import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.service.TripService;
 import com.ll.trip.domain.user.user.entity.UserEntity;
@@ -55,6 +56,7 @@ public class HistoryController {
 
 	private final TripService tripService;
 	private final HistoryService historyService;
+	private final NotificationService notificationService;
 	private final EntityManager entityManager;
 
 	@GetMapping("/{tripId}/history/list")
@@ -192,7 +194,7 @@ public class HistoryController {
 		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 		History history = entityManager.getReference(History.class, historyId);
 		historyService.createHistoryReply(history, user, requestDto);
-
+		notificationService.createHistoryReplyNotification(tripId, history.getId(), securityUser.getNickname(), requestDto.getContent());
 		List<HistoryReplyDto> response = historyService.showHistoryReplyList(historyId);
 
 		return ResponseEntity.ok(response);
@@ -277,6 +279,8 @@ public class HistoryController {
 		boolean toggle = historyService.toggleHistoryLike(
 			entityManager.getReference(History.class, historyId),
 			entityManager.getReference(UserEntity.class, securityUser.getId()));
+
+		notificationService.createHistoryLikeNotification(tripId, historyId, securityUser.getNickname());
 
 		return ResponseEntity.ok(toggle);
 	}

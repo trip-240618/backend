@@ -14,7 +14,6 @@ import com.ll.trip.domain.notification.notification.entity.Notification;
 import com.ll.trip.domain.notification.notification.entity.NotificationConfig;
 import com.ll.trip.domain.notification.notification.repository.NotificationConfigRepository;
 import com.ll.trip.domain.notification.notification.repository.NotificationRepository;
-import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 
 import jakarta.persistence.EntityManager;
@@ -41,18 +40,39 @@ public class NotificationService {
 	}
 
 	@Transactional
-	public void tripJoinNotification(Trip tripRef, long userId, String nickname) {
-		List<NotificationComponentDto> dtos = getAllTripNotificationComponentByTripId(tripRef.getId());
-		String content = "'" + dtos.get(0).getTypeName() + "' 여행방에 " + nickname + "님이 참여하였습니다.";
+	public void tripJoinNotification(long tripId, long userId, String nickname) {
+		List<NotificationComponentDto> dtos = getAllTripNotificationComponentByTripId(tripId);
+		String content = "'" + dtos.get(0).getTypeName() + "'방에 " + nickname + "님이 참여하였습니다.";
+		List<Notification> notifications = tripDtoToNotification(tripId, dtos, content);
+		notificationRepository.saveAll(notifications);
+	}
+
+	@Transactional
+	public void createPlanCreateNotification(long tripId) {
+		List<NotificationComponentDto> dtos = getAllTripNotificationComponentByTripId(tripId);
+		String content = "'" + dtos.get(0).getTypeName() + "'방에 새 일정이 추가되었습니다.";
+		List<Notification> notifications = tripDtoToNotification(tripId, dtos, content);
+		notificationRepository.saveAll(notifications);
+	}
+
+	@Transactional
+	public void createPlanMoveNotification(long tripId) {
+		List<NotificationComponentDto> dtos = getAllTripNotificationComponentByTripId(tripId);
+		String content = "'" + dtos.get(0).getTypeName() + "'여행 일정 순서가 변경되었습니다.";
+		List<Notification> notifications = tripDtoToNotification(tripId, dtos, content);
+		notificationRepository.saveAll(notifications);
+	}
+
+	private List<Notification> tripDtoToNotification(long tripId, List<NotificationComponentDto> dtos, String content) {
 		List<Notification> notifications = new ArrayList<>();
 
 		for (NotificationComponentDto dto : dtos) {
 			if (!dto.isPlanActive())
 				continue;
-			notifications.add(buildNotification(tripRef.getId(), "trip", dto.getTypeId(), "여행 일정", content,
+			notifications.add(buildNotification(tripId, "trip", dto.getTypeId(), "여행 일정", content,
 				dto.getLabelColor(), entityManager.getReference(UserEntity.class, dto.getUserId())));
 		}
-		notificationRepository.saveAll(notifications);
+		return notifications;
 	}
 
 	@Transactional
@@ -80,12 +100,8 @@ public class NotificationService {
 		return notificationRepository.findAllTripNotificationComponentByTripId(tripId);
 	}
 
-	public NotificationComponentDto getNotificationComponentByTripIdAndUserId(long tripId, long userId) {
-		return notificationRepository.findNotificationComponentByTripIdAndUserId(tripId, userId);
-	}
-
-	public NotificationComponentDto getNotificationComponentByTripIdAndUserUuid(long tripId, String uuid) {
-		return notificationRepository.findNotificationComponentByTripIdAndUserUuId(tripId, uuid);
+	public NotificationComponentDto getHistoryNotificationDto(long historyId) {
+		return notificationRepository.findHistoryNotificationComponent(historyId);
 	}
 
 	public List<NotificationListDto> getListByUserIdAndTitle(long userId, String title) {
@@ -111,4 +127,51 @@ public class NotificationService {
 		if (notificationRepository.updateAllIsReadByIdAndUserID(userId) == 0)
 			throw new NoSuchElementException("일치하는 알림이 없습니다.");
 	}
+
+	public void createHistoryReplyNotification(long tripId, long historyId, String nickname, String reply) {
+		NotificationComponentDto componentDto = getHistoryNotificationDto(historyId);
+		if (!componentDto.isHistoryActive())
+			return;
+
+		String content = (nickname.length() > 5 ? nickname.substring(0, 5) : nickname)
+						 + "님이 여행자님의 게시물에 댓글을 남겼습니다:" + " \"" +
+						 (reply.length() > 10 ? reply.substring(0, 10) : reply)
+						 + "\"";
+
+		notificationRepository.save(
+			Notification.builder()
+				.tripId(tripId)
+				.title("여행 기록")
+				.content(content)
+				.isRead(false)
+				.type("history")
+				.typeId(historyId)
+				.labelColor(componentDto.getLabelColor())
+				.user(entityManager.getReference(UserEntity.class, componentDto.getUserId()))
+				.build()
+		);
+	}
+
+	public void createHistoryLikeNotification(long tripId, long historyId, String nickname) {
+		NotificationComponentDto componentDto = getHistoryNotificationDto(historyId);
+		if (!componentDto.isHistoryActive())
+			return;
+
+		String content = (nickname.length() > 5 ? nickname.substring(0, 5) : nickname)
+						 + "님이 여행자님의 게시물을 좋아합니다";
+
+		notificationRepository.save(
+			Notification.builder()
+				.tripId(tripId)
+				.title("여행 기록")
+				.content(content)
+				.isRead(false)
+				.type("history")
+				.typeId(historyId)
+				.labelColor(componentDto.getLabelColor())
+				.user(entityManager.getReference(UserEntity.class, componentDto.getUserId()))
+				.build()
+		);
+	}
+
 }

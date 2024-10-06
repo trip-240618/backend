@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.ll.trip.domain.notification.firebase.dto.NotificationListDto;
@@ -16,21 +17,12 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 		    select new com.ll.trip.domain.notification.notification.dto.NotificationComponentDto(
 			u.fcmToken, u.id, t.id, t.name, t.labelColor, nc.activePlanNotification,
 			nc.activeHistoryNotification, nc.activeAdNotification)
-			from UserEntity u
-			left join Trip t on u.id = :userId and t.id = :tripId
+			from History h
+			left join h.trip t
+			left join h.user u
 		  	left join u.notificationConfigs nc
 		""")
-	NotificationComponentDto findNotificationComponentByTripIdAndUserId(long tripId, long userId);
-
-	@Query("""
-		    select new com.ll.trip.domain.notification.notification.dto.NotificationComponentDto(
-			u.fcmToken, u.id, t.id, t.name, t.labelColor, nc.activePlanNotification,
-			nc.activeHistoryNotification, nc.activeAdNotification)
-			from UserEntity u
-			left join Trip t on u.uuid = :uuid and t.id = :tripId
-		  	left join u.notificationConfigs nc
-		""")
-	NotificationComponentDto findNotificationComponentByTripIdAndUserUuId(long tripId, String uuid);
+	NotificationComponentDto findHistoryNotificationComponent(long historyId);
 
 	@Query("""
 		    select new com.ll.trip.domain.notification.notification.dto.NotificationComponentDto(
@@ -61,6 +53,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 		""")
 	List<NotificationListDto> findAllTypeByUserIdAndDate(long userId, String title, LocalDateTime weekAgo);
 
+	@Modifying
 	@Query("""
 		update Notification n
 		set n.isRead = true
@@ -68,6 +61,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 		""")
 	int updateIsReadByIdAndUserID(long notificationId, long userId);
 
+	@Modifying
 	@Query("""
 		update Notification n
 		set n.isRead = true
