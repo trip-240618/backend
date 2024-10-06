@@ -56,7 +56,8 @@ public class NotificationService {
 
 	public Notification buildAndSaveNotification(Long tripId, String type, Long typeId, String title, String content,
 		String labelColor, UserEntity userRef) {
-		return notificationRepository.save(buildNotification(tripId, type, typeId, title, content, labelColor, userRef));
+		return notificationRepository.save(
+			buildNotification(tripId, type, typeId, title, content, labelColor, userRef));
 	}
 
 	public Notification buildNotification(Long tripId, String type, Long typeId, String title, String content,
@@ -86,10 +87,13 @@ public class NotificationService {
 	}
 
 	public List<NotificationListDto> getListByUserIdAndTitle(long userId, String title) {
-		return notificationRepository.findAllTypeByUserIdAndDate(userId, title, LocalDateTime.now().minusDays(7));
+		return title == null ?
+			notificationRepository.findAllByUserIdAndDate(userId, LocalDateTime.now().minusDays(7))
+			: notificationRepository.findAllTypeByUserIdAndDate(userId, title, LocalDateTime.now().minusDays(7));
 	}
 
 	public void userCreateNotification(UserEntity userRef) {
-		Notification notification = buildAndSaveNotification(null, "app", null, "트립스토리", "트립스토리 회원 가입을 환영합니다 :)", "212121", userRef);
+		Notification notification = buildAndSaveNotification(null, "app", null, "트립스토리", "트립스토리 회원 가입을 환영합니다 :)",
+			"212121", userRef);
 	}
 }
