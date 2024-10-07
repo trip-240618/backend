@@ -43,12 +43,11 @@ public class FlightController {
 	private final FlightService flightService;
 	private final TripService tripService;
 
-	@GetMapping("/{tripId}/flight/search")
+	@GetMapping("/search")
 	@Operation(summary = "항공편 조회")
 	@ApiResponse(responseCode = "200", description = "항공편으로 항공기 출발,도착 정보 조회", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = ScheduleResponseDto.class))})
 	public ResponseEntity<?> searchFlightSchedule(
-		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@Parameter(description = "항공편 번호", example = "319") @RequestParam Integer flightNumber,
 		@Parameter(description = "항공사 코드", example = "AZ") @RequestParam String carrierCode,
 		@Parameter(description = "출발 날짜(과거x)", example = "2024-08-15") @RequestParam String departureDate
@@ -76,7 +75,7 @@ public class FlightController {
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@PostMapping("/{tripId}/flight/create")
+	@PostMapping("/trip/{tripId}/create")
 	@Operation(summary = "항공편 저장")
 	@ApiResponse(responseCode = "200", description = "조회된 항공편을 저장", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = ScheduleResponseDto.class))})
@@ -89,7 +88,7 @@ public class FlightController {
 		return ResponseEntity.ok(responseDto);
 	}
 
-	@DeleteMapping("/{tripId}/flight/delete")
+	@DeleteMapping("/trip/{tripId}/delete")
 	@Operation(summary = "항공편 삭제")
 	@ApiResponse(responseCode = "200", description = "항공편 삭제", content = {
 		@Content(mediaType = "application/json", examples = @ExampleObject(name = "삭제 성공", value = "deleted"))})
@@ -105,7 +104,7 @@ public class FlightController {
 		return ResponseEntity.ok("deleted");
 	}
 
-	@PostMapping("/{tripId}/flight/list")
+	@GetMapping("/trip/{tripId}/list")
 	@Operation(summary = "trip 항공편 목록 조회")
 	@ApiResponse(responseCode = "200", description = "항공편으로 항공기 출발,도착 정보 조회", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = ScheduleResponseDto.class))})
