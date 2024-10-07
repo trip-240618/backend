@@ -58,7 +58,7 @@ public class NotificationController {
 	}
 
 	@PutMapping("/read/all")
-	@Operation(summary = "알림 목록")
+	@Operation(summary = "전체 읽음 처리")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "성공"),
 		@ApiResponse(responseCode = "404", description = "실패")

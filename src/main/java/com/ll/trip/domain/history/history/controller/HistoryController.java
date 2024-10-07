@@ -335,7 +335,7 @@ public class HistoryController {
 	@Operation(summary = "History 모든 태그 목록")
 	@ApiResponse(responseCode = "200", description = "여행방에 등록된 모든 태그를 반환", content = {
 		@Content(mediaType = "application/json",
-			array = @ArraySchema(schema = @Schema(implementation = HistoryListDto.class)))})
+			array = @ArraySchema(schema = @Schema(implementation = HistoryTagDto.class)))})
 	public ResponseEntity<?> searchHistoryTags(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId
 	) {
