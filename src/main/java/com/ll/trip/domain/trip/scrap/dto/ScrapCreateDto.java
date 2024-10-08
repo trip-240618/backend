@@ -1,5 +1,6 @@
 package com.ll.trip.domain.trip.scrap.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,5 +37,7 @@ public class ScrapCreateDto {
 		example = "#FFEFF3")
 	private String color;
 
-	private List<String>
+	@Schema(
+		description = "등록된 사진 목록 (\"prefix/uuid\"로 담아서)")
+	private List<String> photoList = new ArrayList<>();
 }
