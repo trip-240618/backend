@@ -18,7 +18,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 			u.fcmToken, u.id, t.id, t.type, t.name, t.labelColor, nc.activePlanNotification,
 			nc.activeHistoryNotification, nc.activeAdNotification)
 			from History h
-			left join h.trip t on h.id = :historyId
+			inner join h.trip t on h.id = :historyId
 			left join h.user u
 		  	left join u.notificationConfigs nc
 		""")
