@@ -279,14 +279,12 @@ public class HistoryController {
 			return ResponseEntity.badRequest().body("권한이 없습니다.");
 
 		HistoryLike like = historyService.findHistoryLikeByHistoryIdAndUserId(historyId, securityUser.getId());
-		History historyRef = entityManager.getReference(History.class, historyId);
-		UserEntity userRef = entityManager.getReference(UserEntity.class, securityUser.getId());
 		boolean toggle;
 		if (like == null) {
 			notificationService.createHistoryLikeNotification(tripId, historyId, securityUser.getNickname());
-			toggle = historyService.createHistoryLike(historyRef, userRef);
+			toggle = historyService.createHistoryLike(historyId, securityUser.getId());
 		} else
-			toggle = historyService.toggleHistoryLike(historyRef, userRef, like);
+			toggle = historyService.toggleHistoryLike(historyId, securityUser.getId(), like);
 
 		return ResponseEntity.ok(toggle);
 	}

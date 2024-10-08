@@ -17,7 +17,7 @@ public class ScheduleResponseDto {
 	private Long flightId;
 
 	@Schema(
-		description = "항공편명",
+		description = "항공편명 (생성 시에는 \"대한항공(KE) 101\")",
 		example = "KE")
 	private String airlineCode;
 

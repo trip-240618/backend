@@ -27,6 +27,7 @@ import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.repository.TripRepository;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -38,6 +39,7 @@ public class HistoryService {
 	private final HistoryTagRepository historyTagRepository;
 	private final HistoryReplyRepository historyReplyRepository;
 	private final HistoryLikeRepository historyLikeRepository;
+	private final EntityManager entityManager;
 
 	public List<HistoryListDto> findAllByTripId(long tripId) {
 		Pageable pageable = PageRequest.of(0, 50);
@@ -149,22 +151,22 @@ public class HistoryService {
 	}
 
 	@Transactional
-	public boolean createHistoryLike(History historyRef, UserEntity userRef) {
-		historyLikeRepository.save(
+	public boolean createHistoryLike(long historyId, long userId) {
+		HistoryLike historyLike = historyLikeRepository.save(
 			HistoryLike.builder()
-				.history(historyRef)
-				.user(userRef)
+				.history(entityManager.getReference(History.class, historyId))
+				.user(entityManager.getReference(UserEntity.class, userId))
 				.toggle(true)
 				.build());
-		return true;
+		return historyLike.isToggle();
 	}
 
 	@Transactional
-	public boolean toggleHistoryLike(History historyRef, UserEntity userRef, HistoryLike like) {
+	public boolean toggleHistoryLike(long historyId, long userId, HistoryLike like) {
 		boolean toggle = like.isToggle();
 
 		historyLikeRepository.updateToggleById(like.getId(), !toggle);
-		historyRepository.updateLikeCntById(historyRef.getId(), toggle ? -1 : 1);
+		historyRepository.updateLikeCntById(historyId, toggle ? -1 : 1);
 
 		return !toggle;
 	}
