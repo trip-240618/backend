@@ -278,15 +278,15 @@ public class HistoryController {
 		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
 			return ResponseEntity.badRequest().body("권한이 없습니다.");
 
-		HistoryLike optLike = historyService.findHistoryLikeByHistoryIdAndUserId(historyId, securityUser.getId());
+		HistoryLike like = historyService.findHistoryLikeByHistoryIdAndUserId(historyId, securityUser.getId());
 		History historyRef = entityManager.getReference(History.class, historyId);
 		UserEntity userRef = entityManager.getReference(UserEntity.class, securityUser.getId());
 		boolean toggle;
-		if (optLike == null) {
+		if (like == null) {
 			notificationService.createHistoryLikeNotification(tripId, historyId, securityUser.getNickname());
 			toggle = historyService.createHistoryLike(historyRef, userRef);
 		} else
-			toggle = historyService.toggleHistoryLike(historyRef, userRef, optLike);
+			toggle = historyService.toggleHistoryLike(historyRef, userRef, like);
 
 		return ResponseEntity.ok(toggle);
 	}
