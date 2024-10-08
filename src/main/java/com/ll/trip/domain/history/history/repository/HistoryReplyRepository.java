@@ -12,7 +12,7 @@ public interface HistoryReplyRepository extends JpaRepository<HistoryReply, Long
 	@Query("""
 		select new com.ll.trip.domain.history.history.dto.HistoryReplyDto(r.id, u.uuid, r.createDate, r.modifyDate, r.content)
 		from HistoryReply r
-		left join r.user u on r.history.id = :historyId
+		inner join r.user u on r.history.id = :historyId
 		""")
 	List<HistoryReplyDto> findByHistoryId(long historyId);
 
