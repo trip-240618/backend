@@ -1,6 +1,7 @@
 package com.ll.trip.domain.flight.controller;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,13 +63,12 @@ public class FlightController {
 		}
 
 		if (flightStatus == null || flightStatus.length == 0)
-			return ResponseEntity.internalServerError().body("response is null");
+			throw new NoSuchElementException("response is null");
 
 		log.info("statusCode: " + flightStatus[0].getResponse().getStatusCode());
 
 		if (flightStatus[0].getResponse().getStatusCode() != 200)
-			return ResponseEntity.internalServerError()
-				.body("Wrong status code: " + flightStatus[0].getResponse().getStatusCode());
+			throw new NoSuchElementException("wrong status code");
 
 		ScheduleResponseDto responseDto = flightService.parseToDto(carrierCode, flightNumber, flightStatus);
 
