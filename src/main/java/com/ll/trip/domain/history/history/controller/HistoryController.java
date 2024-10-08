@@ -26,7 +26,6 @@ import com.ll.trip.domain.history.history.dto.HistoryReplyModifyDto;
 import com.ll.trip.domain.history.history.dto.HistoryTagDto;
 import com.ll.trip.domain.history.history.entity.History;
 import com.ll.trip.domain.history.history.entity.HistoryLike;
-import com.ll.trip.domain.history.history.entity.HistoryReply;
 import com.ll.trip.domain.history.history.service.HistoryService;
 import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.domain.trip.trip.entity.Trip;
@@ -217,7 +216,7 @@ public class HistoryController {
 			return ResponseEntity.badRequest().body("권한이 없습니다.");
 
 		historyService.modifyHistoryReply(
-			entityManager.getReference(HistoryReply.class, requestDto.getReplyId()),
+			requestDto.getReplyId(),
 			requestDto.getContent());
 
 		List<HistoryReplyDto> response = historyService.showHistoryReplyList(historyId);

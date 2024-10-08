@@ -178,7 +178,8 @@ public class HistoryService {
 	}
 
 	@Transactional
-	public void modifyHistoryReply(HistoryReply replyRef, String content) {
+	public void modifyHistoryReply(long replyId, String content) {
+		HistoryReply replyRef = entityManager.getReference(HistoryReply.class, replyId);
 		replyRef.setContent(content);
 		historyReplyRepository.save(replyRef);
 	}
