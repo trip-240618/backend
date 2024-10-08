@@ -18,9 +18,11 @@ import com.ll.trip.domain.user.user.entity.UserEntity;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class NotificationService {
 	private final NotificationRepository notificationRepository;
@@ -161,7 +163,7 @@ public class NotificationService {
 		NotificationComponentDto componentDto = getHistoryNotificationDto(historyId);
 		if (!componentDto.isHistoryActive())
 			return;
-
+		log.info("userId: " + componentDto.getUserId());
 		String content = nickname + "님이 여행자님의 게시물을 좋아합니다";
 
 		notificationRepository.save(
