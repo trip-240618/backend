@@ -106,6 +106,7 @@ public class FlightService {
 		return flightRepository.findByTrip_Id(tripId);
 	}
 
+	@Transactional
 	public void deleteFlight(long flightId) {
 		flightRepository.deleteById(flightId);
 	}
