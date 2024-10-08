@@ -10,7 +10,7 @@ import com.ll.trip.domain.history.history.entity.HistoryReply;
 
 public interface HistoryReplyRepository extends JpaRepository<HistoryReply, Long> {
 	@Query("""
-		select new com.ll.trip.domain.history.history.dto.HistoryReplyDto(r.id, u.uuid, r.createDate, r.modifyDate, r.content)
+		select new com.ll.trip.domain.history.history.dto.HistoryReplyDto(r.id, u.uuid, u.profileImg, u.nickname, r.createDate, r.modifyDate, r.content)
 		from HistoryReply r
 		inner join r.user u on r.history.id = :historyId
 		""")

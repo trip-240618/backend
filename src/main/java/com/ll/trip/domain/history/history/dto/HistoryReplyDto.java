@@ -14,6 +14,10 @@ public class HistoryReplyDto {
 
 	private String writerUuid;
 
+	private String profileImage;
+
+	private String nickname;
+
 	private LocalDateTime createDate;
 
 	private LocalDateTime modifiedDate;

@@ -158,6 +158,7 @@ public class HistoryService {
 				.user(entityManager.getReference(UserEntity.class, userId))
 				.toggle(true)
 				.build());
+		historyRepository.updateLikeCntById(historyId, 1);
 		return historyLike.isToggle();
 	}
 
