@@ -1,5 +1,7 @@
 package com.ll.trip.domain.trip.scrap.dto;
 
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
@@ -33,4 +35,6 @@ public class ScrapCreateDto {
 		description = "스크랩 컬러",
 		example = "#FFEFF3")
 	private String color;
+
+	private List<String>
 }

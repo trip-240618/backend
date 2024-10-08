@@ -131,6 +131,7 @@ public class NotificationService {
 			throw new NoSuchElementException("일치하는 알림이 없습니다.");
 	}
 
+	@Transactional
 	public void createHistoryReplyNotification(long tripId, long historyId, String nickname, String reply) {
 		NotificationComponentDto componentDto = getHistoryNotificationDto(historyId);
 		if (!componentDto.isHistoryActive())
@@ -155,6 +156,7 @@ public class NotificationService {
 		);
 	}
 
+	@Transactional
 	public void createHistoryLikeNotification(long tripId, long historyId, String nickname) {
 		NotificationComponentDto componentDto = getHistoryNotificationDto(historyId);
 		if (!componentDto.isHistoryActive())
