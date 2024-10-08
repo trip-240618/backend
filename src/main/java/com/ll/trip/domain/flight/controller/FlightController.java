@@ -63,7 +63,7 @@ public class FlightController {
 		}
 
 		if (flightStatus == null || flightStatus.length == 0)
-			throw new NoSuchElementException("response is null");
+			return ResponseEntity.ok(null);
 
 		log.info("statusCode: " + flightStatus[0].getResponse().getStatusCode());
 
