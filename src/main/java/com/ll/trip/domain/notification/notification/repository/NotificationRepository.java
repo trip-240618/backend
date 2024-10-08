@@ -29,7 +29,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 			u.fcmToken, u.id, t.id, t.type, t.name, t.labelColor, nc.activePlanNotification,
 			nc.activeHistoryNotification, nc.activeAdNotification)
 			from TripMember tm
-			left join tm.trip t on tm.trip.id = :tripId
+			inner join tm.trip t on tm.trip.id = :tripId
 		  	left join tm.user u
 		  	left join u.notificationConfigs nc
 		""")
