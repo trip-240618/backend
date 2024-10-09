@@ -15,8 +15,8 @@ public interface ScrapRepository extends JpaRepository<Scrap, Long> {
 			s.id, s.writerUuid, s.title, s.preview, s.hasImage, s.color,
 		 	COALESCE(b.toggle, false), s.createDate
 			) from Scrap s
-			left join ScrapBookmark b
-			on b.scrap.id = s.id and b.user.id = :userId and s.trip.id = :tripId
+			left join ScrapBookmark b on b.scrap.id = s.id and b.user.id = :userId
+			where s.trip.id = :tripId
 		""")
 	List<ScrapListDto> findListByTripId(long tripId, long userId);
 
