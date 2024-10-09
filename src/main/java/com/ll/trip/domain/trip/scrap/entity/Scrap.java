@@ -47,8 +47,6 @@ public class Scrap extends BaseEntity {
 	@JoinColumn(name = "user_id")
 	private UserEntity user;
 
-	private String writerUuid;
-
 	@NotBlank
 	@Setter
 	private String title;

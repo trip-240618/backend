@@ -35,12 +35,12 @@ public class ScrapService {
 	private final EntityManager entityManager;
 
 	@Transactional
-	public Scrap createScrap(String uuid, long tripId, String title, String content, String color, boolean hasImage,
+	public Scrap createScrap(long userId, long tripId, String title, String content, String color, boolean hasImage,
 		List<String> photoList) {
 		Trip tripRef = entityManager.getReference(Trip.class, tripId);
 		String preview = createPreviewContent(content);
 		Scrap scrap = scrapRepository.save(Scrap.builder()
-			.writerUuid(uuid)
+			.user(entityManager.getReference(UserEntity.class, userId))
 			.trip(tripRef)
 			.preview(preview)
 			.title(title)
@@ -141,8 +141,8 @@ public class ScrapService {
 		return scrapRepository.findBookmarkListByTripId(tripId, userId);
 	}
 
-	public boolean existByScrapIdAndUuid(long scrapId, String uuid) {
-		return scrapRepository.existsByIdAndWriterUuid(scrapId, uuid);
+	public boolean existByScrapIdAndUserId(long scrapId, long userId) {
+		return scrapRepository.existsByIdAndUser_Id(scrapId, userId);
 	}
 
 	@Transactional

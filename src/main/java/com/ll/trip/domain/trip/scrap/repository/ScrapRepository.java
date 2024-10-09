@@ -32,8 +32,7 @@ public interface ScrapRepository extends JpaRepository<Scrap, Long> {
 		""")
 	List<ScrapListDto> findBookmarkListByTripId(long tripId, long userId);
 
-	boolean existsByIdAndWriterUuid(long scrapId, String uuid);
-
+	boolean existsByIdAndUser_Id(long scrapId, long userId);
 
 	@Query("""
 		select new com.ll.trip.domain.trip.scrap.dto.ScrapDetailServiceDto(
