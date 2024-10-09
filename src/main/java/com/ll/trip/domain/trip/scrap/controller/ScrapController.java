@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.trip.scrap.dto.ScrapCreateDto;
 import com.ll.trip.domain.trip.scrap.dto.ScrapDetailDto;
 import com.ll.trip.domain.trip.scrap.dto.ScrapListDto;
@@ -43,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ScrapController {
 	private final ScrapService scrapService;
 	private final TripService tripService;
+	private final AwsAuthService awsAuthService;
 
 	@PostMapping("/{tripId}/scrap/create")
 	@Operation(summary = "스크랩 생성")
@@ -58,7 +60,7 @@ public class ScrapController {
 
 		Scrap scrap = scrapService.createScrap(
 			securityUser.getUuid(), tripId, scrapCreateDto.getTitle(), scrapCreateDto.getContent(),
-			scrapCreateDto.getColor(), scrapCreateDto.isHasImage()
+			scrapCreateDto.getColor(), scrapCreateDto.isHasImage(), scrapCreateDto.getPhotoList()
 		);
 
 		return ResponseEntity.ok(new ScrapDetailDto(
@@ -106,7 +108,7 @@ public class ScrapController {
 	) {
 		if (!scrapService.existByScrapIdAndUuid(scrapId, securityUser.getUuid()))
 			return ResponseEntity.badRequest().body("해당 스크랩에 대한 수정/삭제 권한이 없습니다.");
-
+		awsAuthService.deleteImagesByScrapId(scrapId);
 		scrapService.deleteById(scrapId);
 
 		return ResponseEntity.ok("deleted");

@@ -17,6 +17,10 @@ import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.ll.trip.domain.file.file.dto.PreSignedUrlResponseDto;
+import com.ll.trip.domain.history.history.repository.HistoryRepository;
+import com.ll.trip.domain.trip.scrap.repository.ScrapImageRepository;
+import com.ll.trip.domain.trip.trip.dto.TripImageDeleteDto;
+import com.ll.trip.domain.trip.trip.repository.TripRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +32,10 @@ public class AwsAuthService {
 	private String bucket;
 
 	private final AmazonS3 amazonS3;
+
+	private final HistoryRepository historyRepository;
+	private final ScrapImageRepository scrapImageRepository;
+	private final TripRepository tripRepository;
 
 	public PreSignedUrlResponseDto getPreSignedUrl(String prefix, int photoCnt) {
 		List<String> preSignedUrls = new ArrayList<>();
@@ -55,6 +63,22 @@ public class AwsAuthService {
 		return abstractedUrls;
 	}
 
+	public List<String> findImageByTripId(long tripId) {
+		List<TripImageDeleteDto> dtos = tripRepository.findTripAndHistoryByTripId(tripId);
+		List<String> urls = new ArrayList<>();
+
+		if (dtos != null) {
+			urls.add(dtos.get(0).getTripThumbnail());
+
+			for (TripImageDeleteDto dto : dtos) {
+				urls.add(dto.getHistoryThumbnail());
+				urls.add(dto.getHistoryImage());
+			}
+		}
+
+		return urls;
+	}
+
 	public List<String> extractKeyFromUrl(List<String> urls) {
 		List<String> extractedKeys = new ArrayList<>();
 
@@ -65,6 +89,28 @@ public class AwsAuthService {
 		}
 
 		return extractedKeys;
+	}
+
+	public List<String> getKeyFromScrapImagesByTripId(long tripId) {
+		return scrapImageRepository.findAllImageKeyByTripId(tripId);
+	}
+
+	public void deleteUrls(List<String> urls) {
+		deleteObjectByKey(extractKeyFromUrl(urls));
+	}
+
+	public void deleteImagesByTripId(long tripId) {
+		List<String> urls = findImageByTripId(tripId);
+		deleteObjectByKey(extractKeyFromUrl(urls));
+		deleteObjectByKey(getKeyFromScrapImagesByTripId(tripId));
+	}
+
+	public void deleteImagesByScrapId(long scrapId) {
+		deleteObjectByKey(getKeyFromScrapImagesByScrapId(scrapId));
+	}
+
+	private List<String> getKeyFromScrapImagesByScrapId(long scrapId) {
+		return scrapImageRepository.findAllImageKeyByScrapId(scrapId);
 	}
 
 	@Transactional // 트랜잭션 처리
@@ -104,5 +150,4 @@ public class AwsAuthService {
 			return String.format("%s/%s", prefix, fileId);
 		return String.format("%s/%s", prefix, fileId + fileName);
 	}
-
 }

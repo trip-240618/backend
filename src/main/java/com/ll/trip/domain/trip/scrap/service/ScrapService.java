@@ -1,5 +1,6 @@
 package com.ll.trip.domain.trip.scrap.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -8,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ll.trip.domain.trip.scrap.dto.ScrapListDto;
 import com.ll.trip.domain.trip.scrap.entity.Scrap;
 import com.ll.trip.domain.trip.scrap.entity.ScrapBookmark;
+import com.ll.trip.domain.trip.scrap.entity.ScrapImage;
 import com.ll.trip.domain.trip.scrap.repository.ScrapBookmarkRepository;
+import com.ll.trip.domain.trip.scrap.repository.ScrapImageRepository;
 import com.ll.trip.domain.trip.scrap.repository.ScrapRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.user.user.entity.UserEntity;
@@ -24,23 +27,42 @@ import lombok.extern.slf4j.Slf4j;
 public class ScrapService {
 	private final ScrapRepository scrapRepository;
 	private final ScrapBookmarkRepository scrapBookmarkRepository;
+	private final ScrapImageRepository scrapImageRepository;
 	private final EntityManager entityManager;
 
 	@Transactional
-	public Scrap createScrap(String uuid, long tripId, String title, String content, String color, boolean hasImage) {
+	public Scrap createScrap(String uuid, long tripId, String title, String content, String color, boolean hasImage,
+		List<String> photoList) {
+		Trip tripRef = entityManager.getReference(Trip.class, tripId);
 		String preview = createPreviewContent(content);
-
-		Scrap scrap = Scrap.builder()
+		Scrap scrap = scrapRepository.save(Scrap.builder()
 			.writerUuid(uuid)
-			.trip(entityManager.getReference(Trip.class, tripId))
+			.trip(tripRef)
 			.preview(preview)
 			.title(title)
 			.content(content)
 			.hasImage(hasImage)
 			.color(color)
-			.build();
+			.build());
 
-		return scrapRepository.save(scrap);
+		List<ScrapImage> imageList = buildScrapImages(tripRef, scrap, photoList);
+		scrapImageRepository.saveAll(imageList);
+
+		return scrap;
+	}
+
+	private List<ScrapImage> buildScrapImages(Trip tripRef, Scrap scrap, List<String> photoList) {
+		List<ScrapImage> imageList = new ArrayList<>();
+		for (String img : photoList) {
+			imageList.add(
+				ScrapImage.builder()
+					.trip(tripRef)
+					.scrap(scrap)
+					.imgKey(img)
+					.build()
+			);
+		}
+		return imageList;
 	}
 
 	private String createPreviewContent(String content) {

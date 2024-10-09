@@ -160,12 +160,8 @@ public class TripController {
 		if (!tripService.isLeaderOfTrip(securityUser.getId(), tripId))
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("해당 여행방에 대한 수정/삭제 권한이 없습니다."));
 
-		List<String> urls = tripService.findImageByTripId(tripId);
-		List<String> keys = awsAuthService.extractKeyFromUrl(urls);
-		awsAuthService.deleteObjectByKey(keys);
-
+		awsAuthService.deleteImagesByTripId(tripId);
 		tripService.deleteTripById(tripId);
-
 		return ResponseEntity.ok("deleted");
 	}
 
@@ -183,9 +179,7 @@ public class TripController {
 		tripService.deleteTripMember(tripId, securityUser.getId());
 
 		if (tripService.countTripMember(tripId) == 0) {
-			List<String> urls = tripService.findImageByTripId(tripId);
-			List<String> keys = awsAuthService.extractKeyFromUrl(urls);
-			awsAuthService.deleteObjectByKey(keys);
+			awsAuthService.deleteImagesByTripId(tripId);
 			tripService.deleteTripById(tripId);
 		}
 
@@ -229,6 +223,8 @@ public class TripController {
 		if (!tripService.isLeaderOfTrip(securityUser.getId(), tripId))
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("해당 여행방에 대한 수정/삭제 권한이 없습니다."));
 		Trip trip = tripService.findTripByTripId(tripId);
+
+		if(!requestBody.getThumbnail().equals(trip.getThumbnail())) awsAuthService.deleteUrls(List.of(requestBody.getThumbnail()));
 
 		planJService.updatePlanJDay(trip.getId(),
 			(int)ChronoUnit.DAYS.between(trip.getStartDate(), requestBody.getStartDate()),

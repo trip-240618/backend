@@ -43,7 +43,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			if (jwtTokenUtil.validateToken(refreshToken)) {
 				claims = jwtTokenUtil.getClaims(refreshToken);
 			} else {
-				response.sendError(420, "유효하지 않은 리프레시토큰, 다시 로그인 하십시오.");
 				return;
 			}
 		} else {

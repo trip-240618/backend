@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
-import com.ll.trip.domain.trip.trip.dto.TripImageDeleteDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto;
 import com.ll.trip.domain.trip.trip.dto.TripModifyDto;
@@ -153,22 +152,6 @@ public class TripService {
 
 	public boolean isLeaderOfTrip(long userId, long tripId) {
 		return tripMemberRepository.isLeaderOfTrip(userId, tripId);
-	}
-
-	public List<String> findImageByTripId(long tripId) {
-		List<TripImageDeleteDto> dtos = tripRepository.findTripAndHistoryByTripId(tripId);
-		List<String> urls = new ArrayList<>();
-
-		if (dtos != null) {
-			urls.add(dtos.get(0).getTripThumbnail());
-
-			for (TripImageDeleteDto dto : dtos) {
-				urls.add(dto.getHistoryThumbnail());
-				urls.add(dto.getHistoryImage());
-			}
-		}
-
-		return urls;
 	}
 
 	public long findTripIdByInvitationCode(String invitationCode) {
