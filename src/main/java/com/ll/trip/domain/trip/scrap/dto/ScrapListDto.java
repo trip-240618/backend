@@ -3,7 +3,6 @@ package com.ll.trip.domain.trip.scrap.dto;
 import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,7 +33,6 @@ public class ScrapListDto {
 		example = "예수님이 입은 옷이 작을 때 뭐라하게")
 	private String title;
 
-	@Lob
 	@NotBlank
 	@Schema(
 		description = "스크랩 미리보기 내용",

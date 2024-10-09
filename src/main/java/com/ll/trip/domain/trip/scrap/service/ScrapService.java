@@ -172,6 +172,7 @@ public class ScrapService {
 		ScrapDetailDto response = new ScrapDetailDto(dtos.get(0));
 		List<ScrapImageDto> imageDtoList = response.getImageDtos();
 		for (ScrapDetailServiceDto dto : dtos) {
+			if(dto.getImageId() == null) break;
 			ScrapImageDto imageDto = new ScrapImageDto(dto.getImageId(), dto.getImageKey());
 			imageDtoList.add(imageDto);
 		}

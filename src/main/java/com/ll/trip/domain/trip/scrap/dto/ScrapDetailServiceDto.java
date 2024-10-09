@@ -4,9 +4,11 @@ import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ScrapDetailServiceDto {
 	private long id;
 
@@ -26,7 +28,7 @@ public class ScrapDetailServiceDto {
 
 	private LocalDateTime createDate;
 
-	private long imageId;
+	private Long imageId;
 
 	private String imageKey;
 }
