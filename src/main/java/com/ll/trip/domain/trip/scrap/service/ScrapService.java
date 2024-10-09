@@ -7,6 +7,9 @@ import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.trip.scrap.dto.ScrapDetailDto;
+import com.ll.trip.domain.trip.scrap.dto.ScrapDetailServiceDto;
+import com.ll.trip.domain.trip.scrap.dto.ScrapImageDto;
 import com.ll.trip.domain.trip.scrap.dto.ScrapListDto;
 import com.ll.trip.domain.trip.scrap.entity.Scrap;
 import com.ll.trip.domain.trip.scrap.entity.ScrapBookmark;
@@ -71,23 +74,37 @@ public class ScrapService {
 		String[] parts = content.split("\\{\"insert\":");
 
 		int l = 0;
-		for (String part : parts) {
+		sb.append(parts[0]);
+		sb.append("{\"insert\":\"");
+		for (int i = 1; i < parts.length; i++) {
+			String part = parts[i];
 			if (part.startsWith("{\"image\""))
 				continue;
-			int text = part.length() - 6;
+			String[] partA = part.split(",\"attributes\"");
+			part = partA[0];
+			int text;
+			int start = 1;
+			if (partA.length > 1) {
+				start = 1;
+				text = part.length() - 1;
+			} else {
+				text = part.length() - 5;
+			}
+
 			if (l + text > 50) {
 				text = 50 - l + 2;
-
-				sb.append("\\{\"insert\":").append(part, 0, text).append("}");
+				sb.append(part, start, text);
+				if (part.charAt(text - 1) == '\\' && part.length() > text) {
+					sb.append(part.charAt(text));
+				}
 				break;
 			}
 			l += text;
-			sb.append("\\{\"insert\":").append(part);
+			sb.append(part, start, text);
 		}
+		sb.append("\\n\"}]");
 
-		String preview = sb.toString();
-		log.info("preview: " + preview);
-		return preview;
+		return sb.toString();
 	}
 
 	@Transactional
@@ -145,7 +162,19 @@ public class ScrapService {
 		scrapRepository.deleteById(scrapId);
 	}
 
-	public Scrap findByIdWithScrapImage(long scrapId) {
-		return scrapRepository.findByIdWithScrapImage(scrapId).orElseThrow(NoSuchElementException::new);
+	public ScrapDetailDto findByIdWithScrapImage(long scrapId, long userId) {
+		List<ScrapDetailServiceDto> dtos =  scrapRepository.findDetailDtoByScrapIdAndUserId(scrapId, userId);
+		if(dtos == null) throw new NoSuchElementException("scrap을 찾을 수 없음");
+		return parseToDetailDto(dtos);
+	}
+
+	public ScrapDetailDto parseToDetailDto(List<ScrapDetailServiceDto> dtos) {
+		ScrapDetailDto response = new ScrapDetailDto(dtos.get(0));
+		List<ScrapImageDto> imageDtoList = response.getImageDtos();
+		for (ScrapDetailServiceDto dto : dtos) {
+			ScrapImageDto imageDto = new ScrapImageDto(dto.getImageId(), dto.getImageKey());
+			imageDtoList.add(imageDto);
+		}
+		return response;
 	}
 }

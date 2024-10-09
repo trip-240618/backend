@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.ll.trip.domain.trip.trip.entity.Trip;
+import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.global.base.entity.BaseEntity;
 
 import jakarta.persistence.CascadeType;
@@ -41,6 +42,10 @@ public class Scrap extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "trip_id")
 	private Trip trip;
+
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private UserEntity user;
 
 	private String writerUuid;
 

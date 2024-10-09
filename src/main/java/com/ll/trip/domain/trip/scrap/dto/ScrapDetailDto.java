@@ -1,6 +1,8 @@
 package com.ll.trip.domain.trip.scrap.dto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Lob;
@@ -22,6 +24,11 @@ public class ScrapDetailDto {
 		description = "uuid",
 		example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4")
 	private String writerUuid;
+
+	@Schema(
+		description = "작성자 닉네임",
+		example = "작성자")
+	private String nickname;
 
 	@NotBlank
 	@Schema(
@@ -55,4 +62,31 @@ public class ScrapDetailDto {
 		description = "생성 날짜",
 		example = "2024-08-22T14:05")
 	private LocalDateTime createDate;
+
+	private List<ScrapImageDto> imageDtos = new ArrayList<>();
+
+	public ScrapDetailDto(long id, String writerUuid, String nickname, String title, String content, boolean hasImage, String color,
+		boolean bookmark, LocalDateTime createDate) {
+		this.id = id;
+		this.writerUuid = writerUuid;
+		this.nickname = nickname;
+		this.title = title;
+		this.content = content;
+		this.hasImage = hasImage;
+		this.color = color;
+		this.bookmark = bookmark;
+		this.createDate = createDate;
+	}
+
+	public ScrapDetailDto(ScrapDetailServiceDto dto) {
+		this.id = dto.getId();
+		this.writerUuid = dto.getWriterUuid();
+		this.nickname = dto.getNickname();
+		this.title = dto.getTitle();
+		this.content = dto.getContent();
+		this.hasImage = dto.isHasImage();
+		this.color = dto.getColor();
+		this.bookmark = dto.isBookmark();
+		this.createDate = dto.getCreateDate();
+	}
 }

@@ -23,6 +23,11 @@ public class ScrapListDto {
 		example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4")
 	private String writerUuid;
 
+	@Schema(
+		description = "작성자 닉네임",
+		example = "작성자")
+	private String nickname;
+
 	@NotBlank
 	@Schema(
 		description = "스크랩 제목",

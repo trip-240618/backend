@@ -64,7 +64,7 @@ public class ScrapController {
 		);
 
 		return ResponseEntity.ok(new ScrapDetailDto(
-			scrap.getId(), securityUser.getUuid(), scrap.getTitle(),
+			scrap.getId(), securityUser.getUuid(), securityUser.getNickname(), scrap.getTitle(),
 			scrap.getContent(), scrap.isHasImage(), scrap.getColor(),
 			false, scrap.getCreateDate()
 		));
@@ -82,13 +82,8 @@ public class ScrapController {
 		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
 			return ResponseEntity.badRequest().body("해당 여행방에 대한 권한이 없습니다.");
 
-		Scrap scrap = scrapService.findByIdWithScrapImage(scrapId);
-		//TODO 이미지 리스트 담기
-		return ResponseEntity.ok(new ScrapDetailDto(
-			scrap.getId(), securityUser.getUuid(), scrap.getTitle(),
-			scrap.getContent(), scrap.isHasImage(), scrap.getColor(),
-			false, scrap.getCreateDate()
-		));
+		ScrapDetailDto response = scrapService.findByIdWithScrapImage(scrapId, securityUser.getId());
+		return ResponseEntity.ok(response);
 	}
 
 	@PutMapping("/{tripId}/scrap/modify")
@@ -109,7 +104,7 @@ public class ScrapController {
 		);
 
 		return ResponseEntity.ok(new ScrapDetailDto(
-			scrap.getId(), securityUser.getUuid(), scrap.getTitle(),
+			scrap.getId(), securityUser.getUuid(), securityUser.getNickname(), scrap.getTitle(),
 			scrap.getContent(), scrap.isHasImage(), scrap.getColor(),
 			modifyDto.isBookmark(), scrap.getCreateDate()
 		));
