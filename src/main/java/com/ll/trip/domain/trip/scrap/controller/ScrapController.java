@@ -70,6 +70,27 @@ public class ScrapController {
 		));
 	}
 
+	@GetMapping("/{tripId}/scrap/detail/{scrapId}")
+	@Operation(summary = "스크랩 생성")
+	@ApiResponse(responseCode = "200", description = "스크랩 생성", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = ScrapDetailDto.class))})
+	public ResponseEntity<?> showScrapDetail(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long scrapId
+	) {
+		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
+			return ResponseEntity.badRequest().body("해당 여행방에 대한 권한이 없습니다.");
+
+		Scrap scrap = scrapService.findByIdWithScrapImage(scrapId);
+		//TODO 이미지 리스트 담기
+		return ResponseEntity.ok(new ScrapDetailDto(
+			scrap.getId(), securityUser.getUuid(), scrap.getTitle(),
+			scrap.getContent(), scrap.isHasImage(), scrap.getColor(),
+			false, scrap.getCreateDate()
+		));
+	}
+
 	@PutMapping("/{tripId}/scrap/modify")
 	@Operation(summary = "스크랩 수정")
 	@ApiResponse(responseCode = "200", description = "스크랩 수정", content = {

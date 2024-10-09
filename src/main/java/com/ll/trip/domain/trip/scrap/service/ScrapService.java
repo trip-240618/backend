@@ -2,6 +2,7 @@ package com.ll.trip.domain.trip.scrap.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -142,5 +143,9 @@ public class ScrapService {
 	@Transactional
 	public void deleteById(long scrapId) {
 		scrapRepository.deleteById(scrapId);
+	}
+
+	public Scrap findByIdWithScrapImage(long scrapId) {
+		return scrapRepository.findByIdWithScrapImage(scrapId).orElseThrow(NoSuchElementException::new);
 	}
 }

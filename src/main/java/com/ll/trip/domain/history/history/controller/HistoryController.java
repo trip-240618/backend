@@ -355,8 +355,8 @@ public class HistoryController {
 	public ResponseEntity<?> searchHistory(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam(required = false) @Parameter(description = "작성자 uuid", example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4") String uuid,
-		@RequestParam(required = false) @Parameter(description = "태그명", example = "# 긴자") String tagName,
-		@RequestParam(required = false) @Parameter(description = "태그 컬러", example = "#FFEFF3") String tagColor
+		@RequestParam(required = false) @Parameter(description = "태그명", example = "긴자") String tagName,
+		@RequestParam(required = false) @Parameter(description = "태그 컬러", example = "FFEFF3") String tagColor
 	) {
 		List<HistoryListDto> response = null;
 		if (uuid != null) {

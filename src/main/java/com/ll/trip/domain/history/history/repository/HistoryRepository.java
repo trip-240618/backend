@@ -71,12 +71,12 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 	List<HistoryListDto> findHistoryByTripIdAndUuid(long tripId, String uuid, Pageable pageable);
 
 	@Query("""
-    SELECT new com.ll.trip.domain.history.history.dto.HistoryListDto(
+    SELECT distinct new com.ll.trip.domain.history.history.dto.HistoryListDto(
     	h.id, u.uuid, u.thumbnail, h.thumbnail, h.latitude,
         h.longitude, h.photoDate,  h.likeCnt, h.replyCnt)
     FROM History h
-    left join h.historyTags t on t.tagName = :tagName and t.tagColor = :tagColor
-    inner JOIN h.user u on h.trip.id = :tripId and u.uuid = :uuid
+    inner join h.historyTags t on t.trip.id = :tripId and t.tagName = :tagName and t.tagColor = :tagColor
+    left JOIN h.user u
     ORDER BY h.photoDate ASC, h.id DESC
     """)
 	List<HistoryListDto> findHistoryByTripIdAndTagNameAndColor(long tripId, String tagName, String tagColor, Pageable pageable);
@@ -86,8 +86,8 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
     	h.id, u.uuid, u.thumbnail, h.thumbnail, h.latitude,
         h.longitude, h.photoDate,  h.likeCnt, h.replyCnt)
     FROM History h
-    left join h.historyTags t on t.tagName = :tagName
-    inner JOIN h.user u on h.trip.id = :tripId and u.uuid = :uuid
+    inner join h.historyTags t on t.trip.id = :tripId and t.tagName = :tagName
+    left JOIN h.user u
     ORDER BY h.photoDate ASC, h.id DESC
     """)
 	List<HistoryListDto> findHistoryByTripIdAndTagName(long tripId, String tagName, Pageable pageable);

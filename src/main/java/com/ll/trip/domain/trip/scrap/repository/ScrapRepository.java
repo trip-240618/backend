@@ -1,6 +1,7 @@
 package com.ll.trip.domain.trip.scrap.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,4 +32,12 @@ public interface ScrapRepository extends JpaRepository<Scrap, Long> {
 	List<ScrapListDto> findBookmarkListByTripId(long tripId, long userId);
 
 	boolean existsByIdAndWriterUuid(long scrapId, String uuid);
+
+	@Query("""
+		select s
+		from Scrap s
+		join fetch s.scrapImageList
+		where s.id = :scrapId
+		""")
+	Optional<Scrap> findByIdWithScrapImage(long scrapId);
 }
