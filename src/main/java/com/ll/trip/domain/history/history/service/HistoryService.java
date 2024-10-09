@@ -1,6 +1,7 @@
 package com.ll.trip.domain.history.history.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -202,16 +203,19 @@ public class HistoryService {
 	}
 
 	@Transactional
-	public void modifyHistory(long tripId, long historyId, HistoryModifyDto requestDto) {
+	public void modifyHistory(long tripId, History history, HistoryModifyDto requestDto) {
 		Trip tripRef = tripRepository.getReferenceById(tripId);
-		History historyRef = historyRepository.getReferenceById(historyId);
-		List<HistoryTag> tags = createHistoryTags(requestDto.getTags(), tripRef, historyRef);
-		historyRef.setHistoryTags(tags);
-		historyRef.setMemo(requestDto.getMemo());
-		historyRepository.save(historyRef);
+		List<HistoryTag> tags = createHistoryTags(requestDto.getTags(), tripRef, history);
+		history.setHistoryTags(tags);
+		history.setMemo(requestDto.getMemo());
+		historyRepository.save(history);
 	}
 
 	public HistoryLike findHistoryLikeByHistoryIdAndUserId(long historyId, long userId) {
 		return historyLikeRepository.findByHistoryIdAndUserId(historyId, userId).orElse(null);
+	}
+
+	public History findById(long historyId) {
+		return historyRepository.findById(historyId).orElseThrow(NoSuchElementException::new);
 	}
 }

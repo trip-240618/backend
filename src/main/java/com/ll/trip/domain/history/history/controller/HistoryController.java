@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.history.history.dto.HistoriesCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryDetailDto;
@@ -58,6 +59,7 @@ public class HistoryController {
 	private final HistoryService historyService;
 	private final NotificationService notificationService;
 	private final EntityManager entityManager;
+	private final AwsAuthService awsAuthService;
 
 	@GetMapping("/{tripId}/history/list")
 	@Operation(summary = "History 리스트")
@@ -135,7 +137,12 @@ public class HistoryController {
 		if (!historyService.isWriterOfHistory(historyId, securityUser.getId()))
 			return ResponseEntity.badRequest().body("권한이 없습니다.");
 
-		historyService.modifyHistory(tripId, historyId, requestDto);
+		History history = historyService.findById(historyId);
+
+		if (requestDto.getImageUrl() != null && !history.getImageUrl().equals(requestDto.getImageUrl())) {
+			awsAuthService.deleteUrls(List.of(history.getImageUrl()));
+		}
+		historyService.modifyHistory(tripId, history, requestDto);
 		HistoryDetailDto response = historyService.showHistoryDetail(historyId, securityUser.getId());
 
 		return ResponseEntity.ok(response);
@@ -347,9 +354,9 @@ public class HistoryController {
 			array = @ArraySchema(schema = @Schema(implementation = HistoryListDto.class)))})
 	public ResponseEntity<?> searchHistory(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
-		@RequestParam(required = false) @Parameter(description = "작성자 uuid", example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4", in = ParameterIn.PATH) String uuid,
-		@RequestParam(required = false) @Parameter(description = "태그명", example = "# 긴자", in = ParameterIn.PATH) String tagName,
-		@RequestParam(required = false) @Parameter(description = "태그 컬러", example = "#FFEFF3", in = ParameterIn.PATH) String tagColor
+		@RequestParam(required = false) @Parameter(description = "작성자 uuid", example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4") String uuid,
+		@RequestParam(required = false) @Parameter(description = "태그명", example = "# 긴자") String tagName,
+		@RequestParam(required = false) @Parameter(description = "태그 컬러", example = "#FFEFF3") String tagColor
 	) {
 		List<HistoryListDto> response = null;
 		if (uuid != null) {
