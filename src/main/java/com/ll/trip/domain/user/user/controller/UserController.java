@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.dto.UserModifyDto;
 import com.ll.trip.domain.user.user.dto.UserRegisterDto;
@@ -36,6 +37,7 @@ public class UserController {
 
 	private final UserService userService;
 	private final EntityManager entityManager;
+	private final AwsAuthService awsAuthService;
 
 	@GetMapping("/info")
 	@Operation(summary = "유저 정보 반환")
@@ -122,6 +124,7 @@ public class UserController {
 	) {
 		if (!userService.validateUser(securityUser))
 			return ResponseEntity.badRequest().body("너 누구야");
+		awsAuthService.deleteImagesByUserId(securityUser.getId());
 		userService.deleteUserById(securityUser.getId());
 		userService.setTokenInCookie("", "", response);
 		return ResponseEntity.ok("deleted");

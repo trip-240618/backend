@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -29,15 +30,21 @@ public class Notice extends BaseEntity {
 	private Long id;
 
 	@NotBlank
+	@Setter
 	private String type; //시스템, 업데이트, 일반
 
 	@NotBlank
+	@Setter
 	private String title;
 
 	@NotBlank
 	@Lob
+	@Setter
 	private String content;
 
-	@Lob
-	private String markdownDetails;
+	@Setter
+	private String duration;
+
+	@Setter
+	private String reason;
 }

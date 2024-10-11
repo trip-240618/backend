@@ -26,7 +26,8 @@ public class NoticeService {
 				.type(noticeCreateDto.getType())
 				.title(noticeCreateDto.getTitle())
 				.content(noticeCreateDto.getContent())
-				.markdownDetails(noticeCreateDto.getMarkdownDetails())
+				.duration(noticeCreateDto.getDuration())
+				.reason(noticeCreateDto.getReason())
 				.build()
 		);
 
@@ -34,6 +35,28 @@ public class NoticeService {
 	}
 
 	public List<NoticeListDto> showNoticeList(String type) {
+		if(type == null) return noticeRepository.findAllDto();
 		return noticeRepository.findNoticeList(type);
+	}
+
+	@Transactional
+	public NoticeDetailDto modifyNotice(long noticeId, NoticeCreateDto dto) {
+		Notice noticeRef = noticeRepository.getReferenceById(noticeId);
+		if (!dto.getContent().isBlank())
+			noticeRef.setContent(dto.getContent());
+		if (!dto.getType().isBlank())
+			noticeRef.setType(dto.getType());
+		if (!dto.getDuration().isBlank())
+			noticeRef.setDuration(dto.getDuration());
+		if (!dto.getTitle().isBlank())
+			noticeRef.setTitle(dto.getTitle());
+		if (!dto.getReason().isBlank())
+			noticeRef.setReason(dto.getReason());
+		return new NoticeDetailDto(noticeRepository.save(noticeRef));
+	}
+
+	@Transactional
+	public void deleteNotice(long noticeId) {
+		noticeRepository.deleteById(noticeId);
 	}
 }

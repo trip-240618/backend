@@ -109,6 +109,11 @@ public class AwsAuthService {
 		deleteObjectByKey(getKeyFromScrapImagesByScrapId(scrapId));
 	}
 
+	public void deleteImagesByUserId(long userId) {
+		List<String> urls = new ArrayList<>();
+		//TODO
+	}
+
 	private List<String> getKeyFromScrapImagesByScrapId(long scrapId) {
 		return scrapImageRepository.findAllImageKeyByScrapId(scrapId);
 	}

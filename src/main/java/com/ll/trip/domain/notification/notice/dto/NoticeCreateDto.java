@@ -18,6 +18,9 @@ public class NoticeCreateDto {
 	@NotBlank
 	private String content;
 
-	@Schema(description = "공지 상세 (마크다운)", example = "")
-	private String markdownDetails;
+	@Schema(description = "일시", example = "2024년 8월 2일 (금) 04:00 ~ 06:00")
+	private String duration;
+
+	@Schema(description = "사유", example = "전산시스템 점검")
+	private String reason;
 }

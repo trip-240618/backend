@@ -23,8 +23,11 @@ public class NoticeDetailDto {
 	@Schema(description = "공지 내용", example = "안녕하세요, 트립스토리입니다....")
 	private String content;
 
-	@Schema(description = "공지 상세 (마크다운)", example = "")
-	private String markdownDetails;
+	@Schema(description = "일시", example = "2024년 8월 2일 (금) 04:00 ~ 06:00")
+	private String duration;
+
+	@Schema(description = "사유", example = "전산시스템 점검")
+	private String reason;
 
 	@Schema(
 		description = "생성 날짜",
@@ -36,7 +39,8 @@ public class NoticeDetailDto {
 		this.type = notice.getType();
 		this.title = notice.getTitle();
 		this.content = notice.getContent();
-		this.markdownDetails = notice.getMarkdownDetails();
+		this.duration = notice.getDuration();
+		this.reason = notice.getReason();
 		this.createDate = notice.getCreateDate();
 	}
 }

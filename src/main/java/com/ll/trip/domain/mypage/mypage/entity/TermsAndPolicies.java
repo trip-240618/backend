@@ -1,4 +1,4 @@
-package com.ll.trip.domain.user.mypage.entity;
+package com.ll.trip.domain.mypage.mypage.entity;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 

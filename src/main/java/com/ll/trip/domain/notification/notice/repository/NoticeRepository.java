@@ -14,7 +14,17 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 		n.type, n.title, n.createDate
 		)
 		from Notice n
-		where (:type IS NULL OR n.type = :type)
+		where n.type = :type
+		order by n.createDate desc
 		""")
 	List<NoticeListDto> findNoticeList(String type);
+
+	@Query("""
+		select new com.ll.trip.domain.notification.notice.dto.NoticeListDto(
+		n.type, n.title, n.createDate
+		)
+		from Notice n
+		order by n.createDate desc
+		""")
+	List<NoticeListDto> findAllDto();
 }
