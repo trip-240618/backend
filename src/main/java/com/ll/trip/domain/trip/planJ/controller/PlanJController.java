@@ -23,6 +23,7 @@ import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJEditorRegisterDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
+import com.ll.trip.domain.trip.planJ.dto.PlanJListDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJModifyRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJSwapRequestDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
@@ -47,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/trip/j")
+@RequestMapping("/trip/{tripId}/plan/j")
 @Tag(name = "Plan J", description = "J타입 플랜 API")
 public class PlanJController {
 	private final PlanJService planJService;
@@ -55,7 +56,7 @@ public class PlanJController {
 	private final SimpMessagingTemplate template;
 	private final NotificationService notificationService;
 
-	@PostMapping("/{tripId}/plan/create")
+	@PostMapping("/create")
 	@Operation(summary = "J형 Plan 생성")
 	@ApiResponse(responseCode = "200", description = "J형 Plan생성, 응답데이터는 websocket으로 전송 (/topic/api/trip/j/{tripId})", content = {
 		@Content(mediaType = "application/json",
@@ -82,7 +83,7 @@ public class PlanJController {
 		return ResponseEntity.ok("created");
 	}
 
-	@GetMapping("/{tripId}/plan/list")
+	@GetMapping("/list")
 	@Operation(summary = "PlanJ 리스트 요청")
 	@ApiResponse(responseCode = "200", description = "Plan 리스트 요청", content = {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanJInfoDto.class)))})
@@ -91,7 +92,7 @@ public class PlanJController {
 		@RequestParam @Parameter(description = "day", example = "1") int day,
 		@RequestParam @Parameter(description = "보관함 여부", example = "false") boolean locker
 	) {
-		List<PlanJInfoDto> response;
+		List<PlanJListDto> response;
 		if (!locker)
 			response = planJService.findAllPlanAByTripIdAndDay(tripId, day);
 		else
@@ -99,7 +100,7 @@ public class PlanJController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PutMapping("/{tripId}/plan/edit/modify")
+	@PutMapping("/edit/modify")
 	@Operation(summary = "PlanJ 수정")
 	@ApiResponse(responseCode = "200", description = "PlanJ 수정", content = {
 		@Content(
@@ -143,7 +144,7 @@ public class PlanJController {
 		return ResponseEntity.ok("modified");
 	}
 
-	@PutMapping("/{tripId}/plan/edit/swap")
+	@PutMapping("/edit/swap")
 	@Operation(summary = "PlanJ 스왑")
 	@ApiResponse(responseCode = "200", description = "PlanJ 스왑", content = {
 		@Content(
@@ -173,7 +174,7 @@ public class PlanJController {
 		return ResponseEntity.ok("swapped");
 	}
 
-	@DeleteMapping("/{tripId}/plan/delete")
+	@DeleteMapping("/delete")
 	@Operation(summary = "PlanJ 삭제")
 	@ApiResponse(responseCode = "200", description = "PlanJ 삭제", content = {
 		@Content(mediaType = "application/json",
@@ -195,7 +196,7 @@ public class PlanJController {
 		return ResponseEntity.ok("deleted");
 	}
 
-	@MessageMapping("/{tripId}/{day}/edit/register")
+	@MessageMapping("/trip/{tripId}/plan/j/{day}/edit/register")
 	public void addEditor(
 		SimpMessageHeaderAccessor headerAccessor,
 		@DestinationVariable long tripId,
@@ -219,7 +220,7 @@ public class PlanJController {
 		);
 	}
 
-	@GetMapping("/{tripId}/{day}/edit/register")
+	@GetMapping("/{day}/edit/register")
 	@Operation(summary = "(웹소켓 설명용) 편집자 등록")
 	@ApiResponse(responseCode = "200", description = "웹소켓으로 요청해야함, 편집자가 없을 시 편집자로 등록", content = {
 		@Content(mediaType = "application/json",

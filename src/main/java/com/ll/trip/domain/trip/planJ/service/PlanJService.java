@@ -1,13 +1,17 @@
 package com.ll.trip.domain.trip.planJ.service;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
+import com.ll.trip.domain.trip.planJ.dto.PlanJListDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJModifyRequestDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.repository.PlanJRepository;
@@ -55,12 +59,29 @@ public class PlanJService {
 		return new PlanJInfoDto(plan);
 	}
 
-	public List<PlanJInfoDto> findAllPlanAByTripIdAndDay(long tripId, int day) {
-		return planJRepository.findAllPlanAByTripIdAndDay(tripId, day, false);
+	public List<PlanJListDto> findAllPlanAByTripIdAndDay(long tripId, int day) {
+		List<PlanJInfoDto> dtos = planJRepository.findAllPlanAByTripIdAndDay(tripId, day, false);
+		return parseToListResponse(dtos);
 	}
 
-	public List<PlanJInfoDto> findAllPlanBByTripId(long tripId) {
-		return planJRepository.findAllPlanBByTripIdAndDay(tripId, true);
+	public List<PlanJListDto> findAllPlanBByTripId(long tripId) {
+		List<PlanJInfoDto> dtos = planJRepository.findAllPlanBByTripIdAndDay(tripId, true);
+		return parseToListResponse(dtos);
+	}
+
+	private List<PlanJListDto> parseToListResponse(List<PlanJInfoDto> dtos) {
+		Map<Integer, List<PlanJInfoDto>> dayMap = new HashMap<>();
+		List<PlanJListDto> response = new ArrayList<>();
+
+		for (PlanJInfoDto dto : dtos) {
+			dayMap.computeIfAbsent(dto.getDayAfterStart(), day -> {
+				PlanJListDto listDto = new PlanJListDto(day);
+				response.add(listDto);
+				return listDto.getPlanList();
+			}).add(dto);
+		}
+
+		return response;
 	}
 
 	@Transactional

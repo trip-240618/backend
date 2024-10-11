@@ -75,6 +75,7 @@ public class PlanPService {
 		for (PlanPInfoDto dto : dtos) {
 			dayMap.computeIfAbsent(dto.getDayAfterStart(), day -> {
 				PlanPListDto listDto = new PlanPListDto(day);
+				response.add(listDto);
 				return listDto.getPlanList();
 			}).add(dto);
 		}

@@ -157,7 +157,7 @@ public class PlanPController {
 		return ResponseEntity.ok("checked");
 	}
 
-	@MessageMapping("/edit/register")
+	@MessageMapping("trip/{tripId}/plan/p/edit/register")
 	public void addEditor(
 		SimpMessageHeaderAccessor headerAccessor,
 		@DestinationVariable long tripId
