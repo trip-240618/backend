@@ -1,6 +1,11 @@
 package com.ll.trip.global.handler;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import com.ll.trip.global.handler.dto.ErrorResponseDto;
+import com.ll.trip.global.handler.exception.PermissionDeniedException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -15,4 +20,10 @@ public class GlobalExceptionHandler {
 	// 	// 400 상태 코드와 함께 예외 메시지를 반환
 	// 	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDto(e.getMessage()));
 	// }
+
+	@ExceptionHandler(PermissionDeniedException.class)
+	public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
+		// 400 상태 코드와 함께 예외 메시지를 반환
+		return ResponseEntity.status(421).body(new ErrorResponseDto(e.getMessage()));
+	}
 }

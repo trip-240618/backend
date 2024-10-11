@@ -3,7 +3,6 @@ package com.ll.trip.domain.flight.controller;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,7 +19,6 @@ import com.amadeus.resources.DatedFlight;
 import com.ll.trip.domain.flight.dto.ScheduleResponseDto;
 import com.ll.trip.domain.flight.service.FlightService;
 import com.ll.trip.domain.trip.trip.service.TripService;
-import com.ll.trip.global.handler.dto.ErrorResponseDto;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -97,8 +95,7 @@ public class FlightController {
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam @Parameter(description = "삭제할 Flight id", example = "1") long flightId
 	) {
-		if(!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("삭제 권한이 없습니다."));
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		flightService.deleteFlight(flightId);
 
 		return ResponseEntity.ok("deleted");

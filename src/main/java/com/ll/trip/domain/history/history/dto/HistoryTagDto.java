@@ -12,6 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class HistoryTagDto {
 	@Schema(
+		description = "히스토리 태그 id",
+		example = "1")
+	private Long id;
+
+	@Schema(
 		description = "히스토리 태그 컬러",
 		example = "#FFEFF3")
 	private String tagColor;
@@ -22,7 +27,13 @@ public class HistoryTagDto {
 	private String tagName;
 
 	public HistoryTagDto(HistoryTag tag) {
+		this.id = tag.getId();
 		this.tagColor = tag.getTagColor();
 		this.tagName = tag.getTagName();
+	}
+
+	public HistoryTagDto(String tagColor, String tagName) {
+		this.tagColor = tagColor;
+		this.tagName = tagName;
 	}
 }

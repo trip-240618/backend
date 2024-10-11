@@ -1,6 +1,10 @@
 package com.ll.trip.domain.history.history.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ll.trip.domain.history.history.dto.HistoryCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryDetailDto;
 import com.ll.trip.domain.history.history.dto.HistoryListDto;
+import com.ll.trip.domain.history.history.dto.HistoryListServiceDto;
 import com.ll.trip.domain.history.history.dto.HistoryModifyDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
@@ -42,9 +47,27 @@ public class HistoryService {
 	private final HistoryLikeRepository historyLikeRepository;
 	private final EntityManager entityManager;
 
-	public List<HistoryListDto> findAllByTripId(long tripId) {
+	public Map<LocalDate, List<HistoryListDto>> findAllByTripId(long tripId) {
 		Pageable pageable = PageRequest.of(0, 50);
-		return historyRepository.findAllByTripId(tripId, pageable);
+		List<HistoryListServiceDto> serviceDtos = historyRepository.findAllByTripId(tripId, pageable);
+		return parseToResponse(serviceDtos);
+	}
+
+	private Map<LocalDate, List<HistoryListDto>> parseToResponse(List<HistoryListServiceDto> serviceDtos) {
+		Map<Long, HistoryListDto> map = new HashMap<>();
+		Map<LocalDate, List<HistoryListDto>> response = new HashMap<>();
+		for (HistoryListServiceDto dto : serviceDtos) {
+			if (!map.containsKey(dto.getId())) {
+				HistoryListDto responseDto = new HistoryListDto(dto);
+				map.put(dto.getId(), responseDto);
+				response.computeIfAbsent(dto.getPhotoDate(), k -> new ArrayList<>()).add(responseDto);
+			} else {
+				map.get(dto.getId())
+					.getTags()
+					.add(new HistoryTagDto(dto.getTagId(), dto.getTagColor(), dto.getTagName()));
+			}
+		}
+		return response;
 	}
 
 	@Transactional
@@ -96,7 +119,8 @@ public class HistoryService {
 	}
 
 	@Transactional
-	public List<HistoryListDto> createManyHistories(List<HistoryCreateRequestDto> dtos, UserEntity user, Trip trip) {
+	public Map<LocalDate, List<HistoryListDto>> createManyHistories(List<HistoryCreateRequestDto> dtos, UserEntity user,
+		Trip trip) {
 		for (HistoryCreateRequestDto dto : dtos) {
 			createHistory(dto, user, trip);
 		}
@@ -106,19 +130,6 @@ public class HistoryService {
 	@Transactional
 	public void deleteHistory(long historyId) {
 		historyRepository.deleteById(historyId);
-	}
-
-	public HistoryDetailDto showHistoryDetail(long historyId, long userId) {
-		List<HistoryServiceDto> dtos = historyRepository.findHistoryById(historyId, userId);
-		return convertToHistoryDetailDto(dtos);
-	}
-
-	public HistoryDetailDto convertToHistoryDetailDto(List<HistoryServiceDto> dtos) {
-		HistoryDetailDto historyDetailDto = new HistoryDetailDto(dtos.remove(0));
-		for (HistoryServiceDto dto : dtos) {
-			historyDetailDto.getTags().add(dto.getTag());
-		}
-		return historyDetailDto;
 	}
 
 	@Transactional
@@ -189,17 +200,21 @@ public class HistoryService {
 		return historyTagRepository.findAllTagsByTripId(tripId);
 	}
 
-	public List<HistoryListDto> searchHistoryByUuid(long tripId, String uuid) {
+	public Map<LocalDate, List<HistoryListDto>> searchHistoryByUuid(long tripId, String uuid) {
 		Pageable pageable = PageRequest.of(0, 50);
-		return historyRepository.findHistoryByTripIdAndUuid(tripId, uuid, pageable);
+		List<HistoryListServiceDto> serviceDtos = historyRepository.findHistoryByTripIdAndUuid(tripId, uuid, pageable);
+		return parseToResponse(serviceDtos);
 	}
 
-	public List<HistoryListDto> searchHistoryByTagNameAndColor(long tripId, String tagName, String tagColor) {
+	public Map<LocalDate, List<HistoryListDto>> searchHistoryByTagNameAndColor(
+		long tripId, String tagName, String tagColor) {
 		Pageable pageable = PageRequest.of(0, 50);
+		List<HistoryListServiceDto> serviceDtos;
 		if (tagColor != null)
-			return historyRepository.findHistoryByTripIdAndTagNameAndColor(tripId, tagName, tagColor, pageable);
+			serviceDtos = historyRepository.findHistoryByTripIdAndTagNameAndColor(tripId, tagName, tagColor, pageable);
 		else
-			return historyRepository.findHistoryByTripIdAndTagName(tripId, tagName, pageable);
+			serviceDtos = historyRepository.findHistoryByTripIdAndTagName(tripId, tagName, pageable);
+		return parseToResponse(serviceDtos);
 	}
 
 	@Transactional
@@ -217,5 +232,18 @@ public class HistoryService {
 
 	public History findById(long historyId) {
 		return historyRepository.findById(historyId).orElseThrow(NoSuchElementException::new);
+	}
+
+	public HistoryDetailDto showHistoryDetail(long historyId, long userId) {
+		List<HistoryServiceDto> dtos = historyRepository.findHistoryById(historyId, userId);
+		return convertToHistoryDetailDto(dtos);
+	}
+
+	public HistoryDetailDto convertToHistoryDetailDto(List<HistoryServiceDto> dtos) {
+		HistoryDetailDto historyDetailDto = new HistoryDetailDto(dtos.remove(0));
+		for (HistoryServiceDto dto : dtos) {
+			historyDetailDto.getTags().add(dto.getTag());
+		}
+		return historyDetailDto;
 	}
 }

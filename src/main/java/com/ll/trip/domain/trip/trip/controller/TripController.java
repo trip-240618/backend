@@ -108,9 +108,7 @@ public class TripController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId
 	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("입장 권한이 없습니다."));
-
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		TripInfoDto response = new TripInfoDto(tripService.findTripByTripId(tripId));
 
 		return ResponseEntity.ok(response);
@@ -173,8 +171,7 @@ public class TripController {
 		@RequestParam @Parameter(description = "트립 타입", example = "j") char tripType,
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId
 	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("해당 여행방의 멤버가 아닙니다."));
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
 		tripService.deleteTripMember(tripId, securityUser.getId());
 

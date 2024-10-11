@@ -55,8 +55,7 @@ public class ScrapController {
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody ScrapCreateDto scrapCreateDto
 	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("해당 여행방에 대한 권한이 없습니다.");
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
 		Scrap scrap = scrapService.createScrap(
 			securityUser.getId(), tripId, scrapCreateDto.getTitle(), scrapCreateDto.getContent(),
@@ -75,8 +74,7 @@ public class ScrapController {
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long scrapId
 	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("해당 여행방에 대한 권한이 없습니다.");
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
 		ScrapDetailDto response = scrapService.findByIdWithScrapImage(scrapId, securityUser.getId());
 		return ResponseEntity.ok(response);

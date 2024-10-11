@@ -1,6 +1,8 @@
 package com.ll.trip.domain.history.history.controller;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.history.history.dto.HistoriesCreateRequestDto;
-import com.ll.trip.domain.history.history.dto.HistoryCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryDetailDto;
 import com.ll.trip.domain.history.history.dto.HistoryListDto;
 import com.ll.trip.domain.history.history.dto.HistoryModifyDto;
@@ -63,40 +64,14 @@ public class HistoryController {
 
 	@GetMapping("/{tripId}/history/list")
 	@Operation(summary = "History 리스트")
-	@ApiResponse(responseCode = "200", description = "History 리스트", content = {
-		@Content(mediaType = "application/json",
-			array = @ArraySchema(schema = @Schema(implementation = HistoryListDto.class)))})
-	public ResponseEntity<?> showHistoryList(
+	@ApiResponse(responseCode = "200", description = "History 리스트")
+	public ResponseEntity<Map<LocalDate, List<HistoryListDto>>> showHistoryList(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("권한이 없습니다.");
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
-		List<HistoryListDto> response = historyService.findAllByTripId(tripId);
-
-		return ResponseEntity.ok(response);
-	}
-
-	@PostMapping("/{tripId}/history/create")
-	@Operation(summary = "History 생성")
-	@ApiResponse(responseCode = "200", description = "History 생성", content = {
-		@Content(mediaType = "application/json",
-			array = @ArraySchema(schema = @Schema(implementation = HistoryListDto.class)))})
-	public ResponseEntity<?> createHistory(
-		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
-		@AuthenticationPrincipal SecurityUser securityUser,
-		@RequestBody HistoryCreateRequestDto requestDto
-	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("권한이 없습니다.");
-
-		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
-		Trip trip = entityManager.getReference(Trip.class, tripId);
-
-		HistoryDetailDto response = historyService.showHistoryDetail(
-			historyService.createHistory(requestDto, user, trip).getId(),
-			securityUser.getId());
+		Map<LocalDate, List<HistoryListDto>> response = historyService.findAllByTripId(tripId);
 
 		return ResponseEntity.ok(response);
 	}
@@ -111,13 +86,12 @@ public class HistoryController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestBody HistoriesCreateRequestDto requestDto
 	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("권한이 없습니다.");
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
 		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 		Trip trip = entityManager.getReference(Trip.class, tripId);
 
-		List<HistoryListDto> response = historyService.createManyHistories(requestDto.getHistoryCreateRequestDtos(),
+		Map<LocalDate, List<HistoryListDto>> response = historyService.createManyHistories(requestDto.getHistoryCreateRequestDtos(),
 			user, trip);
 
 		return ResponseEntity.ok(response);
@@ -166,24 +140,6 @@ public class HistoryController {
 		return ResponseEntity.ok("deleted");
 	}
 
-	@GetMapping("/{tripId}/history/detail/{historyId}")
-	@Operation(summary = "History 상세")
-	@ApiResponse(responseCode = "200", description = "History 상세", content = {
-		@Content(mediaType = "application/json",
-			schema = @Schema(implementation = HistoryDetailDto.class))})
-	public ResponseEntity<?> showHistoryDetail(
-		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
-		@PathVariable @Parameter(description = "히스토리 id", example = "1", in = ParameterIn.PATH) long historyId,
-		@AuthenticationPrincipal SecurityUser securityUser
-	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("권한이 없습니다.");
-
-		HistoryDetailDto response = historyService.showHistoryDetail(historyId, securityUser.getId());
-
-		return ResponseEntity.ok(response);
-	}
-
 	@PostMapping("/{tripId}/history/{historyId}/reply/create")
 	@Operation(summary = "History 댓글 생성")
 	@ApiResponse(responseCode = "200", description = "History 댓글 생성 후 댓글목록 반환", content = {
@@ -195,8 +151,7 @@ public class HistoryController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestBody HistoryReplyCreateRequestDto requestDto
 	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("권한이 없습니다.");
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
 		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 		History history = entityManager.getReference(History.class, historyId);
@@ -261,8 +216,7 @@ public class HistoryController {
 		@PathVariable @Parameter(description = "히스토리 id", example = "1", in = ParameterIn.PATH) long historyId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("권한이 없습니다.");
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
 		List<HistoryReplyDto> response = historyService.showHistoryReplyList(historyId);
 
@@ -281,8 +235,7 @@ public class HistoryController {
 		@PathVariable @Parameter(description = "히스토리 id", example = "1", in = ParameterIn.PATH) long historyId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("권한이 없습니다.");
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
 		HistoryLike like = historyService.findHistoryLikeByHistoryIdAndUserId(historyId, securityUser.getId());
 		boolean toggle;
@@ -358,7 +311,7 @@ public class HistoryController {
 		@RequestParam(required = false) @Parameter(description = "태그명", example = "긴자") String tagName,
 		@RequestParam(required = false) @Parameter(description = "태그 컬러", example = "FFEFF3") String tagColor
 	) {
-		List<HistoryListDto> response = null;
+		Map<LocalDate, List<HistoryListDto>> response = null;
 		if (uuid != null) {
 			response = historyService.searchHistoryByUuid(tripId, uuid);
 		} else if (tagName != null) {

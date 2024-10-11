@@ -24,6 +24,7 @@ import com.ll.trip.domain.trip.trip.repository.TripMemberRepository;
 import com.ll.trip.domain.trip.trip.repository.TripRepository;
 import com.ll.trip.domain.user.user.dto.VisitedCountryDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.global.handler.exception.PermissionDeniedException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -73,8 +74,10 @@ public class TripService {
 		return true;
 	}
 
-	public boolean existTripMemberByTripIdAndUserId(long tripId, long userId) {
-		return tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId);
+	public void checkTripMemberByTripIdAndUserId(long tripId, long userId) {
+		if (!tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId))
+			throw new PermissionDeniedException("user: " + userId + "isn't member of trip: " + tripId);
+
 	}
 
 	public List<TripInfoDto> findAllIncomingByUserId(Long userId, LocalDate date) {
@@ -155,7 +158,8 @@ public class TripService {
 	}
 
 	public long findTripIdByInvitationCode(String invitationCode) {
-		return tripRepository.findTrip_idByInvitationCode(invitationCode).orElseThrow(() -> new NoSuchElementException("Trip not found with invitation code: " + invitationCode));
+		return tripRepository.findTrip_idByInvitationCode(invitationCode)
+			.orElseThrow(() -> new NoSuchElementException("Trip not found with invitation code: " + invitationCode));
 	}
 
 	public void deleteTripMember(long tripId, long userId) {

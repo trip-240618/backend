@@ -2,8 +2,8 @@ package com.ll.trip.domain.history.history.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
-import com.ll.trip.domain.history.history.entity.History;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -55,15 +55,23 @@ public class HistoryListDto {
 		example = "3")
 	private int replyCnt;
 
-	public HistoryListDto(History history) {
-		this.id = history.getId();
-		this.writerUuid = history.getUser().getUuid();
-		this.profileImage = history.getUser().getThumbnail();
-		this.thumbnail = history.getThumbnail();
-		this.latitude = history.getLatitude();
-		this.longitude = history.getLongitude();
-		this.photoDate = history.getPhotoDate();
-		this.likeCnt = history.getLikeCnt();
-		this.replyCnt = history.getReplyCnt();
+	private List<HistoryTagDto> tags = new ArrayList<>();
+
+	public HistoryListDto(HistoryListServiceDto serviceDto) {
+		this.id = serviceDto.getId();
+		this.writerUuid = serviceDto.getWriterUuid();
+		this.profileImage = serviceDto.getProfileImage();
+		this.thumbnail = serviceDto.getThumbnail();
+		this.latitude = serviceDto.getLatitude();
+		this.longitude = serviceDto.getLongitude();
+		this.photoDate = serviceDto.getPhotoDate();
+		this.likeCnt = serviceDto.getLikeCnt();
+		this.replyCnt = serviceDto.getReplyCnt();
+		if (serviceDto.getTagId() != null)
+			tags.add(new HistoryTagDto(
+				serviceDto.getTagId(),
+				serviceDto.getTagColor(),
+				serviceDto.getTagName()
+			));
 	}
 }

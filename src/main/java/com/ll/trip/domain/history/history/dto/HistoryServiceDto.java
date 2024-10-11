@@ -31,7 +31,8 @@ public class HistoryServiceDto {
 	private HistoryTagDto tag;
 
 	public HistoryServiceDto(long id, String writerUuid, String profileImage, String imageUrl, BigDecimal latitude,
-		BigDecimal longitude, String memo, int likeCnt, int replyCnt, boolean like, String tagColor, String tagName) {
+		BigDecimal longitude, String memo, int likeCnt, int replyCnt, boolean like, Long tagId, String tagColor,
+		String tagName) {
 		this.id = id;
 		this.writerUuid = writerUuid;
 		this.profileImage = profileImage;
@@ -42,6 +43,8 @@ public class HistoryServiceDto {
 		this.likeCnt = likeCnt;
 		this.replyCnt = replyCnt;
 		this.like = like;
-		this.tag = new HistoryTagDto(tagColor, tagName);
+		if (tagId != null)
+			this.tag = new HistoryTagDto(tagId, tagColor, tagName);
+
 	}
 }
