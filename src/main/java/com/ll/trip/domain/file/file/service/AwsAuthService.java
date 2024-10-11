@@ -17,6 +17,7 @@ import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.ll.trip.domain.file.file.dto.PreSignedUrlResponseDto;
+import com.ll.trip.domain.history.history.dto.HistoryImageDeleteDto;
 import com.ll.trip.domain.history.history.repository.HistoryRepository;
 import com.ll.trip.domain.trip.scrap.repository.ScrapImageRepository;
 import com.ll.trip.domain.trip.trip.dto.TripImageDeleteDto;
@@ -63,9 +64,8 @@ public class AwsAuthService {
 		return abstractedUrls;
 	}
 
-	public List<String> findImageByTripId(long tripId) {
+	public List<String> findImageByTripId(List<String> urls, long tripId) {
 		List<TripImageDeleteDto> dtos = tripRepository.findTripAndHistoryByTripId(tripId);
-		List<String> urls = new ArrayList<>();
 
 		if (dtos != null) {
 			urls.add(dtos.get(0).getTripThumbnail());
@@ -91,8 +91,9 @@ public class AwsAuthService {
 		return extractedKeys;
 	}
 
-	public List<String> getKeyFromScrapImagesByTripId(long tripId) {
-		return scrapImageRepository.findAllImageKeyByTripId(tripId);
+	public List<String> getUrlFromScrapImagesByTripId(List<String> urls, long tripId) {
+		urls.addAll(scrapImageRepository.findAllImageKeyByTripId(tripId));
+		return urls;
 	}
 
 	public void deleteUrls(List<String> urls) {
@@ -100,9 +101,9 @@ public class AwsAuthService {
 	}
 
 	public void deleteImagesByTripId(long tripId) {
-		List<String> urls = findImageByTripId(tripId);
+		List<String> urls = findImageByTripId(new ArrayList<>(), tripId);
+		getUrlFromScrapImagesByTripId(urls, tripId);
 		deleteObjectByKey(extractKeyFromUrl(urls));
-		deleteObjectByKey(getKeyFromScrapImagesByTripId(tripId));
 	}
 
 	public void deleteImagesByScrapId(long scrapId) {
@@ -154,5 +155,11 @@ public class AwsAuthService {
 		if (fileName == null)
 			return String.format("%s/%s", prefix, fileId);
 		return String.format("%s/%s", prefix, fileId + fileName);
+	}
+
+	public void deleteImageByHistoryId(long historyId) {
+		HistoryImageDeleteDto dto = historyRepository.findHistoryImages(historyId);
+		List<String> urls = List.of(dto.getImageUrl(), dto.getThumbnail());
+		deleteObjectByKey(extractKeyFromUrl(urls));
 	}
 }

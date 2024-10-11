@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import com.ll.trip.domain.history.history.dto.HistoryImageDeleteDto;
 import com.ll.trip.domain.history.history.dto.HistoryServiceDto;
 import com.ll.trip.domain.history.history.entity.History;
 import com.ll.trip.domain.trip.trip.entity.Trip;
@@ -96,4 +97,12 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 		ORDER BY h.photoDate ASC, h.id DESC
 		""")
 	List<HistoryServiceDto> findHistoryByTripIdAndTagName(long tripId, long userId, String tagName, Pageable pageable);
+
+	@Query("""
+		select new com.ll.trip.domain.history.history.dto.HistoryImageDeleteDto(
+		h.thumbnail, h.imageUrl
+		) from History h
+		where h.id = :history
+		""")
+	HistoryImageDeleteDto findHistoryImages(long historyId);
 }

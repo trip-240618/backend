@@ -118,6 +118,7 @@ public class HistoryController {
 		historyService.checkIsWriterOfHistory(historyId, securityUser.getId());
 
 		historyService.deleteHistory(historyId);
+		awsAuthService.deleteImageByHistoryId(historyId);
 
 		return ResponseEntity.ok("deleted");
 	}
