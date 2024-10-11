@@ -1,6 +1,9 @@
 package com.ll.trip.domain.trip.planP.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPListDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPLockerDto;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
 import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
@@ -59,8 +63,23 @@ public class PlanPService {
 		);
 	}
 
-	public List<PlanPInfoDto> findAllByTripId(long tripId, boolean locker) {
-		return planPRepository.findAllByTripIdOrderByDayAfterStartAndOrderByDate(tripId, locker);
+	public List<PlanPListDto> findAllByTripId(long tripId, boolean locker) {
+		List<PlanPInfoDto> dtos = planPRepository.findAllByTripIdOrderByDayAfterStartAndOrderByDate(tripId, locker);
+		return parseToListResponse(dtos);
+	}
+
+	private List<PlanPListDto> parseToListResponse(List<PlanPInfoDto> dtos) {
+		List<PlanPListDto> response = new ArrayList<>();
+		Map<Integer, List<PlanPInfoDto>> dayMap = new HashMap<>();
+
+		for (PlanPInfoDto dto : dtos) {
+			dayMap.computeIfAbsent(dto.getDayAfterStart(), day -> {
+				PlanPListDto listDto = new PlanPListDto(day);
+				return listDto.getPlanList();
+			}).add(dto);
+		}
+
+		return response;
 	}
 
 	@Transactional

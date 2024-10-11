@@ -22,6 +22,7 @@ import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPListDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPLockerDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPMoveDto;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
@@ -33,7 +34,6 @@ import com.ll.trip.global.security.userDetail.SecurityUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -80,14 +80,11 @@ public class PlanPController {
 
 	@GetMapping("/{tripId}/plan/list")
 	@Operation(summary = "Plan 리스트 요청")
-	@ApiResponse(responseCode = "200", description = "Plan 리스트 요청", content = {
-		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanPInfoDto.class)))})
-	public ResponseEntity<?> showPlanPList(
+	public ResponseEntity<List<PlanPListDto>> showPlanPList(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam @Parameter(description = "보관함 여부", example = "false") boolean locker
 	) {
-		List<PlanPInfoDto> response = planPService.findAllByTripId(tripId, locker);
-
+		List<PlanPListDto> response = planPService.findAllByTripId(tripId, locker);
 		return ResponseEntity.ok(response);
 	}
 
@@ -237,8 +234,7 @@ public class PlanPController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestBody PlanPMoveDto moveDto
 	) {
-		if (!planPEditService.isEditor(tripId, securityUser.getUuid()))
-			return ResponseEntity.badRequest().body("편집자가 아닙니다.");
+		planPEditService.checkIsEditor(tripId, securityUser.getUuid());
 
 		planPEditService.movePlanByDayAndOrder(tripId, moveDto.getPlanId(), moveDto.getDayFrom(),
 			moveDto.getDayTo(), moveDto.getOrderFrom(), moveDto.getOrderTo());

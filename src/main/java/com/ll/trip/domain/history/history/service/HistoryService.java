@@ -61,14 +61,18 @@ public class HistoryService {
 		Map<LocalDate, List<HistoryDto>> dateMap = new HashMap<>();
 
 		for (HistoryServiceDto dto : serviceDtos) {
-			HistoryDto historyDto = idMap.computeIfAbsent(dto.getId(), id -> new HistoryDto(dto));
-			historyDto.getTags().add(dto.getTag());
+			HistoryDto historyDto = idMap.computeIfAbsent(dto.getId(), id -> {
+				HistoryDto newHistoryDto = new HistoryDto(dto);
 
-			dateMap.computeIfAbsent(dto.getPhotoDate(), date -> {
-				HistoryListDto responseDto = new HistoryListDto(date);
-				response.add(responseDto);
-				return responseDto.getHistoryList();
-			}).add(historyDto);
+				dateMap.computeIfAbsent(dto.getPhotoDate(), date -> {
+					HistoryListDto ListDto = new HistoryListDto(date);
+					response.add(ListDto);
+					return ListDto.getHistoryList();
+				}).add(newHistoryDto);
+
+				return newHistoryDto;
+			});
+			historyDto.getTags().add(dto.getTag());
 		}
 		return response;
 	}

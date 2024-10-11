@@ -63,7 +63,7 @@ public class HistoryDto {
 		example = "3")
 	private int replyCnt;
 
-	private List<HistoryTagDto> tags = new ArrayList<>();
+	private List<HistoryTagDto> tags;
 
 	public HistoryDto(HistoryServiceDto serviceDto) {
 		this.id = serviceDto.getId();
@@ -76,8 +76,6 @@ public class HistoryDto {
 		this.like = serviceDto.isLike();
 		this.likeCnt = serviceDto.getLikeCnt();
 		this.replyCnt = serviceDto.getReplyCnt();
-		if (serviceDto.getTag() != null)
-			tags.add(serviceDto.getTag()
-			);
+		this.tags = new ArrayList<>();
 	}
 }

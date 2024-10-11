@@ -63,9 +63,7 @@ public class HistoryController {
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
 		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
-
 		List<HistoryListDto> response = historyService.findAllByTripId(tripId, securityUser.getId());
-
 		return ResponseEntity.ok(response);
 	}
 

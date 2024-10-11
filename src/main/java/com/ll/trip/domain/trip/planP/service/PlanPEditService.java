@@ -8,13 +8,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
+import com.ll.trip.global.handler.exception.PermissionDeniedException;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class PlanPEditService {
 
 	private final PlanPRepository planPRepository;
@@ -78,8 +81,11 @@ public class PlanPEditService {
 		return updated;
 	}
 
-	public boolean isEditor(long tripId, String uuid) {
-		return activeEditTopicsAndUuid.get(tripId).equals(uuid);
+	public void checkIsEditor(long tripId, String uuid) {
+		if(!activeEditTopicsAndUuid.get(tripId).equals(uuid)) {
+			log.info("user:" + uuid + "\nisn't editor of trip: " + tripId);
+			throw new PermissionDeniedException("user isn't editor of trip");
+		}
 	}
 
 	public void removeEditor(long tripId, String uuid) {
