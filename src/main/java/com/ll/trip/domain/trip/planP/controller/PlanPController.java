@@ -44,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/trip/p")
+@RequestMapping("/trip/{tripId}/plan/p")
 @Slf4j
 @Tag(name = "Plan P", description = "P타입 플랜 API")
 public class PlanPController {
@@ -53,7 +53,7 @@ public class PlanPController {
 	private final SimpMessagingTemplate template;
 	private final NotificationService notificationService;
 
-	@PostMapping("/{tripId}/plan/create")
+	@PostMapping("/create")
 	@Operation(summary = "P형 Plan 생성")
 	@ApiResponse(responseCode = "200", description = "P형 Plan생성, 응답데이터는 websocket으로 전송", content = {
 		@Content(mediaType = "application/json",
@@ -78,7 +78,7 @@ public class PlanPController {
 		return ResponseEntity.ok("created");
 	}
 
-	@GetMapping("/{tripId}/plan/list")
+	@GetMapping("/list")
 	@Operation(summary = "Plan 리스트 요청")
 	public ResponseEntity<List<PlanPListDto>> showPlanPList(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
@@ -88,7 +88,7 @@ public class PlanPController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PutMapping("/{tripId}/plan/modify")
+	@PutMapping("/modify")
 	@Operation(summary = "planP 수정")
 	@ApiResponse(responseCode = "200", description = "planP 수정", content = {
 		@Content(
@@ -112,7 +112,7 @@ public class PlanPController {
 		return ResponseEntity.ok("modified");
 	}
 
-	@DeleteMapping("/{tripId}/plan/delete")
+	@DeleteMapping("/delete")
 	@Operation(summary = "planP 삭제")
 	@ApiResponse(responseCode = "200", description = "planP 삭제", content = {
 		@Content(mediaType = "application/json",
@@ -134,7 +134,7 @@ public class PlanPController {
 		return ResponseEntity.ok("deleted");
 	}
 
-	@PutMapping("/{tripId}/plan/check")
+	@PutMapping("/check")
 	@Operation(summary = "planP 체크박스")
 	@ApiResponse(responseCode = "200", description = "planP 체크박스 수정", content = {
 		@Content(
@@ -157,7 +157,7 @@ public class PlanPController {
 		return ResponseEntity.ok("checked");
 	}
 
-	@MessageMapping("/{tripId}/edit/register")
+	@MessageMapping("/edit/register")
 	public void addEditor(
 		SimpMessageHeaderAccessor headerAccessor,
 		@DestinationVariable long tripId
@@ -180,7 +180,7 @@ public class PlanPController {
 		);
 	}
 
-	@GetMapping("/{tripId}/edit/register")
+	@GetMapping("/edit/register")
 	@Operation(summary = "(웹소켓 설명용) 편집자 등록")
 	@ApiResponse(responseCode = "200", description = "웹소켓으로 요청해야함, 편집자가 없을 시 편집자로 등록", content = {
 		@Content(mediaType = "application/json",
@@ -200,7 +200,7 @@ public class PlanPController {
 		return new SocketResponseBody<>("edit start", "uuid");
 	}
 
-	@GetMapping("/{tripId}/edit/finish")
+	@GetMapping("/edit/finish")
 	@Operation(summary = "편집자 해제")
 	@ApiResponse(responseCode = "200", description = "편집자 목록에서 제거", content = {
 		@Content(mediaType = "application/json",
@@ -221,7 +221,7 @@ public class PlanPController {
 		return new SocketResponseBody<>("edit finish", "uuid");
 	}
 
-	@PutMapping("/{tripId}/edit/move")
+	@PutMapping("/edit/move")
 	@Operation(summary = "Plan P 이동")
 	@ApiResponse(responseCode = "200", description = "Plan P 이동", content = {
 		@Content(mediaType = "application/json",
@@ -245,7 +245,7 @@ public class PlanPController {
 		return ResponseEntity.ok("moved");
 	}
 
-	@PutMapping("/{tripId}/locker/move")
+	@PutMapping("/locker/move")
 	@Operation(summary = "Plan P 보관함으로 이동 또는 일정으로 이동")
 	@ApiResponse(responseCode = "200", description = "http응답은 \"moved\""
 		, content = {
@@ -273,6 +273,7 @@ public class PlanPController {
 		return ResponseEntity.ok("moved");
 	}
 
+	@RequestMapping("/trip/plan/p")
 	@GetMapping("/show/editors")
 	@Operation(summary = "플랜p editor권한 목록")
 	@ApiResponse(responseCode = "200", description = "플랜p editor권한 목록")

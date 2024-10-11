@@ -72,6 +72,7 @@ public class HistoryDto {
 		this.imageUrl = serviceDto.getImageUrl();
 		this.thumbnail = serviceDto.getThumbnail();
 		this.latitude = serviceDto.getLatitude();
+		this.memo = serviceDto.getMemo();
 		this.longitude = serviceDto.getLongitude();
 		this.like = serviceDto.isLike();
 		this.likeCnt = serviceDto.getLikeCnt();

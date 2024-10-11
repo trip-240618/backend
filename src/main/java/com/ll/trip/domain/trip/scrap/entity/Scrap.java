@@ -68,5 +68,10 @@ public class Scrap extends BaseEntity {
 	@OneToMany(mappedBy = "scrap", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	@Setter
+	List<ScrapBookmark> scrapBookmarkList = new ArrayList<>();
+
+	@OneToMany(mappedBy = "scrap", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	@Setter
 	List<ScrapImage> scrapImageList = new ArrayList<>();
 }
