@@ -8,15 +8,18 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.repository.PlanJRepository;
+import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
+import com.ll.trip.global.handler.exception.PermissionDeniedException;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class PlanJEditService {
 	private final PlanJRepository planJRepository;
@@ -54,10 +57,12 @@ public class PlanJEditService {
 		activeEditTopicsAndUuidAndDay.get(tripId).put(uuid, day);
 	}
 
-	public boolean isEditor(long tripId, String uuid, int day) {
-		if (!activeEditTopicsAndUuidAndDay.containsKey(tripId))
-			return false;
-		return activeEditTopicsAndUuidAndDay.get(tripId).get(uuid) == day;
+	public void checkIsEditor(long tripId, String uuid, int day) {
+		if (!activeEditTopicsAndUuidAndDay.containsKey(tripId)
+			  || !(activeEditTopicsAndUuidAndDay.get(tripId).get(uuid) == day)) {
+			log.info("user is not editor of trip :" + tripId + "day : " + day + "\nuuid : " + uuid);
+			throw new PermissionDeniedException("user is not editor of day");
+		}
 	}
 
 	@Transactional

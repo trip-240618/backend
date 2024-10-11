@@ -27,10 +27,12 @@ import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class TripService {
 
 	private final TripRepository tripRepository;
@@ -75,8 +77,10 @@ public class TripService {
 	}
 
 	public void checkTripMemberByTripIdAndUserId(long tripId, long userId) {
-		if (!tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId))
-			throw new PermissionDeniedException("user: " + userId + "isn't member of trip: " + tripId);
+		if (!tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId)){
+			log.info("user: " + userId +  " isn't member of trip: " + tripId);
+			throw new PermissionDeniedException("user isn't member of trip");
+		}
 
 	}
 

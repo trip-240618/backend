@@ -120,11 +120,13 @@ public class PlanJController {
 
 		if ((plan.getStartTime() != requestBody.getStartTime()) || !dayFrom.equals(dayTo)) {
 			if (!requestBody.isLocker()) {
-				if (!planJEditService.isEditor(tripId, securityUser.getUuid(), dayFrom))
-					return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("day" + dayFrom + "의 편집자가 아닙니다."));
-				if (!requestBody.isLocker() && !dayTo.equals(dayFrom) && !planJEditService.isEditor(tripId,
-					securityUser.getUuid(), dayTo))
-					return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("day" + dayTo + "의 편집자가 아닙니다."));
+				planJEditService.checkIsEditor(tripId, securityUser.getUuid(), dayFrom);
+				if (!requestBody.isLocker() && !dayTo.equals(dayFrom)) {
+					planJEditService.checkIsEditor(tripId,
+						securityUser.getUuid(), dayTo);
+					return ResponseEntity.status(HttpStatus.NOT_FOUND)
+						.body(new ErrorResponseDto("day" + dayTo + "의 편집자가 아닙니다."));
+				}
 			}
 			order = planJEditService.getLastOrderByTripId(tripId);
 			notificationService.createPlanMoveNotification(tripId);
@@ -157,8 +159,7 @@ public class PlanJController {
 	) {
 		int day = requestBody.getDayAfterStart();
 
-		if (!planJEditService.isEditor(tripId, securityUser.getUuid(), day))
-			return ResponseEntity.badRequest().body("day" + day + "의 편집자가 아닙니다.");
+		planJEditService.checkIsEditor(tripId, securityUser.getUuid(), day);
 
 		if (planJEditService.swapPlanJByIds(requestBody.getPlanId1(), requestBody.getPlanId2()) != 2)
 			return ResponseEntity.internalServerError().body("swap 실패");

@@ -78,9 +78,7 @@ public class HistoryController {
 
 	@PostMapping("/{tripId}/history/create/many")
 	@Operation(summary = "History 일괄 생성")
-	@ApiResponse(responseCode = "200", description = "History 생성", content = {
-		@Content(mediaType = "application/json",
-			array = @ArraySchema(schema = @Schema(implementation = HistoryListDto.class)))})
+	@ApiResponse(responseCode = "200", description = "History 생성")
 	public ResponseEntity<?> createManyHistories(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser,
@@ -302,9 +300,7 @@ public class HistoryController {
 
 	@GetMapping("/{tripId}/history/search")
 	@Operation(summary = "History 검색")
-	@ApiResponse(responseCode = "200", description = "주어진 파라미터로 검색 (uuid가 있으면 uuid만 검색)", content = {
-		@Content(mediaType = "application/json",
-			array = @ArraySchema(schema = @Schema(implementation = HistoryListDto.class)))})
+	@ApiResponse(responseCode = "200", description = "주어진 파라미터로 검색 (uuid가 있으면 uuid만 검색)")
 	public ResponseEntity<?> searchHistory(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam(required = false) @Parameter(description = "작성자 uuid", example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4") String uuid,
