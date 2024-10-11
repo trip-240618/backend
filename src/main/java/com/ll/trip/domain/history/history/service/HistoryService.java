@@ -94,6 +94,7 @@ public class HistoryService {
 		return historyTagRepository.saveAll(tags);
 	}
 
+	@Transactional
 	public HistoryTag createHistoryTag(HistoryTagDto dto, long tripId, long historyId) {
 		HistoryTag tag = HistoryTag.builder()
 			.tagName(dto.getTagName())
