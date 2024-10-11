@@ -102,7 +102,7 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 		select new com.ll.trip.domain.history.history.dto.HistoryImageDeleteDto(
 		h.thumbnail, h.imageUrl
 		) from History h
-		where h.id = :history
+		where h.id = :historyId
 		""")
 	HistoryImageDeleteDto findHistoryImages(long historyId);
 }

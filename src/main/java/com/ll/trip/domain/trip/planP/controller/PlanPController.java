@@ -273,11 +273,12 @@ public class PlanPController {
 		return ResponseEntity.ok("moved");
 	}
 
-	@RequestMapping("/trip/plan/p")
 	@GetMapping("/show/editors")
 	@Operation(summary = "플랜p editor권한 목록")
 	@ApiResponse(responseCode = "200", description = "플랜p editor권한 목록")
-	public ResponseEntity<?> showEditors() {
+	public ResponseEntity<?> showEditors(
+		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId
+	) {
 		return ResponseEntity.ok(planPEditService.getActiveEditTopicsAndUuid());
 	}
 
