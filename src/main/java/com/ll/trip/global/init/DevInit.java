@@ -86,7 +86,7 @@ public class DevInit {
 						LocalDate.of(2024, 9, 14), // photoDate
 						"오사카에서 찍은 사진", // memo
 						Arrays.asList(new HistoryTagDto("##FFEFF3","tag1"), new HistoryTagDto("##FFEFF3","tag2")) // tags 리스트
-					),user, trip);
+					),trip, user);
 
 				historyService.createHistory(
 					new HistoryCreateRequestDto(
@@ -99,7 +99,7 @@ public class DevInit {
 						LocalDate.of(2024, 9, 15), // photoDate
 						"오사카에서 찍은 사진", // memo
 						Arrays.asList(new HistoryTagDto("##FFEFF3","tag1"), new HistoryTagDto("##FFEFF3","tag2")) // tags 리스트
-					),user, trip);
+					),trip, user);
 			}
 
 		};
