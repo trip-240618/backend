@@ -93,14 +93,12 @@ public class ScrapController {
 
 		Scrap scrap = scrapService.modifyScrap(
 			modifyDto.getId(), modifyDto.getTitle(), modifyDto.getContent(),
-			modifyDto.getColor(), modifyDto.isHasImage()
+			modifyDto.getColor(), modifyDto.isHasImage(), modifyDto.getPhotoList()
 		);
 
-		return ResponseEntity.ok(new ScrapDetailDto(
-			scrap.getId(), securityUser.getUuid(), securityUser.getNickname(), scrap.getTitle(),
-			scrap.getContent(), scrap.isHasImage(), scrap.getColor(),
-			modifyDto.isBookmark(), scrap.getCreateDate()
-		));
+		ScrapDetailDto response = scrapService.findByIdWithScrapImage(scrap.getId(), securityUser.getId());
+
+		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/{tripId}/scrap/delete")

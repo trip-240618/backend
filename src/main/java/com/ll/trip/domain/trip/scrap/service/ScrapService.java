@@ -143,20 +143,29 @@ public class ScrapService {
 	}
 
 	public void checkIsWriterOfScrap(long scrapId, long userId) {
-		if(!scrapRepository.existsByIdAndUser_Id(scrapId, userId)) {
-			log.info("user: " + userId + " is not writer of scrap: " +scrapId);
+		if (!scrapRepository.existsByIdAndUser_Id(scrapId, userId)) {
+			log.info("user: " + userId + " is not writer of scrap: " + scrapId);
 			throw new PermissionDeniedException("user is not writer of scrap");
 		}
 	}
 
 	@Transactional
-	public Scrap modifyScrap(long scrapId, String title, String content, String color, boolean hasImage) {
+	public Scrap modifyScrap(long scrapId, String title, String content, String color, boolean hasImage,
+		List<ScrapImageDto> photoList) {
 		Scrap scrap = entityManager.getReference(Scrap.class, scrapId);
 		scrap.setTitle(title);
 		scrap.setContent(content);
 		scrap.setPreview(createPreviewContent(content));
 		scrap.setHasImage(hasImage);
 		scrap.setColor(color);
+
+		List<ScrapImage> imageList = new ArrayList<>();
+		for (int i = 0; i < photoList.size(); i++) {
+			ScrapImage scrapImage = entityManager.getReference(ScrapImage.class, photoList.get(i).getId());
+			imageList.add(scrapImage);
+		}
+
+		scrap.setScrapImageList(imageList);
 
 		return scrapRepository.save(scrap);
 	}
@@ -167,8 +176,9 @@ public class ScrapService {
 	}
 
 	public ScrapDetailDto findByIdWithScrapImage(long scrapId, long userId) {
-		List<ScrapDetailServiceDto> dtos =  scrapRepository.findDetailDtoByScrapIdAndUserId(scrapId, userId);
-		if(dtos == null) throw new NoSuchDataException("scrap을 찾을 수 없음 scrapId :" + scrapId);
+		List<ScrapDetailServiceDto> dtos = scrapRepository.findDetailDtoByScrapIdAndUserId(scrapId, userId);
+		if (dtos == null)
+			throw new NoSuchDataException("scrap을 찾을 수 없음 scrapId :" + scrapId);
 		return parseToDetailDto(dtos);
 	}
 
@@ -176,7 +186,8 @@ public class ScrapService {
 		ScrapDetailDto response = new ScrapDetailDto(dtos.get(0));
 		List<ScrapImageDto> imageDtoList = response.getImageDtos();
 		for (ScrapDetailServiceDto dto : dtos) {
-			if(dto.getImageId() == null) break;
+			if (dto.getImageId() == null)
+				break;
 			ScrapImageDto imageDto = new ScrapImageDto(dto.getImageId(), dto.getImageKey());
 			imageDtoList.add(imageDto);
 		}

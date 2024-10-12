@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ScrapImageDto {
 	private long id;
-	private String imgKey;
+	private String imageUrl;
 }
