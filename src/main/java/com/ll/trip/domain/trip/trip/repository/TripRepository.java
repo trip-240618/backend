@@ -29,21 +29,23 @@ public interface TripRepository extends JpaRepository<Trip, Long>{
 
 	@Query("""
 		    SELECT new com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto(t.id, t.name, t.type, t.startDate, t.endDate, t.country,
-		    t.thumbnail, t.invitationCode, t.labelColor, COALESCE(b.toggle, false), u.uuid, u.nickname, u.thumbnail, tm.isLeader)
+		    t.thumbnail, t.invitationCode, t.labelColor, COALESCE(b.toggle, false), u.uuid, u.nickname, u.thumbnail, tm2.isLeader)
 		    FROM TripMember tm
 		    inner join tm.trip t on tm.user.id = :userId and t.endDate >= :date
 		    left join t.bookmarks b on b.user.id = :userId
-		    left join tm.user u
+		    left join t.tripMembers tm2
+		    left join tm2.user u
 		""")
 	List<TripInfoServiceDto> findTripIncomingByUserIdAndDate(Long userId, LocalDate date);
 
 	@Query("""
 		    SELECT new com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto(t.id, t.name, t.type, t.startDate, t.endDate, t.country,
-		    t.thumbnail, t.invitationCode, t.labelColor, COALESCE(b.toggle, false), u.uuid, u.nickname, u.thumbnail, tm.isLeader)
+		    t.thumbnail, t.invitationCode, t.labelColor, COALESCE(b.toggle, false), u.uuid, u.nickname, u.thumbnail, tm2.isLeader)
 		    FROM TripMember tm
 		    inner join tm.trip t on tm.user.id = :userId and t.endDate < :date
 		    left join t.bookmarks b on b.user.id = :userId
-		    left join tm.user u
+		    left join t.tripMembers tm2
+		    left join tm2.user u
 		""")
 	List<TripInfoServiceDto> findTripLastByUserIdAndDate(Long userId, LocalDate date);
 

@@ -16,8 +16,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.ll.trip.domain.file.file.dto.DeleteImageDto;
 import com.ll.trip.domain.file.file.dto.PreSignedUrlResponseDto;
-import com.ll.trip.domain.history.history.dto.HistoryImageDeleteDto;
 import com.ll.trip.domain.history.history.repository.HistoryRepository;
 import com.ll.trip.domain.trip.scrap.repository.ScrapImageRepository;
 import com.ll.trip.domain.trip.trip.dto.TripImageDeleteDto;
@@ -111,8 +111,9 @@ public class AwsAuthService {
 	}
 
 	public void deleteImagesByUserId(long userId) {
-		List<String> urls = new ArrayList<>();
 		//TODO
+		List<String> urls = new ArrayList<>();
+		historyRepository.findHistoryImagesByUserId(userId);
 	}
 
 	private List<String> getKeyFromScrapImagesByScrapId(long scrapId) {
@@ -158,7 +159,7 @@ public class AwsAuthService {
 	}
 
 	public void deleteImageByHistoryId(long historyId) {
-		HistoryImageDeleteDto dto = historyRepository.findHistoryImages(historyId);
+		DeleteImageDto dto = historyRepository.findHistoryImages(historyId);
 		List<String> urls = List.of(dto.getImageUrl(), dto.getThumbnail());
 		deleteObjectByKey(extractKeyFromUrl(urls));
 	}
