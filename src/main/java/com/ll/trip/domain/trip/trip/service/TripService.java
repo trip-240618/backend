@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +23,7 @@ import com.ll.trip.domain.trip.trip.repository.TripMemberRepository;
 import com.ll.trip.domain.trip.trip.repository.TripRepository;
 import com.ll.trip.domain.user.user.dto.VisitedCountryDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.global.handler.exception.NoSuchDataException;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
 
 import lombok.RequiredArgsConstructor;
@@ -163,7 +163,7 @@ public class TripService {
 
 	public long findTripIdByInvitationCode(String invitationCode) {
 		return tripRepository.findTrip_idByInvitationCode(invitationCode)
-			.orElseThrow(() -> new NoSuchElementException("Trip not found with invitation code: " + invitationCode));
+			.orElseThrow(() -> new NoSuchDataException("Trip not found with invitation code: " + invitationCode));
 	}
 
 	public void deleteTripMember(long tripId, long userId) {

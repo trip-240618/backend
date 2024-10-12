@@ -11,7 +11,7 @@ import com.ll.trip.domain.notification.notice.entity.Notice;
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
 	@Query("""
 		select new com.ll.trip.domain.notification.notice.dto.NoticeListDto(
-		n.type, n.title, n.createDate
+		n.id, n.type, n.title, n.createDate
 		)
 		from Notice n
 		where n.type = :type
@@ -21,7 +21,7 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
 	@Query("""
 		select new com.ll.trip.domain.notification.notice.dto.NoticeListDto(
-		n.type, n.title, n.createDate
+		n.id, n.type, n.title, n.createDate
 		)
 		from Notice n
 		order by n.createDate desc

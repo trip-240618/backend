@@ -10,15 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ll.trip.domain.flight.dto.ScheduleResponseDto;
 import com.ll.trip.domain.notification.notification.dto.NotificationListDto;
 import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,9 +30,7 @@ public class NotificationController {
 
 	@GetMapping("/list")
 	@Operation(summary = "알림 목록")
-	@ApiResponse(responseCode = "200", description = "알림 목록 (파라미터가 없으면 전체 알림 반환)", content = {
-		@Content(mediaType = "application/json", schema = @Schema(implementation = ScheduleResponseDto.class))})
-	public ResponseEntity<?> showNotification(
+	public ResponseEntity<List<NotificationListDto>> showNotification(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam(required = false) @Parameter(description = "알림 종류 (여행 일정, 여행 기록, 트립스토리)", example = "여행 일정") String title
 	) {

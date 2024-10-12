@@ -89,8 +89,7 @@ public class ScrapController {
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody ScrapModifyDto modifyDto
 	) {
-		if (!scrapService.existByScrapIdAndUserId(modifyDto.getId(), securityUser.getId()))
-			return ResponseEntity.badRequest().body("해당 스크랩에 대한 수정/삭제 권한이 없습니다.");
+		scrapService.checkIsWriterOfScrap(modifyDto.getId(), securityUser.getId());
 
 		Scrap scrap = scrapService.modifyScrap(
 			modifyDto.getId(), modifyDto.getTitle(), modifyDto.getContent(),
@@ -116,8 +115,7 @@ public class ScrapController {
 		@RequestParam @Parameter(description = "스크랩 pk", example = "1")
 		long scrapId
 	) {
-		if (!scrapService.existByScrapIdAndUserId(scrapId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("해당 스크랩에 대한 수정/삭제 권한이 없습니다.");
+		scrapService.checkIsWriterOfScrap(scrapId, securityUser.getId());
 		awsAuthService.deleteImagesByScrapId(scrapId);
 		scrapService.deleteById(scrapId);
 

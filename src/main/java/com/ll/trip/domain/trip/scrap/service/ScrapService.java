@@ -2,7 +2,6 @@ package com.ll.trip.domain.trip.scrap.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +18,8 @@ import com.ll.trip.domain.trip.scrap.repository.ScrapImageRepository;
 import com.ll.trip.domain.trip.scrap.repository.ScrapRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.global.handler.exception.NoSuchDataException;
+import com.ll.trip.global.handler.exception.PermissionDeniedException;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -141,8 +142,11 @@ public class ScrapService {
 		return scrapRepository.findBookmarkListByTripId(tripId, userId);
 	}
 
-	public boolean existByScrapIdAndUserId(long scrapId, long userId) {
-		return scrapRepository.existsByIdAndUser_Id(scrapId, userId);
+	public void checkIsWriterOfScrap(long scrapId, long userId) {
+		if(!scrapRepository.existsByIdAndUser_Id(scrapId, userId)) {
+			log.info("user: " + userId + " is not writer of scrap: " +scrapId);
+			throw new PermissionDeniedException("user is not writer of scrap");
+		}
 	}
 
 	@Transactional
@@ -164,7 +168,7 @@ public class ScrapService {
 
 	public ScrapDetailDto findByIdWithScrapImage(long scrapId, long userId) {
 		List<ScrapDetailServiceDto> dtos =  scrapRepository.findDetailDtoByScrapIdAndUserId(scrapId, userId);
-		if(dtos == null) throw new NoSuchElementException("scrap을 찾을 수 없음");
+		if(dtos == null) throw new NoSuchDataException("scrap을 찾을 수 없음 scrapId :" + scrapId);
 		return parseToDetailDto(dtos);
 	}
 

@@ -8,13 +8,14 @@ import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.notification.notification.dto.NotificationListDto;
 import com.ll.trip.domain.notification.notification.dto.NotificationComponentDto;
+import com.ll.trip.domain.notification.notification.dto.NotificationListDto;
 import com.ll.trip.domain.notification.notification.entity.Notification;
 import com.ll.trip.domain.notification.notification.entity.NotificationConfig;
 import com.ll.trip.domain.notification.notification.repository.NotificationConfigRepository;
 import com.ll.trip.domain.notification.notification.repository.NotificationRepository;
 import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.global.handler.exception.NoSuchDataException;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -124,13 +125,13 @@ public class NotificationService {
 	@Transactional
 	public void updateIsReadByIdAndUserId(long notificationId, long userId) {
 		if (notificationRepository.updateIsReadByIdAndUserID(notificationId, userId) == 0)
-			throw new NoSuchElementException("일치하는 알림이 없습니다.");
+			throw new NoSuchElementException("알림수정이 이루어지지 않았습니다. notificationId: " + notificationId + ", userId: " + userId);
 	}
 
 	@Transactional
 	public void updateAllIsReadByUserId(long userId) {
 		if (notificationRepository.updateAllIsReadByIdAndUserID(userId) == 0)
-			throw new NoSuchElementException("일치하는 알림이 없습니다.");
+			throw new NoSuchDataException("알림수정이 이루어지지 않았습니다. userId: " + userId);
 	}
 
 	@Transactional

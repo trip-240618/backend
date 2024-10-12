@@ -31,6 +31,7 @@ import com.ll.trip.domain.history.history.repository.HistoryTagRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.repository.TripRepository;
 import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.global.handler.exception.NoSuchDataException;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
 
 import jakarta.persistence.EntityManager;
@@ -260,7 +261,7 @@ public class HistoryService {
 	}
 
 	public History findById(long historyId) {
-		return historyRepository.findById(historyId).orElseThrow(NoSuchElementException::new);
+		return historyRepository.findById(historyId).orElseThrow(() -> new NoSuchDataException("can't find such data, historyId: " + historyId));
 	}
 
 	public List<HistoryListDto> showHistoryDetail(long historyId, long userId) {

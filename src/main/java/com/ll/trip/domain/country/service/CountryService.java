@@ -1,13 +1,13 @@
 package com.ll.trip.domain.country.service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.country.entity.Country;
 import com.ll.trip.domain.country.repository.CountryRepository;
+import com.ll.trip.global.handler.exception.NoSuchDataException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +42,7 @@ public class CountryService {
 
 	public Country findCountryByName(String countryName) {
 		return countryRepository.findByCountryName(countryName)
-			.orElseThrow(() -> new NoSuchElementException("Country not found with countryName: " + countryName));
+			.orElseThrow(() -> new NoSuchDataException("Country not found with countryName: " + countryName));
 	}
 
 	public List<String> findAllCountryNameLike(String keyword) {

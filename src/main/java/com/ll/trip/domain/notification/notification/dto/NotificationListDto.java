@@ -10,6 +10,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class NotificationListDto {
+	@Schema(description = "알림 id", example = "1")
 	private long id;
 
 	@Schema(description = "알림이 발생한 Trip의 id (이동하는 url에 필요함)", example = "1")

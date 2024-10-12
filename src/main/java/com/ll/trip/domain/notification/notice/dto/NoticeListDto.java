@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NoticeListDto {
+	@Schema(description = "공지 id", example = "1")
+	private long id;
+
 	@Schema(description = "공지 유형", example = "업데이트")
 	private String type;
 
