@@ -1,6 +1,7 @@
 package com.ll.trip.domain.history.history.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +64,11 @@ public class HistoryDto {
 		example = "3")
 	private int replyCnt;
 
+	@Schema(
+		description = "사진 날짜",
+		example = "2024-08-22")
+	private LocalDate photoDate;
+
 	private List<HistoryTagDto> tags;
 
 	public HistoryDto(HistoryServiceDto serviceDto) {
@@ -77,6 +83,7 @@ public class HistoryDto {
 		this.like = serviceDto.isLike();
 		this.likeCnt = serviceDto.getLikeCnt();
 		this.replyCnt = serviceDto.getReplyCnt();
+		this.photoDate = serviceDto.getPhotoDate();
 		this.tags = new ArrayList<>();
 	}
 }

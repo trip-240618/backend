@@ -213,14 +213,14 @@ public class HistoryService {
 		return historyTagRepository.findAllTagsByTripId(tripId);
 	}
 
-	public List<HistoryListDto> searchHistoryByUuid(long tripId, long userId, String uuid) {
+	public List<HistoryDto> searchHistoryByUuid(long tripId, long userId, String uuid) {
 		Pageable pageable = PageRequest.of(0, 50);
 		List<HistoryServiceDto> serviceDtos = historyRepository.findHistoryByTripIdAndUuid(tripId, userId, uuid,
 			pageable);
-		return parseToResponse(serviceDtos);
+		return serviceDtos.stream().map(HistoryDto::new).toList();
 	}
 
-	public List<HistoryListDto> searchHistoryByTagNameAndColor(long tripId, long userId, String tagName,
+	public List<HistoryDto> searchHistoryByTagNameAndColor(long tripId, long userId, String tagName,
 		String tagColor) {
 		Pageable pageable = PageRequest.of(0, 50);
 		List<HistoryServiceDto> serviceDtos;
@@ -229,7 +229,7 @@ public class HistoryService {
 				pageable);
 		else
 			serviceDtos = historyRepository.findHistoryByTripIdAndTagName(tripId, userId, tagName, pageable);
-		return parseToResponse(serviceDtos);
+		return serviceDtos.stream().map(HistoryDto::new).toList();
 	}
 
 	@Transactional

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.history.history.dto.HistoriesCreateRequestDto;
+import com.ll.trip.domain.history.history.dto.HistoryDto;
 import com.ll.trip.domain.history.history.dto.HistoryListDto;
 import com.ll.trip.domain.history.history.dto.HistoryModifyDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyCreateRequestDto;
@@ -280,14 +281,14 @@ public class HistoryController {
 	@GetMapping("/{tripId}/history/search")
 	@Operation(summary = "History 검색")
 	@ApiResponse(responseCode = "200", description = "주어진 파라미터로 검색 (uuid가 있으면 uuid만 검색)")
-	public ResponseEntity<List<HistoryListDto>> searchHistory(
+	public ResponseEntity<List<HistoryDto>> searchHistory(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam(required = false) @Parameter(description = "작성자 uuid", example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4") String uuid,
 		@RequestParam(required = false) @Parameter(description = "태그명", example = "긴자") String tagName,
 		@RequestParam(required = false) @Parameter(description = "태그 컬러", example = "FFEFF3") String tagColor
 	) {
-		List<HistoryListDto> response = null;
+		List<HistoryDto> response = null;
 		if (uuid != null) {
 			response = historyService.searchHistoryByUuid(tripId, securityUser.getId(), uuid);
 		} else if (tagName != null) {
