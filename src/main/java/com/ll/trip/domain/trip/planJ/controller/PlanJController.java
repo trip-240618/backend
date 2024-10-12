@@ -236,7 +236,7 @@ public class PlanJController {
 		return new SocketResponseBody<>("edit start", "uuid");
 	}
 
-	@GetMapping("/{tripId}/{day}/edit/finish")
+	@GetMapping("/{day}/edit/finish")
 	@Operation(summary = "편집자 해제")
 	@ApiResponse(responseCode = "200", description = "편집자 목록에서 제거", content = {
 		@Content(mediaType = "application/json",
