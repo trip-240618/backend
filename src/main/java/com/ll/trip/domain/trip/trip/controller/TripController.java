@@ -158,7 +158,6 @@ public class TripController {
 		if (!tripService.isLeaderOfTrip(securityUser.getId(), tripId))
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("해당 여행방에 대한 수정/삭제 권한이 없습니다."));
 
-		awsAuthService.deleteImagesByTripId(tripId);
 		tripService.deleteTripById(tripId);
 		return ResponseEntity.ok("deleted");
 	}
@@ -174,11 +173,6 @@ public class TripController {
 		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
 		tripService.deleteTripMember(tripId, securityUser.getId());
-
-		if (tripService.countTripMember(tripId) == 0) {
-			awsAuthService.deleteImagesByTripId(tripId);
-			tripService.deleteTripById(tripId);
-		}
 
 		template.convertAndSend("/topic/api/trip/" + Character.toLowerCase(tripType) + "/" + tripId,
 			new SocketResponseBody<>("member out",

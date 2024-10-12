@@ -11,5 +11,6 @@ public class DeleteImageDto {
 
 	public DeleteImageDto(String imageUrl) {
 		this.imageUrl = imageUrl;
+		this.thumbnail = null;
 	}
 }

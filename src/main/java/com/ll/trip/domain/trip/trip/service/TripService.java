@@ -9,9 +9,11 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto;
+import com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto;
 import com.ll.trip.domain.trip.trip.dto.TripModifyDto;
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
 import com.ll.trip.domain.trip.trip.entity.BookmarkId;
@@ -41,6 +43,7 @@ public class TripService {
 
 	//bookmark
 	private final BookmarkRepository bookmarkRepository;
+	private final AwsAuthService awsAuthService;
 
 	@Transactional
 	public Trip createTrip(TripCreateDto tripCreateDto, String invitationCode) {
@@ -77,8 +80,8 @@ public class TripService {
 	}
 
 	public void checkTripMemberByTripIdAndUserId(long tripId, long userId) {
-		if (!tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId)){
-			log.info("user: " + userId +  " isn't member of trip: " + tripId);
+		if (!tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId)) {
+			log.info("user: " + userId + " isn't member of trip: " + tripId);
 			throw new PermissionDeniedException("user isn't member of trip");
 		}
 
@@ -118,8 +121,9 @@ public class TripService {
 	}
 
 	@Transactional
-	public void deleteTripById(Long id) {
-		tripRepository.deleteById(id);
+	public void deleteTripById(long tripId) {
+		awsAuthService.deleteImagesByTripId(tripId);
+		tripRepository.deleteById(tripId);
 	}
 
 	@Transactional
@@ -167,16 +171,37 @@ public class TripService {
 	}
 
 	public void deleteTripMember(long tripId, long userId) {
-		tripMemberRepository.deleteById(
-			TripMemberId.builder()
-				.tripId(tripId)
-				.userId(userId)
-				.build()
-		);
+		TripMemberDeleteDto dto = tripMemberRepository.findDeleteDtoBy(tripId);
+		extractAndDeleteTripMember(List.of(dto), userId);
 	}
 
-	public int countTripMember(long tripId) {
-		return tripMemberRepository.countTripMemberByTrip_Id(tripId);
+	public void deleteAllTripMember(long userId) {
+		List<TripMemberDeleteDto> dtos = tripMemberRepository.findAllDeleteDtoBy(userId);
+		extractAndDeleteTripMember(dtos, userId);
+	}
+
+	@Transactional
+	public void extractAndDeleteTripMember(List<TripMemberDeleteDto> dtos, long userId) {
+		List<TripMemberId> ids = new ArrayList<>();
+		for (TripMemberDeleteDto dto : dtos) {
+			ids.add(TripMemberId.builder()
+				.tripId(dto.getTripId())
+				.userId(userId)
+				.build());
+
+			if (dto.getMemberCnt() == 1) {
+				deleteTripById(dto.getTripId());
+			} else if (dto.isLeader()) {
+				handLeaderToMember(dto.getTripId());
+			}
+		}
+
+		tripMemberRepository.deleteAllById(ids);
+	}
+
+	@Transactional
+	public void handLeaderToMember(long tripId) {
+		tripMemberRepository.handLeaderToMember(tripId);
 	}
 
 	public List<VisitedCountryDto> findVisitedCountry(long userId) {

@@ -1,5 +1,6 @@
 package com.ll.trip.domain.trip.planJ.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -13,5 +14,6 @@ public class PlanJListDto {
 
 	public PlanJListDto(int day){
 		this.dayAfterStart = day;
+		this.planList = new ArrayList<>();
 	}
 }

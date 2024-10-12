@@ -11,9 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.notification.notification.repository.NotificationConfigRepository;
-import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
+import com.ll.trip.domain.user.user.entity.DeletedUser;
 import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.domain.user.user.repository.DeletedUserRepository;
 import com.ll.trip.domain.user.user.repository.UserRepository;
+import com.ll.trip.global.handler.exception.PermissionDeniedException;
+import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +29,7 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final JwtTokenUtil jwtTokenUtil;
 	private final NotificationConfigRepository notificationConfigRepository;
+	private final DeletedUserRepository deletedUserRepository;
 
 	public Optional<UserEntity> findUserByUuid(String uuid) {
 		return userRepository.findByUuid(uuid);
@@ -93,16 +97,32 @@ public class UserService {
 		return user;
 	}
 
-	public boolean validateUser(SecurityUser securityUser) {
+	public UserEntity validateUser(SecurityUser securityUser) {
 		UserEntity user = userRepository.findById(securityUser.getId()).orElseThrow(NullPointerException::new);
-		return securityUser.getUuid().equals(user.getUuid())
-			   && securityUser.getNickname().equals(user.getNickname())
-			   && new HashSet<>(securityUser.getAuthorities()).equals(new HashSet<>(user.getAuthorities()));
+		if (securityUser.getUuid().equals(user.getUuid())
+			&& securityUser.getNickname().equals(user.getNickname())
+			&& new HashSet<>(securityUser.getAuthorities()).equals(new HashSet<>(user.getAuthorities())))
+			return user;
+		else
+			throw new PermissionDeniedException("not a valid user");
 	}
 
 	@Transactional
-	public void deleteUserById(long userId) {
-
-		userRepository.deleteById(userId);
+	public void deleteUserById(UserEntity user) {
+		DeletedUser du = DeletedUser.builder()
+			.id(user.getId())
+			.name(user.getName())
+			.nickname(user.getNickname())
+			.memo(user.getMemo())
+			.email(user.getEmail())
+			.providerId(user.getProviderId())
+			.roles(user.getRoles())
+			.profileImg(user.getProfileImg())
+			.thumbnail(user.getThumbnail())
+			.uuid(user.getUuid())
+			.fcmToken(user.getFcmToken())
+			.build();
+		deletedUserRepository.save(du);
+		userRepository.deleteById(user.getId());
 	}
 }

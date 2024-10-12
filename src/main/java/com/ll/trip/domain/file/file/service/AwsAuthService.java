@@ -111,9 +111,18 @@ public class AwsAuthService {
 	}
 
 	public void deleteImagesByUserId(long userId) {
-		//TODO
 		List<String> urls = new ArrayList<>();
-		historyRepository.findHistoryImagesByUserId(userId);
+		addToListFromDeleteImageDto(urls, historyRepository.findHistoryImagesByUserId(userId));
+		urls.addAll(scrapImageRepository.findScrapImagesByUserId(userId));
+		deleteObjectByKey(extractKeyFromUrl(urls));
+	}
+
+	private void addToListFromDeleteImageDto(List<String> urls, List<DeleteImageDto> dtos) {
+		for (DeleteImageDto dto : dtos) {
+			urls.add(dto.getImageUrl());
+			if (!(dto.getThumbnail() == null))
+				urls.add(dto.getThumbnail());
+		}
 	}
 
 	private List<String> getKeyFromScrapImagesByScrapId(long scrapId) {

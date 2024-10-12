@@ -19,4 +19,11 @@ public interface ScrapImageRepository extends JpaRepository<ScrapImage, Long> {
 		from ScrapImage i where i.trip.id = :tripId
 		""")
 	List<String> findAllImageKeyByTripId(long tripId);
+
+	@Query("""
+		select i.imgKey
+		from Scrap s
+		inner join s.scrapImageList i on s.user.id = :userId
+		""")
+	List<String> findScrapImagesByUserId(long userId);
 }

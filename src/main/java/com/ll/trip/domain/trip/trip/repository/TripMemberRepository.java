@@ -1,9 +1,12 @@
 package com.ll.trip.domain.trip.trip.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto;
 import com.ll.trip.domain.trip.trip.entity.TripMember;
 import com.ll.trip.domain.trip.trip.entity.TripMemberId;
 
@@ -24,12 +27,30 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 		""")
 	boolean isLeaderOfTrip(long userId, long tripId);
 
-	int countTripMemberByTrip_Id(long tripId);
-
 	@Modifying
 	@Query("""
 		from TripMember tm
 		left join tm.user u on tm.trip.id = :tripId and u.uuid = :uuid
 		""")
 	void deleteByTripIdAndUuid(long tripId, String uuid);
+
+	@Modifying
+	@Query(value = "UPDATE trip_member tm SET tm.is_leader = 1 WHERE tm.trip_id = :tripId LIMIT 1", nativeQuery = true)
+	void handLeaderToMember(long tripId);
+
+	@Query("""
+  		select new com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto(
+  		tm.trip.id, tm.isLeader, SIZE(tm.trip.tripMembers))
+		from TripMember tm
+		where tm.trip.id = :tripId
+		""")
+	TripMemberDeleteDto findDeleteDtoBy(long tripId);
+
+	@Query("""
+  		select new com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto(
+  		tm.trip.id, tm.isLeader, SIZE(tm.trip.tripMembers))
+		from TripMember tm
+		where tm.user.id = :userId
+		""")
+	List<TripMemberDeleteDto> findAllDeleteDtoBy(long userId);
 }

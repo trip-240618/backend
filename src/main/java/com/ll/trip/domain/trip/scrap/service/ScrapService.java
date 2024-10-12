@@ -39,7 +39,7 @@ public class ScrapService {
 	public Scrap createScrap(long userId, long tripId, String title, String content, String color, boolean hasImage,
 		List<String> photoList) {
 		Trip tripRef = entityManager.getReference(Trip.class, tripId);
-		String preview = createPreviewContent(content);
+		String preview = parseToPreviewContent(content);
 		Scrap scrap = scrapRepository.save(Scrap.builder()
 			.user(entityManager.getReference(UserEntity.class, userId))
 			.trip(tripRef)
@@ -70,7 +70,7 @@ public class ScrapService {
 		return imageList;
 	}
 
-	private String createPreviewContent(String content) {
+	private String parseToPreviewContent(String content) {
 		StringBuilder sb = new StringBuilder();
 		String[] parts = content.split("\\{\"insert\":");
 
@@ -155,7 +155,7 @@ public class ScrapService {
 		Scrap scrap = entityManager.getReference(Scrap.class, scrapId);
 		scrap.setTitle(title);
 		scrap.setContent(content);
-		scrap.setPreview(createPreviewContent(content));
+		scrap.setPreview(parseToPreviewContent(content));
 		scrap.setHasImage(hasImage);
 		scrap.setColor(color);
 
