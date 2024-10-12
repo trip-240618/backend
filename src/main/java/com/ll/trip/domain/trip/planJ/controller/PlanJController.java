@@ -2,7 +2,6 @@ package com.ll.trip.domain.trip.planJ.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -30,7 +29,6 @@ import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.service.PlanJEditService;
 import com.ll.trip.domain.trip.planJ.service.PlanJService;
 import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
-import com.ll.trip.global.handler.dto.ErrorResponseDto;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,10 +72,14 @@ public class PlanJController {
 		PlanJ plan = planJService.createPlan(tripId, requestDto, order, securityUser.getUuid());
 		PlanJInfoDto response = planJService.convertPlanJToDto(plan);
 
-		template.convertAndSend(
-			"/topic/api/trip/j/" + tripId,
-			new SocketResponseBody<>("create", response)
-		);
+		if (!requestDto.isLocker())
+			template.convertAndSend(
+				"/topic/api/trip/j/" + tripId,
+				new SocketResponseBody<>("create", response)
+			);
+		else {
+			return ResponseEntity.ok(response);
+		}
 
 		notificationService.createPlanCreateNotification(tripId);
 		return ResponseEntity.ok("created");
@@ -123,10 +125,7 @@ public class PlanJController {
 			if (!requestBody.isLocker()) {
 				planJEditService.checkIsEditor(tripId, securityUser.getUuid(), dayFrom);
 				if (!requestBody.isLocker() && !dayTo.equals(dayFrom)) {
-					planJEditService.checkIsEditor(tripId,
-						securityUser.getUuid(), dayTo);
-					return ResponseEntity.status(HttpStatus.NOT_FOUND)
-						.body(new ErrorResponseDto("day" + dayTo + "의 편집자가 아닙니다."));
+					planJEditService.checkIsEditor(tripId, securityUser.getUuid(), dayTo);
 				}
 			}
 			order = planJEditService.getLastOrderByTripId(tripId);
@@ -136,10 +135,13 @@ public class PlanJController {
 		plan = planJService.updatePlanJByPlanId(plan, requestBody, order);
 		PlanJInfoDto response = planJService.convertPlanJToDto(plan);
 
-		template.convertAndSend(
-			"/topic/api/trip/j/" + tripId,
-			new SocketResponseBody<>("modify", response)
-		);
+		if (!requestBody.isLocker())
+			template.convertAndSend(
+				"/topic/api/trip/j/" + tripId,
+				new SocketResponseBody<>("modify", response)
+			);
+		else
+			return ResponseEntity.ok(response);
 
 		return ResponseEntity.ok("modified");
 	}

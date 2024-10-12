@@ -13,13 +13,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-	private final WebSocketHandshakeInterceptor handshakeInterceptor;
+	//private final WebSocketHandshakeInterceptor handshakeInterceptor;
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/ws")
 			.setAllowedOriginPatterns("*")
-			.addInterceptors(handshakeInterceptor)
 			.withSockJS();
 	}
 
