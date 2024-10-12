@@ -19,7 +19,6 @@ import lombok.experimental.SuperBuilder;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BaseEntity {
-
 	@CreatedDate
 	private LocalDateTime createDate;
 
