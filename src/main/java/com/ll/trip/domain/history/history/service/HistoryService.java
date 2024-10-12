@@ -52,10 +52,10 @@ public class HistoryService {
 	public List<HistoryListDto> findAllByTripId(long tripId, long userId) {
 		Pageable pageable = PageRequest.of(0, 50);
 		List<HistoryServiceDto> serviceDtos = historyRepository.findAllByTripId(tripId, userId, pageable);
-		return parseToResponse(serviceDtos);
+		return parseToMapResponse(serviceDtos);
 	}
 
-	private List<HistoryListDto> parseToResponse(List<HistoryServiceDto> serviceDtos) {
+	private List<HistoryListDto> parseToMapResponse(List<HistoryServiceDto> serviceDtos) {
 		List<HistoryListDto> response = new ArrayList<>();
 		Map<Long, HistoryDto> idMap = new HashMap<>();
 		Map<LocalDate, List<HistoryDto>> dateMap = new HashMap<>();
@@ -73,6 +73,20 @@ public class HistoryService {
 				return newHistoryDto;
 			});
 			historyDto.getTags().add(dto.getTag());
+		}
+		return response;
+	}
+
+	private List<HistoryDto> parseToListResponse(List<HistoryServiceDto> serviceDtos) {
+		List<HistoryDto> response = new ArrayList<>();
+		Map<Long, HistoryDto> idMap = new HashMap<>();
+
+		for (HistoryServiceDto dto : serviceDtos) {
+			idMap.computeIfAbsent(dto.getId(), id -> {
+				HistoryDto newHistoryDto = new HistoryDto(dto);
+				response.add(newHistoryDto);
+				return newHistoryDto;
+			}).getTags().add(dto.getTag());
 		}
 		return response;
 	}
@@ -217,7 +231,7 @@ public class HistoryService {
 		Pageable pageable = PageRequest.of(0, 50);
 		List<HistoryServiceDto> serviceDtos = historyRepository.findHistoryByTripIdAndUuid(tripId, userId, uuid,
 			pageable);
-		return serviceDtos.stream().map(HistoryDto::new).toList();
+		return parseToListResponse(serviceDtos);
 	}
 
 	public List<HistoryDto> searchHistoryByTagNameAndColor(long tripId, long userId, String tagName,
@@ -229,7 +243,7 @@ public class HistoryService {
 				pageable);
 		else
 			serviceDtos = historyRepository.findHistoryByTripIdAndTagName(tripId, userId, tagName, pageable);
-		return serviceDtos.stream().map(HistoryDto::new).toList();
+		return parseToListResponse(serviceDtos);
 	}
 
 	@Transactional
@@ -251,6 +265,6 @@ public class HistoryService {
 
 	public List<HistoryListDto> showHistoryDetail(long historyId, long userId) {
 		List<HistoryServiceDto> dtos = historyRepository.findHistoryById(historyId, userId);
-		return parseToResponse(dtos);
+		return parseToMapResponse(dtos);
 	}
 }
