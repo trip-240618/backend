@@ -159,24 +159,25 @@ public class PlanPController {
 
 	@MessageMapping("trip/{tripId}/plan/p/edit/register")
 	public void addEditor(
+		@AuthenticationPrincipal SecurityUser securityUser,
 		SimpMessageHeaderAccessor headerAccessor,
 		@DestinationVariable long tripId
 	) {
-		String username = headerAccessor.getUser().getName();
-		log.info("uuid : " + username);
+		String uuid = securityUser.getUuid();
+		log.info("uuid : " + uuid);
 
-		String uuid = planPEditService.getEditorByTripId(tripId);
-		if (uuid != null) {
-			template.convertAndSendToUser(username, "/topic/api/trip/p/" + tripId,
-				new SocketResponseBody<>("wait", uuid)
+		String[] editor = planPEditService.getEditorByTripId(tripId);
+		if (editor != null) {
+			template.convertAndSend("/topic/api/trip/p/" + tripId,
+				new SocketResponseBody<>("wait", editor[2])
 			);
 			return;
 		}
 
-		planPEditService.addEditor(tripId, username);
+		planPEditService.addEditor(tripId, headerAccessor.getSessionId(), securityUser.getUuid(), securityUser.getNickname());
 
 		template.convertAndSend("/topic/api/trip/p/" + tripId,
-			new SocketResponseBody<>("edit start", username)
+			new SocketResponseBody<>("edit start", uuid)
 		);
 	}
 
@@ -212,11 +213,7 @@ public class PlanPController {
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
-		planPEditService.removeEditor(tripId, securityUser.getUuid());
-
-		template.convertAndSend("/topic/api/trip/p/" + tripId,
-			new SocketResponseBody<>("edit finish", securityUser.getUuid())
-		);
+		planPEditService.removeEditorByDestination(tripId, securityUser.getUuid());
 
 		return new SocketResponseBody<>("edit finish", "uuid");
 	}
@@ -279,7 +276,7 @@ public class PlanPController {
 	public ResponseEntity<?> showEditors(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId
 	) {
-		return ResponseEntity.ok(planPEditService.getActiveEditTopicsAndUuid());
+		return ResponseEntity.ok(planPEditService.getSessionIdMap());
 	}
 
 }

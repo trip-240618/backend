@@ -123,9 +123,9 @@ public class PlanJController {
 
 		if ((plan.getStartTime() != requestBody.getStartTime()) || !dayFrom.equals(dayTo)) {
 			if (!requestBody.isLocker()) {
-				planJEditService.checkIsEditor(tripId, securityUser.getUuid(), dayFrom);
+				planJEditService.checkIsEditor(tripId, dayFrom, securityUser.getUuid());
 				if (!requestBody.isLocker() && !dayTo.equals(dayFrom)) {
-					planJEditService.checkIsEditor(tripId, securityUser.getUuid(), dayTo);
+					planJEditService.checkIsEditor(tripId, dayTo, securityUser.getUuid());
 				}
 			}
 			order = planJEditService.getLastOrderByTripId(tripId);
@@ -162,7 +162,7 @@ public class PlanJController {
 	) {
 		int day = requestBody.getDayAfterStart();
 
-		planJEditService.checkIsEditor(tripId, securityUser.getUuid(), day);
+		planJEditService.checkIsEditor(tripId, day, securityUser.getUuid());
 
 		if (planJEditService.swapPlanJByIds(requestBody.getPlanId1(), requestBody.getPlanId2()) != 2)
 			return ResponseEntity.internalServerError().body("swap 실패");
@@ -200,25 +200,28 @@ public class PlanJController {
 
 	@MessageMapping("/trip/{tripId}/plan/j/{day}/edit/register")
 	public void addEditor(
+		@AuthenticationPrincipal SecurityUser securityUser,
 		SimpMessageHeaderAccessor headerAccessor,
 		@DestinationVariable long tripId,
 		@DestinationVariable int day
 	) {
-		String username = headerAccessor.getUser().getName();
-		log.info("uuid : " + username);
-
-		String uuid = planJEditService.getEditorByTripIdAndDay(tripId, day);
-		if (uuid != null) {
-			template.convertAndSendToUser(username, "/topic/api/trip/j/" + tripId,
-				new SocketResponseBody<>("wait", new PlanJEditorRegisterDto(day, username))
+		String sessionId = headerAccessor.getSessionId();
+		String nickname = securityUser.getNickname();
+		String uuid = securityUser.getUuid();
+		log.info("sessionId: " + sessionId);
+		log.info("nickname: " + nickname);
+		String[] editor = planJEditService.getEditorByTripIdAndDay(tripId, day);
+		if (editor != null) {
+			template.convertAndSend("/topic/api/trip/j/" + tripId,
+				new SocketResponseBody<>("wait", new PlanJEditorRegisterDto(day, editor[1], editor[2]))
 			);
 			return;
 		}
 
-		planJEditService.addEditor(tripId, username, day);
+		planJEditService.addEditor(tripId, day, sessionId, uuid, nickname);
 
 		template.convertAndSend("/topic/api/trip/j/" + tripId,
-			new SocketResponseBody<>("edit start", new PlanJEditorRegisterDto(day, username))
+			new SocketResponseBody<>("edit start", new PlanJEditorRegisterDto(day, uuid, nickname))
 		);
 	}
 
@@ -251,13 +254,13 @@ public class PlanJController {
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@PathVariable int day
 	) {
-		String username = securityUser.getUuid();
-		log.info("uuid : " + username);
+		String uuid = securityUser.getUuid();
+		log.info("uuid : " + uuid);
 
-		planJEditService.removeEditor(tripId, day, username);
+		planJEditService.removeEditorByDestination(tripId, day, uuid);
 
 		template.convertAndSend("/topic/api/trip/j/" + tripId,
-			new SocketResponseBody<>("edit finish", new PlanJEditorRegisterDto(day, username))
+			new SocketResponseBody<>("edit finish", new PlanJEditorRegisterDto(day, uuid, securityUser.getNickname()))
 		);
 	}
 
@@ -265,7 +268,7 @@ public class PlanJController {
 	@Operation(summary = "플랜j editor권한 목록")
 	@ApiResponse(responseCode = "200", description = "플랜j editor권한 목록")
 	public ResponseEntity<?> showEditors() {
-		return ResponseEntity.ok(planJEditService.getActiveEditTopicsAndUuidAndDay());
+		return ResponseEntity.ok(planJEditService.getSessionIdMap());
 	}
 
 }

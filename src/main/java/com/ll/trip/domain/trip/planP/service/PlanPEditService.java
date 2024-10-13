@@ -24,25 +24,30 @@ public class PlanPEditService {
 
 	private final String TOPIC_PREFIX = "/topic/api/trip/p/";
 	@Getter
-	private final ConcurrentHashMap<Long, String> activeEditTopicsAndUuid = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, Long> sessionIdMap = new ConcurrentHashMap<>();
+	// sessionId, tripId
+	@Getter
+	private final ConcurrentHashMap<Long, String[]> destinationMap = new ConcurrentHashMap<>();
+	// tripId, {sessionId, uuid, nickname}
 	private final SimpMessagingTemplate template;
 
-	public void editorClosedSubscription(long tripId, String username) {
-		String uuid = activeEditTopicsAndUuid.getOrDefault(tripId, null);
-
-		if (uuid != null && uuid.equals(username)) {
-			activeEditTopicsAndUuid.remove(tripId);
-
-			template.convertAndSend(TOPIC_PREFIX + tripId, new SocketResponseBody<>("edit finish", username));
-		}
+	public void removeEditorBySessionId(String sessionId) {
+		Long tripId = sessionIdMap.computeIfPresent(sessionId, (id, value) -> sessionIdMap.remove(id));
+		if (tripId == null)
+			return;
+		destinationMap.computeIfPresent(tripId, (id, value) -> {
+			template.convertAndSend(TOPIC_PREFIX + tripId, new SocketResponseBody<>("edit finish", value[2]));
+			return destinationMap.remove(id);
+		});
 	}
 
-	public void addEditor(long tripId, String username) {
-		activeEditTopicsAndUuid.put(tripId, username);
+	public void addEditor(long tripId, String sessionId, String uuid, String nickname) {
+		destinationMap.put(tripId, new String[] {sessionId, uuid, nickname});
+		sessionIdMap.put(sessionId, tripId);
 	}
 
-	public String getEditorByTripId(long tripId) {
-		return activeEditTopicsAndUuid.getOrDefault(tripId, null);
+	public String[] getEditorByTripId(long tripId) {
+		return destinationMap.getOrDefault(tripId, null);
 	}
 
 	@Transactional
@@ -82,13 +87,21 @@ public class PlanPEditService {
 	}
 
 	public void checkIsEditor(long tripId, String uuid) {
-		if(!activeEditTopicsAndUuid.get(tripId).equals(uuid)) {
+		if (!uuid.equals(destinationMap.getOrDefault(tripId, new String[3])[1])) {
 			log.info("user:" + uuid + "\nisn't editor of trip: " + tripId);
 			throw new PermissionDeniedException("user isn't editor of trip");
 		}
 	}
 
-	public void removeEditor(long tripId, String uuid) {
-		this.activeEditTopicsAndUuid.remove(tripId, uuid);
+	public void removeEditorByDestination(long tripId, String uuid) {
+		String[] editor = destinationMap.computeIfPresent(tripId, (id, value) -> {
+			if (uuid.equals(value[1]))
+				return destinationMap.remove(id);
+			return null;
+		});
+		if (editor == null)
+			return;
+		sessionIdMap.remove(editor[1], tripId);
+		template.convertAndSend(TOPIC_PREFIX + tripId, new SocketResponseBody<>("edit finish", editor[2]));
 	}
 }

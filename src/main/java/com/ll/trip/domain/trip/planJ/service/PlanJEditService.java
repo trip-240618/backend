@@ -1,7 +1,6 @@
 package com.ll.trip.domain.trip.planJ.service;
 
 import java.time.LocalTime;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -24,7 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 public class PlanJEditService {
 	private final PlanJRepository planJRepository;
 	@Getter
-	private final ConcurrentHashMap<Long, ConcurrentHashMap<String, Integer>> activeEditTopicsAndUuidAndDay = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, String> sessionIdMap = new ConcurrentHashMap<>();
+	// SessionId, "tripId/day"
+	@Getter
+	private final ConcurrentHashMap<String, String[]> destinationMap = new ConcurrentHashMap<>();
+	// "tripId/day", {SessionId, uuid, nickname}
 	private final SimpMessagingTemplate template;
 	private final String TOPIC_PREFIX = "/topic/api/trip/j/";
 
@@ -35,31 +38,19 @@ public class PlanJEditService {
 		return order + 1;
 	}
 
-	public String getEditorByTripIdAndDay(Long tripId, int day) {
-		ConcurrentHashMap<String, Integer> map = activeEditTopicsAndUuidAndDay.getOrDefault(tripId, null);
-
-		if (map == null)
-			return null;
-
-		return map.entrySet()
-			.stream()
-			.filter(entry -> entry.getValue().equals(day))
-			.map(Map.Entry::getKey)
-			.findFirst()
-			.orElse(null);
+	public String[] getEditorByTripIdAndDay(long tripId, int day) {
+		return destinationMap.getOrDefault(tripId + "/" + day, null);
 	}
 
-	public void addEditor(long tripId, String uuid, int day) {
-		if (!activeEditTopicsAndUuidAndDay.containsKey(tripId)) {
-			activeEditTopicsAndUuidAndDay.put(tripId, new ConcurrentHashMap<>());
-		}
-
-		activeEditTopicsAndUuidAndDay.get(tripId).put(uuid, day);
+	public void addEditor(long tripId, int day, String sessionId, String uuid, String name) {
+		String dest = tripId + "/" + day;
+		destinationMap.put(dest, new String[] {sessionId, uuid, name});
+		sessionIdMap.put(sessionId, dest);
 	}
 
-	public void checkIsEditor(long tripId, String uuid, int day) {
-		if (!activeEditTopicsAndUuidAndDay.containsKey(tripId)
-			  || !(activeEditTopicsAndUuidAndDay.get(tripId).get(uuid) == day)) {
+	public void checkIsEditor(long tripId, int day, String uuid) {
+		String[] editor = destinationMap.getOrDefault(tripId + "/" + day, null);
+		if (editor == null || !uuid.equals(editor[1])) {
 			log.info("user is not editor of trip :" + tripId + "day : " + day + "\nuuid : " + uuid);
 			throw new PermissionDeniedException("user is not editor of day");
 		}
@@ -79,14 +70,26 @@ public class PlanJEditService {
 			   planJRepository.updateStartTimeAndOrder(planId2, startTime1, order1);
 	}
 
-	public void editorClosedSubscription(long tripId, String uuid) {
-		ConcurrentHashMap<String, Integer> map = activeEditTopicsAndUuidAndDay.getOrDefault(tripId, null);
-		map.remove(uuid);
-		template.convertAndSend(TOPIC_PREFIX + tripId, new SocketResponseBody<>("edit finish", uuid));
+	public void removeEditorBySessionId(String sessionId) {
+		String dest = sessionIdMap.getOrDefault(sessionId, null);
+		if (dest == null)
+			return;
+		destinationMap.remove(dest);
+		sessionIdMap.remove(sessionId);
+		String[] dests = dest.split("/");
+		long tripId = Long.parseLong(dests[0]);
+		int day = Integer.parseInt(dests[1]);
+
+		template.convertAndSend(TOPIC_PREFIX + tripId, new SocketResponseBody<>("edit finish", day));
 	}
 
-	public void removeEditor(long tripId, int day, String uuid) {
-		ConcurrentHashMap<String, Integer> map = activeEditTopicsAndUuidAndDay.getOrDefault(tripId, null);
-		map.remove(uuid, day);
+	public void removeEditorByDestination(long tripId, int day, String uuid) {
+		String dest = tripId + "/" + day;
+		String[] editor = destinationMap.getOrDefault(dest, null);
+		if (editor == null || !editor[1].equals(uuid))
+			return;
+		String sessionId = editor[0];
+		destinationMap.remove(dest);
+		sessionIdMap.remove(sessionId);
 	}
 }
