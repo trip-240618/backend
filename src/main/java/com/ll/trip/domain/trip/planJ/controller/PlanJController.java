@@ -1,6 +1,7 @@
 package com.ll.trip.domain.trip.planJ.controller;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -197,14 +198,15 @@ public class PlanJController {
 
 	@MessageMapping("/trip/{tripId}/plan/j/{day}/edit/register")
 	public void addEditor(
-		@AuthenticationPrincipal SecurityUser securityUser,
 		SimpMessageHeaderAccessor headerAccessor,
 		@DestinationVariable long tripId,
 		@DestinationVariable int day
 	) {
 		String sessionId = headerAccessor.getSessionId();
-		String nickname = securityUser.getNickname();
-		String uuid = securityUser.getUuid();
+		String nickname = (String) Objects.requireNonNull(headerAccessor.getSessionAttributes())
+			.getOrDefault("nickname", null);
+		String uuid = Objects.requireNonNull(headerAccessor.getUser()).getName();
+
 		log.info("sessionId: " + sessionId);
 		log.info("nickname: " + nickname);
 		String[] editor = planJEditService.getEditorByTripIdAndDay(tripId, day);

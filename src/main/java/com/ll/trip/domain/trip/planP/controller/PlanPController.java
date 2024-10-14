@@ -1,6 +1,7 @@
 package com.ll.trip.domain.trip.planP.controller;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -159,12 +160,15 @@ public class PlanPController {
 
 	@MessageMapping("trip/{tripId}/plan/p/edit/register")
 	public void addEditor(
-		@AuthenticationPrincipal SecurityUser securityUser,
 		SimpMessageHeaderAccessor headerAccessor,
 		@DestinationVariable long tripId
 	) {
-		String uuid = securityUser.getUuid();
-		log.info("uuid : " + uuid);
+		String sessionId = headerAccessor.getSessionId();
+		String nickname = (String) Objects.requireNonNull(headerAccessor.getSessionAttributes())
+			.getOrDefault("nickname", null);
+		String uuid = Objects.requireNonNull(headerAccessor.getUser()).getName();
+		log.info("uuid: " + uuid);
+		log.info("nickname: " + nickname);
 
 		String[] editor = planPEditService.getEditorByTripId(tripId);
 		if (editor != null) {
@@ -174,7 +178,7 @@ public class PlanPController {
 			return;
 		}
 
-		planPEditService.addEditor(tripId, headerAccessor.getSessionId(), securityUser.getUuid(), securityUser.getNickname());
+		planPEditService.addEditor(tripId, sessionId, uuid, nickname);
 
 		template.convertAndSend("/topic/api/trip/p/" + tripId,
 			new SocketResponseBody<>("edit start", uuid)
@@ -191,12 +195,8 @@ public class PlanPController {
 			}
 		)})
 	public SocketResponseBody<String> addEditor(
-		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId
 	) {
-		template.convertAndSend("/topic/api/trip/p/" + tripId,
-			new SocketResponseBody<>("edit start", securityUser.getUuid())
-		);
 
 		return new SocketResponseBody<>("edit start", "uuid");
 	}

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
+import com.ll.trip.global.security.userDetail.SecurityUser;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,6 +36,7 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
 		}
 
 		log.info("WebSocket에 연결중 uuid: " + authentication.getName());
+		attributes.put("nickname", ((SecurityUser) authentication.getPrincipal()).getNickname());
 		return true;
 	}
 
