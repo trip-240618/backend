@@ -56,6 +56,14 @@ public class PlanJEditService {
 		}
 	}
 
+	public void checkHasEditor(long tripId, int day, String uuid) {
+		String[] editor = destinationMap.getOrDefault(tripId + "/" + day, null);
+		if(editor != null && !editor[1].equals(uuid)) {
+			log.info("there are editor at trip :" + tripId + "day : " + day + "\nuuid : " + uuid);
+			throw new PermissionDeniedException("there are editor at destination already");
+		}
+	}
+
 	@Transactional
 	public int swapPlanJByIds(long planId1, long planId2) {
 		PlanJ plan1 = planJRepository.findById(planId1).orElseThrow(NullPointerException::new);

@@ -121,11 +121,11 @@ public class PlanJController {
 		Integer dayFrom = plan.getDayAfterStart();
 		Integer dayTo = requestBody.getDayAfterStart();
 
-		if ((plan.getStartTime() != requestBody.getStartTime()) || !dayFrom.equals(dayTo)) {
+		if (!plan.getStartTime().equals(requestBody.getStartTime()) || !dayFrom.equals(dayTo)) {
 			if (!requestBody.isLocker()) {
-				planJEditService.checkIsEditor(tripId, dayFrom, securityUser.getUuid());
-				if (!requestBody.isLocker() && !dayTo.equals(dayFrom)) {
-					planJEditService.checkIsEditor(tripId, dayTo, securityUser.getUuid());
+				planJEditService.checkHasEditor(tripId, dayFrom, securityUser.getUuid());
+				if (!dayTo.equals(dayFrom)) {
+					planJEditService.checkHasEditor(tripId, dayTo, securityUser.getUuid());
 				}
 			}
 			order = planJEditService.getLastOrderByTripId(tripId);
