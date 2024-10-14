@@ -75,6 +75,7 @@ public class PlanJInfoDto {
 		this.orderByDate = plan.getOrderByDate();
 		this.startTime = plan.getStartTime();
 		this.writerUuid = plan.getWriterUuid();
+		this.place = plan.getPlace();
 		this.title = plan.getTitle();
 		this.memo = plan.getMemo();
 		this.latitude = plan.getLatitude();
