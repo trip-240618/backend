@@ -1,13 +1,12 @@
 package com.ll.trip.domain.trip.planJ.service;
 
-import java.time.LocalTime;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.trip.planJ.entity.PlanJ;
+import com.ll.trip.domain.trip.planJ.dto.PlanJEditorRegisterDto;
 import com.ll.trip.domain.trip.planJ.repository.PlanJRepository;
 import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
@@ -64,20 +63,6 @@ public class PlanJEditService {
 		}
 	}
 
-	@Transactional
-	public int swapPlanJByIds(long planId1, long planId2) {
-		PlanJ plan1 = planJRepository.findById(planId1).orElseThrow(NullPointerException::new);
-		PlanJ plan2 = planJRepository.findById(planId2).orElseThrow(NullPointerException::new);
-
-		LocalTime startTime1 = plan1.getStartTime();
-		LocalTime startTime2 = plan2.getStartTime();
-		int order1 = plan1.getOrderByDate();
-		int order2 = plan2.getOrderByDate();
-
-		return planJRepository.updateStartTimeAndOrder(planId1, startTime2, order2) +
-			   planJRepository.updateStartTimeAndOrder(planId2, startTime1, order1);
-	}
-
 	public void removeEditorBySessionId(String sessionId) {
 		String dest = sessionIdMap.getOrDefault(sessionId, null);
 		if (dest == null)
@@ -99,5 +84,9 @@ public class PlanJEditService {
 		String sessionId = editor[0];
 		destinationMap.remove(dest);
 		sessionIdMap.remove(sessionId);
+
+		template.convertAndSend("/topic/api/trip/j/" + tripId,
+			new SocketResponseBody<>("edit finish", new PlanJEditorRegisterDto(day, uuid, editor[2]))
+		);
 	}
 }

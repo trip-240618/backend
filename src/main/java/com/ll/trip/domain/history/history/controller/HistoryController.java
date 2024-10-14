@@ -54,7 +54,6 @@ public class HistoryController {
 	private final TripService tripService;
 	private final HistoryService historyService;
 	private final NotificationService notificationService;
-	private final AwsAuthService awsAuthService;
 
 	@GetMapping("/{tripId}/history/list")
 	@Operation(summary = "History 리스트")
@@ -97,9 +96,6 @@ public class HistoryController {
 
 		History history = historyService.findById(historyId);
 
-		if (requestDto.getImageUrl() != null && !history.getImageUrl().equals(requestDto.getImageUrl())) {
-			awsAuthService.deleteUrls(List.of(history.getImageUrl()));
-		}
 		historyService.modifyHistory(tripId, history, requestDto);
 		List<HistoryListDto> response = historyService.showHistoryDetail(historyId, securityUser.getId());
 
@@ -119,7 +115,6 @@ public class HistoryController {
 		historyService.checkIsWriterOfHistory(historyId, securityUser.getId());
 
 		historyService.deleteHistory(historyId);
-		awsAuthService.deleteImageByHistoryId(historyId);
 
 		return ResponseEntity.ok("deleted");
 	}

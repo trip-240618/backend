@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.history.history.dto.HistoryCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryDto;
 import com.ll.trip.domain.history.history.dto.HistoryListDto;
@@ -29,7 +29,6 @@ import com.ll.trip.domain.history.history.repository.HistoryReplyRepository;
 import com.ll.trip.domain.history.history.repository.HistoryRepository;
 import com.ll.trip.domain.history.history.repository.HistoryTagRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
-import com.ll.trip.domain.trip.trip.repository.TripRepository;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.global.handler.exception.NoSuchDataException;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
@@ -43,12 +42,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Transactional(readOnly = true)
 public class HistoryService {
-	private final TripRepository tripRepository;
 	private final HistoryRepository historyRepository;
 	private final HistoryTagRepository historyTagRepository;
 	private final HistoryReplyRepository historyReplyRepository;
 	private final HistoryLikeRepository historyLikeRepository;
 	private final EntityManager entityManager;
+	private final AwsAuthService awsAuthService;
 
 	public List<HistoryListDto> findAllByTripId(long tripId, long userId) {
 		Pageable pageable = PageRequest.of(0, 50);
@@ -154,6 +153,7 @@ public class HistoryService {
 
 	@Transactional
 	public void deleteHistory(long historyId) {
+		awsAuthService.deleteImageByHistoryId(historyId);
 		historyRepository.deleteById(historyId);
 	}
 
@@ -249,7 +249,11 @@ public class HistoryService {
 
 	@Transactional
 	public void modifyHistory(long tripId, History history, HistoryModifyDto requestDto) {
-		Trip tripRef = tripRepository.getReferenceById(tripId);
+		if (requestDto.getImageUrl() != null && !history.getImageUrl().equals(requestDto.getImageUrl())) {
+			awsAuthService.deleteUrls(List.of(history.getImageUrl()));
+		}
+
+		Trip tripRef = entityManager.getReference(Trip.class, tripId);
 		List<HistoryTag> tags = createHistoryTags(requestDto.getTags(), tripRef, history);
 		history.setHistoryTags(tags);
 		history.setMemo(requestDto.getMemo());

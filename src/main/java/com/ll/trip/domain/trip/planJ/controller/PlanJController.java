@@ -150,9 +150,9 @@ public class PlanJController {
 		@Content(
 			mediaType = "application/json",
 			examples = {
-				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"swap\", \"data\": \"PlanJSwapRequestDto\"}"),
+				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"swap\", \"data\": \"[ PlanJListDto ]\"}"),
 				@ExampleObject(name = "http 응답", value = "swapped")},
-			schema = @Schema(implementation = PlanJSwapRequestDto.class))})
+			array = @ArraySchema(schema = @Schema(implementation = PlanJListDto.class)))})
 	public ResponseEntity<?> swapPlanJ(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
@@ -161,13 +161,12 @@ public class PlanJController {
 		int day = requestBody.getDayAfterStart();
 
 		planJEditService.checkIsEditor(tripId, day, securityUser.getUuid());
-
-		if (planJEditService.swapPlanJByIds(requestBody.getPlanId1(), requestBody.getPlanId2()) != 2)
-			return ResponseEntity.internalServerError().body("swap 실패");
+		List<PlanJListDto> response = planJService.bulkUpdatePlanJOrder(tripId, requestBody.getDayAfterStart(),
+			requestBody.getOrderDtos());
 
 		template.convertAndSend(
 			"/topic/api/trip/j/" + tripId,
-			new SocketResponseBody<>("modify", requestBody)
+			new SocketResponseBody<>("swap", response)
 		);
 
 		notificationService.createPlanMoveNotification(tripId);
@@ -203,7 +202,7 @@ public class PlanJController {
 		@DestinationVariable int day
 	) {
 		String sessionId = headerAccessor.getSessionId();
-		String nickname = (String) Objects.requireNonNull(headerAccessor.getSessionAttributes())
+		String nickname = (String)Objects.requireNonNull(headerAccessor.getSessionAttributes())
 			.getOrDefault("nickname", null);
 		String uuid = Objects.requireNonNull(headerAccessor.getUser()).getName();
 
@@ -257,10 +256,6 @@ public class PlanJController {
 		log.info("uuid : " + uuid);
 
 		planJEditService.removeEditorByDestination(tripId, day, uuid);
-
-		template.convertAndSend("/topic/api/trip/j/" + tripId,
-			new SocketResponseBody<>("edit finish", new PlanJEditorRegisterDto(day, uuid, securityUser.getNickname()))
-		);
 	}
 
 	@GetMapping("/show/editors")

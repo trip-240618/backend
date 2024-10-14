@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +37,6 @@ public class UserController {
 
 	private final UserService userService;
 	private final TripService tripService;
-	private final EntityManager entityManager;
 	private final AwsAuthService awsAuthService;
 
 	@GetMapping("/info")
@@ -88,10 +86,9 @@ public class UserController {
 		@RequestBody UserRegisterDto registerDto
 	) {
 		log.info("uuid : " + securityUser.getUsername());
-		UserEntity userRef = entityManager.getReference(UserEntity.class, securityUser.getId());
 
 		UserEntity user = userService.registerUserInfo(
-			userRef, registerDto.getNickname(),
+			securityUser.getId(), registerDto.getNickname(),
 			registerDto.getProfileImg(),
 			registerDto.getThumbnail(),
 			registerDto.getMemo(),
@@ -127,7 +124,7 @@ public class UserController {
 		UserEntity user = userService.validateUser(securityUser);
 		awsAuthService.deleteImagesByUserId(securityUser.getId());
 		tripService.deleteAllTripMember(securityUser.getId());
-		userService.deleteUserById(user);
+		userService.deleteUserByUser(user);
 		userService.setTokenInCookie("", "", response);
 		return ResponseEntity.ok("deleted");
 	}

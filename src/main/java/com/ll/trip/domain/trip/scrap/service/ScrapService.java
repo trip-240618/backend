@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.trip.scrap.dto.ScrapDetailDto;
 import com.ll.trip.domain.trip.scrap.dto.ScrapDetailServiceDto;
 import com.ll.trip.domain.trip.scrap.dto.ScrapImageDto;
@@ -34,6 +35,7 @@ public class ScrapService {
 	private final ScrapBookmarkRepository scrapBookmarkRepository;
 	private final ScrapImageRepository scrapImageRepository;
 	private final EntityManager entityManager;
+	private final AwsAuthService awsAuthService;
 
 	@Transactional
 	public Scrap createScrap(long userId, long tripId, String title, String content, String color, boolean hasImage,
@@ -172,6 +174,7 @@ public class ScrapService {
 
 	@Transactional
 	public void deleteById(long scrapId) {
+		awsAuthService.deleteImagesByScrapId(scrapId);
 		scrapRepository.deleteById(scrapId);
 	}
 

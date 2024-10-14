@@ -100,12 +100,6 @@ public class AwsAuthService {
 		deleteObjectByKey(extractKeyFromUrl(urls));
 	}
 
-	public void deleteImagesByTripId(long tripId) {
-		List<String> urls = findImageByTripId(new ArrayList<>(), tripId);
-		getUrlFromScrapImagesByTripId(urls, tripId);
-		deleteObjectByKey(extractKeyFromUrl(urls));
-	}
-
 	public void deleteImagesByScrapId(long scrapId) {
 		deleteObjectByKey(getKeyFromScrapImagesByScrapId(scrapId));
 	}
@@ -165,6 +159,12 @@ public class AwsAuthService {
 		if (fileName == null)
 			return String.format("%s/%s", prefix, fileId);
 		return String.format("%s/%s", prefix, fileId + fileName);
+	}
+
+	public void deleteImagesByTripId(long tripId) {
+		List<String> urls = findImageByTripId(new ArrayList<>(), tripId);
+		getUrlFromScrapImagesByTripId(urls, tripId);
+		deleteObjectByKey(extractKeyFromUrl(urls));
 	}
 
 	public void deleteImageByHistoryId(long historyId) {

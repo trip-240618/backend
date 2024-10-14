@@ -26,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity
-//@EnableWebSocketSecurity
 public class SpringSecurityConfig {
 
 	private final JwtTokenUtil jwtTokenUtil;

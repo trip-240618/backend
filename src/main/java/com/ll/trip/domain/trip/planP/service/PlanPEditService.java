@@ -6,6 +6,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.trip.planP.dto.PlanPEditRegisterDto;
 import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
@@ -94,14 +95,10 @@ public class PlanPEditService {
 	}
 
 	public void removeEditorByDestination(long tripId, String uuid) {
-		String[] editor = destinationMap.computeIfPresent(tripId, (id, value) -> {
-			if (uuid.equals(value[1]))
-				return destinationMap.remove(id);
-			return null;
-		});
-		if (editor == null)
-			return;
-		sessionIdMap.remove(editor[1], tripId);
-		template.convertAndSend(TOPIC_PREFIX + tripId, new SocketResponseBody<>("edit finish", editor[2]));
+		checkIsEditor(tripId, uuid);
+		String[] editor = destinationMap.remove(tripId);
+		sessionIdMap.remove(editor[0], tripId);
+		template.convertAndSend(TOPIC_PREFIX + tripId,
+			new SocketResponseBody<>("edit finish", new PlanPEditRegisterDto(editor[1], editor[2])));
 	}
 }

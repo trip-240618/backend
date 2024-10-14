@@ -2,6 +2,8 @@ package com.ll.trip.domain.trip.planJ.service;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +15,7 @@ import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJListDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJModifyRequestDto;
+import com.ll.trip.domain.trip.planJ.dto.PlanJOrderDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.repository.PlanJRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
@@ -107,5 +110,35 @@ public class PlanJService {
 	public void updatePlanJDay(Long tripId, int dayDiffer, int duration) {
 		planJRepository.updateDayByTripId(tripId, dayDiffer);
 		planJRepository.deleteByTripIdAndDuration(tripId, duration);
+	}
+
+	@Transactional
+	public List<PlanJListDto> bulkUpdatePlanJOrder(long tripId, int day, List<PlanJOrderDto> orderDtos) {
+		List<PlanJInfoDto> planJList = findAllPlanAByTripIdAndDay(tripId, day).get(0).getPlanList();
+		Map<Long, PlanJInfoDto> planJMap = new HashMap<>();
+
+		for (PlanJInfoDto plan : planJList) {
+			planJMap.put(plan.getPlanId(), plan);
+		}
+
+		List<PlanJInfoDto> response = new ArrayList<>();
+		for (PlanJOrderDto dto : orderDtos) {
+			if (dto.getOrderByDate() == null || dto.getStartTime() == null)
+				continue;
+			PlanJInfoDto plan = planJMap.remove(dto.getPlanId());
+			if (dto.getStartTime().equals(plan.getStartTime()) && dto.getOrderByDate().equals(plan.getOrderByDate()))
+				continue;
+			plan.setStartTime(dto.getStartTime());
+			plan.setOrderByDate(dto.getOrderByDate());
+			planJRepository.updateStartTimeAndOrder(dto.getPlanId(), dto.getStartTime(), dto.getOrderByDate());
+			response.add(plan);
+		}
+		response.addAll(planJMap.values());
+
+		response.sort(Comparator
+			.comparing(PlanJInfoDto::getStartTime)
+			.thenComparing(PlanJInfoDto::getOrderByDate));
+
+		return List.of(new PlanJListDto(day, response));
 	}
 }

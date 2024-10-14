@@ -90,8 +90,9 @@ public class UserService {
 	}
 
 	@Transactional
-	public UserEntity registerUserInfo(UserEntity userRef, String nickname, String profileImg, String thumbnail,
+	public UserEntity registerUserInfo(long userId, String nickname, String profileImg, String thumbnail,
 		String memo, boolean marketing) {
+		UserEntity userRef = userRepository.getReferenceById(userId);
 		UserEntity user = modifyUserInfo(userRef, nickname, profileImg, thumbnail, memo);
 		notificationConfigRepository.updateMarketingAgree(user.getId(), marketing);
 		return user;
@@ -108,7 +109,7 @@ public class UserService {
 	}
 
 	@Transactional
-	public void deleteUserById(UserEntity user) {
+	public void deleteUserByUser(UserEntity user) {
 		DeletedUser du = DeletedUser.builder()
 			.id(user.getId())
 			.name(user.getName())

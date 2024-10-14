@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPEditRegisterDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPListDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPLockerDto;
@@ -164,7 +165,7 @@ public class PlanPController {
 		@DestinationVariable long tripId
 	) {
 		String sessionId = headerAccessor.getSessionId();
-		String nickname = (String) Objects.requireNonNull(headerAccessor.getSessionAttributes())
+		String nickname = (String)Objects.requireNonNull(headerAccessor.getSessionAttributes())
 			.getOrDefault("nickname", null);
 		String uuid = Objects.requireNonNull(headerAccessor.getUser()).getName();
 		log.info("uuid: " + uuid);
@@ -173,7 +174,7 @@ public class PlanPController {
 		String[] editor = planPEditService.getEditorByTripId(tripId);
 		if (editor != null) {
 			template.convertAndSend("/topic/api/trip/p/" + tripId,
-				new SocketResponseBody<>("wait", editor[2])
+				new SocketResponseBody<>("wait", new PlanPEditRegisterDto(editor[1], editor[2]))
 			);
 			return;
 		}
@@ -181,7 +182,7 @@ public class PlanPController {
 		planPEditService.addEditor(tripId, sessionId, uuid, nickname);
 
 		template.convertAndSend("/topic/api/trip/p/" + tripId,
-			new SocketResponseBody<>("edit start", uuid)
+			new SocketResponseBody<>("edit start", new PlanPEditRegisterDto(uuid, nickname))
 		);
 	}
 
@@ -194,11 +195,12 @@ public class PlanPController {
 				@ExampleObject(name = "편집중인 사람이 존재할 경우", value = "{\"command\": \"wait\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}")
 			}
 		)})
-	public SocketResponseBody<String> addEditor(
+	public ResponseEntity<SocketResponseBody<PlanPEditRegisterDto>> addEditor(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId
 	) {
 
-		return new SocketResponseBody<>("edit start", "uuid");
+		return ResponseEntity.ok(new SocketResponseBody<>("edit finish",
+			new PlanPEditRegisterDto("uuid", "nickname")));
 	}
 
 	@GetMapping("/edit/finish")
@@ -209,13 +211,14 @@ public class PlanPController {
 				@ExampleObject(value = "{\"command\": \"edit finish\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}"),
 			}
 		)})
-	public SocketResponseBody<String> removeEditor(
+	public ResponseEntity<SocketResponseBody<PlanPEditRegisterDto>> removeEditor(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
 		planPEditService.removeEditorByDestination(tripId, securityUser.getUuid());
 
-		return new SocketResponseBody<>("edit finish", "uuid");
+		return ResponseEntity.ok(new SocketResponseBody<>("edit finish",
+			new PlanPEditRegisterDto(securityUser.getUuid(), securityUser.getNickname())));
 	}
 
 	@PutMapping("/edit/move")

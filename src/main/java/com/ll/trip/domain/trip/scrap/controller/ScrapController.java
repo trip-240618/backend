@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.trip.scrap.dto.ScrapCreateDto;
 import com.ll.trip.domain.trip.scrap.dto.ScrapDetailDto;
 import com.ll.trip.domain.trip.scrap.dto.ScrapListDto;
@@ -44,7 +43,6 @@ import lombok.extern.slf4j.Slf4j;
 public class ScrapController {
 	private final ScrapService scrapService;
 	private final TripService tripService;
-	private final AwsAuthService awsAuthService;
 
 	@PostMapping("/{tripId}/scrap/create")
 	@Operation(summary = "스크랩 생성")
@@ -114,7 +112,6 @@ public class ScrapController {
 		long scrapId
 	) {
 		scrapService.checkIsWriterOfScrap(scrapId, securityUser.getId());
-		awsAuthService.deleteImagesByScrapId(scrapId);
 		scrapService.deleteById(scrapId);
 
 		return ResponseEntity.ok(scrapService.findAllByTripIdAndUserId(tripId, securityUser.getId()));
