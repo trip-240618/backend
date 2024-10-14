@@ -135,13 +135,10 @@ public class PlanJController {
 		plan = planJService.updatePlanJByPlanId(plan, requestBody, order);
 		PlanJInfoDto response = planJService.convertPlanJToDto(plan);
 
-		if (!requestBody.isLocker())
-			template.convertAndSend(
-				"/topic/api/trip/j/" + tripId,
-				new SocketResponseBody<>("modify", response)
-			);
-		else
-			return ResponseEntity.ok(response);
+		template.convertAndSend(
+			"/topic/api/trip/j/" + tripId,
+			new SocketResponseBody<>("modify", response)
+		);
 
 		return ResponseEntity.ok("modified");
 	}
