@@ -2,7 +2,6 @@ package com.ll.trip.domain.trip.planJ.service;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -126,11 +125,12 @@ public class PlanJService {
 			if (dto.getOrderByDate() == null || dto.getStartTime() == null)
 				continue;
 			PlanJInfoDto plan = planJMap.remove(dto.getPlanId());
-			if (dto.getStartTime().equals(plan.getStartTime()) && dto.getOrderByDate().equals(plan.getOrderByDate()))
-				continue;
-			plan.setStartTime(dto.getStartTime());
-			plan.setOrderByDate(dto.getOrderByDate());
-			planJRepository.updateStartTimeAndOrder(dto.getPlanId(), dto.getStartTime(), dto.getOrderByDate());
+			if (!dto.getStartTime().equals(plan.getStartTime()) || !dto.getOrderByDate()
+				.equals(plan.getOrderByDate())) {
+				plan.setStartTime(dto.getStartTime());
+				plan.setOrderByDate(dto.getOrderByDate());
+				planJRepository.updateStartTimeAndOrder(dto.getPlanId(), dto.getStartTime(), dto.getOrderByDate());
+			}
 			response.add(plan);
 		}
 		response.addAll(planJMap.values());
