@@ -15,6 +15,11 @@ public class PlanPCheckBoxResponseDto {
 	private long planId;
 
 	@Schema(
+		description = "예정일",
+		example = "1")
+	private Integer dayAfterStart;
+
+	@Schema(
 		description = "변경 후 check 여부",
 		example = "true")
 	private boolean checkbox;

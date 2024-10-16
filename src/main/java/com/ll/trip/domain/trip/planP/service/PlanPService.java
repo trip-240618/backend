@@ -16,6 +16,7 @@ import com.ll.trip.domain.trip.planP.dto.PlanPLockerDto;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
 import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
+import com.ll.trip.global.handler.exception.NoSuchDataException;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -100,13 +101,13 @@ public class PlanPService {
 
 	@Transactional
 	public PlanPCheckBoxResponseDto updateCheckBoxById(Long planId) {
-		boolean checkbox = planPRepository.findIsCheckBoxByPlanId(planId);
-		int cnt = planPRepository.updateCheckBoxByPlanId(planId, !checkbox);
+		PlanP planp = planPRepository.findById(planId).orElseThrow(() -> new NoSuchDataException("no such plan"));
+		int cnt = planPRepository.updateCheckBoxByPlanId(planId, !planp.isCheckbox());
 
 		if (cnt == 0)
 			return null;
 
-		return new PlanPCheckBoxResponseDto(planId, !checkbox);
+		return new PlanPCheckBoxResponseDto(planId, planp.getDayAfterStart(), !planp.isCheckbox());
 	}
 
 	@Transactional

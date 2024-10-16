@@ -82,12 +82,6 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		""")
 	int increaseOrderFromByTripIdAndDay(long tripId, int day, int from);
 
-	@Query("""
-		select p.checkbox
-		from PlanP p
-		where p.id = :planId
-	""")
-	boolean findIsCheckBoxByPlanId(Long planId);
 
 	@Modifying
 	@Query("""
