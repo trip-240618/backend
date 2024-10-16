@@ -1,6 +1,7 @@
 package com.ll.trip.domain.trip.planJ.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.http.ResponseEntity;
@@ -178,18 +179,19 @@ public class PlanJController {
 	@ApiResponse(responseCode = "200", description = "PlanJ 삭제", content = {
 		@Content(mediaType = "application/json",
 			examples = {
-				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"delete\", \"data\": planId}"),
-				@ExampleObject(name = "http 응답", value = "삭제로 인해 순서가 수정된 plan 수")}
+				@ExampleObject(name = "웹소켓 응답", value = "{\n  \"command\": \"delete\",\n  \"data\": {\n    \"dayAfterStart\": 1,\n    \"planId\": 1\n  }\n}"),
+				@ExampleObject(name = "http 응답", value = "deleted")}
 		)})
 	public ResponseEntity<?> deletePlanJ(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
-		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId
+		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId,
+		@RequestParam @Parameter(description = "dayAfterStart", example = "1") Integer day
 	) {
-		planJService.deletePlanJById(planId);
+		planJService.deletePlanJById(day, planId);
 
 		template.convertAndSend(
 			"/topic/api/trip/j/" + tripId,
-			new SocketResponseBody<>("delete", planId)
+			new SocketResponseBody<>("delete", Map.of("dayAfterStart", day, "planId", planId))
 		);
 
 		return ResponseEntity.ok("deleted");

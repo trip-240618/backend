@@ -31,8 +31,8 @@ public class PlanJService {
 	private final EntityManager entityManager;
 
 	@Transactional
-	public void deletePlanJById(Long planId) {
-		planJRepository.deleteById(planId);
+	public void deletePlanJById(int day, long planId) {
+		planJRepository.deleteByIdAndDayAfterStart(planId, day);
 	}
 
 	@Transactional

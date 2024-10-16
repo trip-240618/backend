@@ -60,4 +60,6 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 		where p.trip.id = :tripId and (p.dayAfterStart < 1 or p.dayAfterStart > :duration)
 		""")
 	void deleteByTripIdAndDuration(Long tripId, int duration);
+
+	void deleteByIdAndDayAfterStart(long id, int day);
 }

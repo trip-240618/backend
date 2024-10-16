@@ -94,8 +94,8 @@ public class PlanPService {
 	}
 
 	@Transactional
-	public void deletePlanPByPlanId(Long planId) {
-		planPRepository.deleteById(planId);
+	public void deletePlanPByPlanId(int day, long planId) {
+		planPRepository.deleteByIdAndDayAfterStart(planId, day);
 	}
 
 	@Transactional
