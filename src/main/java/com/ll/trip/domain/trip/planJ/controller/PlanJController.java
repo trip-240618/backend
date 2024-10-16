@@ -230,8 +230,8 @@ public class PlanJController {
 	@ApiResponse(responseCode = "200", description = "웹소켓으로 요청해야함, 편집자가 없을 시 편집자로 등록", content = {
 		@Content(mediaType = "application/json",
 			examples = {
-				@ExampleObject(name = "편집자로 등록된 경우", value = "{\"command\": \"edit start\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}"),
-				@ExampleObject(name = "편집중인 사람이 존재할 경우", value = "{\"command\": \"wait\", \"data\": \"223e4567-e89b-12d3-a456-426614174001\"}")
+				@ExampleObject(name = "편집자로 등록된 경우", value = "{\"command\": \"edit start\", \"data\": {\"day\": 1, \"editorUuid\": \"123e4567-e89b-12d3-a456-426614174000\", \"nickname\": \"등록된 편집자\"}}"),
+				@ExampleObject(name = "편집중인 사람이 존재할 경우", value = "{\"command\": \"wait\", \"data\": {\"day\": 1, \"editorUuid\": \"123e4567-e89b-12d3-a456-426614174000\", \"nickname\": \"기존 편집자\"}}")
 			},
 			schema = @Schema(implementation = PlanJEditorRegisterDto.class))})
 	public SocketResponseBody<String> addEditor(
@@ -246,9 +246,8 @@ public class PlanJController {
 	@ApiResponse(responseCode = "200", description = "편집자 목록에서 제거", content = {
 		@Content(mediaType = "application/json",
 			examples = {
-				@ExampleObject(value = "{\"command\": \"edit finish\", \"data\": PlanJEditorRegisterDto"),
-			},
-			schema = @Schema(implementation = PlanJEditorRegisterDto.class))})
+				@ExampleObject(value = "{\"command\": \"edit finish\", \"data\": {\"day\": 1, \"editorUuid\": \"123e4567-e89b-12d3-a456-426614174000\", \"nickname\": \"example\"}}")
+			})})
 	public void removeEditor(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
