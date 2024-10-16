@@ -145,8 +145,9 @@ public class PlanPController {
 			mediaType = "application/json",
 			examples = {
 				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"check\", \"data\": \"PlanPCheckBoxResponseDto\"}"),
-				@ExampleObject(name = "http 응답", value = "checked")},
-			schema = @Schema(implementation = PlanPCheckBoxResponseDto.class))})
+				@ExampleObject(name = "http 응답", value = "checked")}
+			,schema = @Schema(implementation = PlanPCheckBoxResponseDto.class)
+		)})
 	public ResponseEntity<?> modifyPlanP(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId
@@ -213,24 +214,22 @@ public class PlanPController {
 				@ExampleObject(value = "{\"command\": \"edit finish\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}"),
 			}
 		)})
-	public ResponseEntity<SocketResponseBody<PlanPEditRegisterDto>> removeEditor(
+	public void removeEditor(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
 		planPEditService.removeEditorByDestination(tripId, securityUser.getUuid());
-
-		return ResponseEntity.ok(new SocketResponseBody<>("edit finish",
-			new PlanPEditRegisterDto(securityUser.getUuid(), securityUser.getNickname())));
 	}
 
 	@PutMapping("/edit/move")
 	@Operation(summary = "Plan P 이동")
 	@ApiResponse(responseCode = "200", description = "Plan P 이동", content = {
-		@Content(mediaType = "application/json",
-			examples = {
-				@ExampleObject(value = "{\"command\": \"move\", \"data\": PlanPMoveDto}")},
-			schema = @Schema(implementation = PlanPMoveDto.class)
-		)})
+		@Content(mediaType = "application/json", examples = {
+			@ExampleObject(description = "웹소켓 응답",
+				value = "{\"command\": \"move\", \"data\": {\"planId\": 1, \"dayFrom\": 1, \"dayTo\": 2, \"orderFrom\": 1, \"orderTo\": 1}}"),
+			@ExampleObject(description = "http 응답",
+				value = "moved")
+		})})
 	public ResponseEntity<?> movePlanP(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser,
@@ -253,8 +252,14 @@ public class PlanPController {
 		, content = {
 		@Content(mediaType = "application/json",
 			examples = {
-				@ExampleObject(description = "보관함으로 이동", value = "{\"command\": \"locker in\", \"data\": PlanPMoveDto}"),
-				@ExampleObject(description = "일정으로 이동", value = "{\"command\": \"locker out\", \"data\": PlanPMoveDto}")
+				@ExampleObject(
+					description = "보관함으로 이동",
+					value = "{\"command\": \"locker in\", \"data\": {\"planId\": 1, \"dayTo\": 2, \"order\": 22, \"locker\": false}}"
+				),
+				@ExampleObject(
+					description = "일정으로 이동",
+					value = "{\"command\": \"locker out\", \"data\": {\"planId\": 1, \"dayTo\": 2, \"order\": 22, \"locker\": false}}"
+				)
 			},
 			schema = @Schema(implementation = PlanPLockerDto.class)
 		)})
