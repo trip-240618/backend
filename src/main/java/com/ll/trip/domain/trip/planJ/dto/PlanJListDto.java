@@ -12,7 +12,7 @@ public class PlanJListDto {
 	private Integer dayAfterStart;
 	private List<PlanJInfoDto> planList;
 
-	public PlanJListDto(int day){
+	public PlanJListDto(Integer day){
 		this.dayAfterStart = day;
 		this.planList = new ArrayList<>();
 	}
