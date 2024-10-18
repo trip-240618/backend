@@ -49,8 +49,9 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 				tm.trip.id, tm.isLeader, SIZE(tm.trip.tripMembers))
 		from TripMember tm
 		where tm.trip.id = :tripId
+		and tm.user.id = :userId
 		""")
-	TripMemberDeleteDto findDeleteDtoBy(long tripId);
+	TripMemberDeleteDto findDeleteDtoBy(long tripId, long userId);
 
 	@Query("""
 				select new com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto(

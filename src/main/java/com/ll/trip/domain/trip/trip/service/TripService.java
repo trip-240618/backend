@@ -171,7 +171,7 @@ public class TripService {
 	}
 
 	public void deleteTripMember(long tripId, long userId) {
-		TripMemberDeleteDto dto = tripMemberRepository.findDeleteDtoBy(tripId);
+		TripMemberDeleteDto dto = tripMemberRepository.findDeleteDtoBy(tripId, userId);
 		extractAndDeleteTripMember(List.of(dto), userId);
 	}
 
