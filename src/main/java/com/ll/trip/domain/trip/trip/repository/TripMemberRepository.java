@@ -34,23 +34,23 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 
 	@Modifying
 	@Query(value = """
-		UPDATE trip_member tm
-		SET tm.is_leader = 1
-		WHERE tm.id = (SELECT id FROM trip_member tm1 WHERE tm1.trip_id = :tripId LIMIT 1)
-		""", nativeQuery = true)
+		UPDATE TripMember tm
+		SET tm.isLeader = 1
+		WHERE tm.id = (SELECT MIN(tm1.id) FROM TripMember tm1 WHERE tm1.trip.id = :tripId)
+		""")
 	void handLeaderToMember(long tripId);
 
 	@Query("""
-  		select new com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto(
-  		tm.trip.id, tm.isLeader, SIZE(tm.trip.tripMembers))
+				select new com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto(
+				tm.trip.id, tm.isLeader, SIZE(tm.trip.tripMembers))
 		from TripMember tm
 		where tm.trip.id = :tripId
 		""")
 	TripMemberDeleteDto findDeleteDtoBy(long tripId);
 
 	@Query("""
-  		select new com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto(
-  		tm.trip.id, tm.isLeader, SIZE(tm.trip.tripMembers))
+				select new com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto(
+				tm.trip.id, tm.isLeader, SIZE(tm.trip.tripMembers))
 		from TripMember tm
 		where tm.user.id = :userId
 		""")

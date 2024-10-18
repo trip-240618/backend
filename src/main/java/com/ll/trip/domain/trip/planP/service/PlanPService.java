@@ -147,7 +147,25 @@ public class PlanPService {
 		PlanPWeekDto<PlanPInfoDto> response = new PlanPWeekDto<>(request.getWeek());
 		List<PlanPDayDto<PlanPInfoDto>> dayList = findAllByTripId(tripId, request.getWeek(), false);
 		Map<Long, PlanPInfoDto> idMap = new HashMap<>();
+		for (PlanPDayDto<PlanPInfoDto> dayDto : dayList) {
+			for (PlanPInfoDto dto : dayDto.getPlanList())
+				idMap.put(dto.getPlanId(), dto);
+		}
 
+		for (PlanPDayDto<PlanPInfoDto> dayDto : response.getDayList()) {
+			int requestSize = dayDto.getPlanList().size();
+			PlanPDayDto<PlanPInfoDto> responseDay = new PlanPDayDto<>(dayDto.getDay());
+			response.getDayList().add(responseDay); //새로운 day 생성
+			List<PlanPInfoDto> list = responseDay.getPlanList();
+			for (PlanPInfoDto dto : dayDto.getPlanList()) {
+				if (!idMap.containsKey(dto.getPlanId())) {
+					requestSize--;
+					continue;
+				}
+
+
+			}
+		}
 
 		template.convertAndSend("/topic/api/trip/p/" + tripId, new SocketResponseBody<>("move", response));
 	}
