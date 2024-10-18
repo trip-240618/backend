@@ -5,17 +5,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPDayDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPListDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPLockerDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPOrderDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPWeekDto;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
 import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
+import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.global.handler.exception.NoSuchDataException;
 
 import jakarta.persistence.EntityManager;
@@ -28,9 +30,10 @@ public class PlanPService {
 
 	private final PlanPRepository planPRepository;
 	private final EntityManager entityManager;
+	private final SimpMessagingTemplate template;
 
 	@Transactional
-	public PlanP createPlanP(long tripId, PlanPCreateRequestDto requestDto, String uuid) {
+	public PlanP createPlanP(long tripId, PlanPInfoDto requestDto) {
 		Trip trip = entityManager.getReference(Trip.class, tripId);
 
 		PlanP plan = PlanP.builder()
@@ -38,9 +41,8 @@ public class PlanPService {
 			.dayAfterStart(requestDto.getDayAfterStart())
 			.content(requestDto.getContent())
 			.orderByDate(
-				getNextIdx(trip.getId(), requestDto.getDayAfterStart())
+				getNextIdx(trip.getId(), requestDto.getDayAfterStart(), requestDto.isLocker())
 			)
-			.writerUuid(uuid)
 			.checkbox(false)
 			.locker(requestDto.isLocker())
 			.build();
@@ -48,9 +50,9 @@ public class PlanPService {
 		return planPRepository.save(plan);
 	}
 
-	public int getNextIdx(long tripId, Integer day) {
-		Integer maxOrder = planPRepository.findMaxOrder(tripId, day);
-		return maxOrder == null ? 0 : maxOrder + 11;
+	public int getNextIdx(long tripId, Integer day, boolean locker) {
+		Integer maxOrder = planPRepository.findMaxOrder(tripId, day, locker);
+		return maxOrder == null ? 0 : maxOrder + 1_048_576;
 	}
 
 	public PlanPInfoDto convertPlanPToDto(PlanP plan) {
@@ -58,24 +60,32 @@ public class PlanPService {
 			plan.getId(),
 			plan.getDayAfterStart(),
 			plan.getOrderByDate(),
-			plan.getWriterUuid(),
 			plan.getContent(),
-			plan.isCheckbox()
+			plan.isCheckbox(),
+			plan.isLocker()
 		);
 	}
 
-	public List<PlanPListDto> findAllByTripId(long tripId, boolean locker) {
-		List<PlanPInfoDto> dtos = planPRepository.findAllByTripIdOrderByDayAfterStartAndOrderByDate(tripId, locker);
+	public List<PlanPDayDto<PlanPInfoDto>> findAllByTripId(long tripId, Integer week, boolean locker) {
+		List<PlanPInfoDto> dtos;
+		if (locker) {
+			dtos = planPRepository.findAllLockerByTripId(tripId);
+		} else {
+			int dayFrom = (week - 1) * 7 + 1;
+			int dayTo = week * 7;
+			dtos = planPRepository.findAllByTripId(tripId, dayFrom, dayTo);
+		}
+
 		return parseToListResponse(dtos);
 	}
 
-	private List<PlanPListDto> parseToListResponse(List<PlanPInfoDto> dtos) {
-		List<PlanPListDto> response = new ArrayList<>();
+	private List<PlanPDayDto<PlanPInfoDto>> parseToListResponse(List<PlanPInfoDto> dtos) {
+		List<PlanPDayDto<PlanPInfoDto>> response = new ArrayList<>();
 		Map<Integer, List<PlanPInfoDto>> dayMap = new HashMap<>();
 
 		for (PlanPInfoDto dto : dtos) {
 			dayMap.computeIfAbsent(dto.getDayAfterStart(), day -> {
-				PlanPListDto listDto = new PlanPListDto(day);
+				PlanPDayDto<PlanPInfoDto> listDto = new PlanPDayDto<>(day);
 				response.add(listDto);
 				return listDto.getPlanList();
 			}).add(dto);
@@ -111,11 +121,35 @@ public class PlanPService {
 	}
 
 	@Transactional
-	public PlanPLockerDto moveLocker(long tripId, long planId, Integer dayTo, boolean locker) {
-		int order = getNextIdx(tripId, dayTo);
-		if (planPRepository.updatePlanPDayAndLockerByPlanId(planId, dayTo, order, locker) > 0)
-			return new PlanPLockerDto(planId, dayTo, order, locker);
+	public void moveLocker(long tripId, long planId, Integer dayTo, boolean locker) {
+		PlanP plan = planPRepository.findPlanPById(planId)
+			.orElseThrow(() -> new NoSuchDataException("plan을 찾을 수 없습니다. planId: " + planId));
+		if (plan.isLocker() == locker)
+			return;
+		Integer dayFrom = plan.getDayAfterStart();
+
+		plan.setDayAfterStart(dayTo);
+		plan.setOrderByDate(getNextIdx(tripId, dayTo, locker));
+		plan.setLocker(locker);
+		plan = planPRepository.save(plan);
+
+		if (locker)
+			template.convertAndSend("/topic/api/trip/p/" + tripId,
+				new SocketResponseBody<>("delete", Map.of("dayAfterStart", dayFrom, "planId", planId)));
 		else
-			return null;
+			template.convertAndSend("/topic/api/trip/p/" + tripId,
+				new SocketResponseBody<>("create", convertPlanPToDto(plan)));
+
 	}
+
+	@Transactional
+	public void movePlanByDayAndOrder(long tripId, PlanPWeekDto<PlanPOrderDto> request) {
+		PlanPWeekDto<PlanPInfoDto> response = new PlanPWeekDto<>(request.getWeek());
+		List<PlanPDayDto<PlanPInfoDto>> dayList = findAllByTripId(tripId, request.getWeek(), false);
+		Map<Long, PlanPInfoDto> idMap = new HashMap<>();
+
+
+		template.convertAndSend("/topic/api/trip/p/" + tripId, new SocketResponseBody<>("move", response));
+	}
+
 }

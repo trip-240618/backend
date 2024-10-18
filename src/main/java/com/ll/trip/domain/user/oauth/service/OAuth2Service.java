@@ -35,19 +35,16 @@ public class OAuth2Service {
 		if (optUser.isEmpty()) {
 			user = registerUser(name, profileImg, providerId, email, fcmToken);
 			notificationService.createNotificationConfig(user);
-			notificationService.userCreateNotification(user);
 			uuid = user.getUuid();
-			userInfoDto = new UserInfoDto(user, "register");
+			userInfoDto = new UserInfoDto(user);
 		} else {
 			user = optUser.get();
 			uuid = user.getUuid();
 
 			userService.updateFcmTokenByUserId(user.getId(), fcmToken);
 
-			if (user.getNickname() == null)
-				userInfoDto = new UserInfoDto(user, "register");
-			else
-				userInfoDto = new UserInfoDto(user, "login");
+
+			userInfoDto = new UserInfoDto(user);
 		}
 
 		userService.createAndSetTokens(user.getId(), uuid, user.getNickname(), user.getAuthorities(), response);

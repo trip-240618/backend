@@ -37,13 +37,14 @@ public class PlanP extends BaseEntity {
 	@JoinColumn(name = "trip_id")
 	private Trip trip;
 
+	@Setter
 	private Integer dayAfterStart;
 
+	@Setter
 	private Integer orderByDate;
 
+	@Setter
 	private boolean locker;
-
-	private String writerUuid;
 
 	@NotBlank
 	@Setter

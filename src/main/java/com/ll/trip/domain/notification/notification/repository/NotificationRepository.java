@@ -37,18 +37,20 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
 	@Query("""
 			select new com.ll.trip.domain.notification.notification.dto.NotificationListDto(
-			n.id, n.tripId, n.tripType, n.type, n.typeId, n.title, n.content, n.isRead, n.createDate
+			n.id, t.labelColor, n.destination, n.title, n.content, n.isRead, n.createDate
 			)
 			from Notification n
+			left join n.trip t
 			where n.user.id = :userId and n.createDate >= :weekAgo
 		""")
 	List<NotificationListDto> findAllByUserIdAndDate(long userId, LocalDateTime weekAgo);
 
 	@Query("""
 			select new com.ll.trip.domain.notification.notification.dto.NotificationListDto(
-			n.id, n.tripId, n.tripType, n.type, n.typeId, n.title, n.content, n.isRead, n.createDate
+			n.id, t.labelColor, n.destination, n.title, n.content, n.isRead, n.createDate
 			)
 			from Notification n
+			left join n.trip t
 			where n.user.id = :userId and n.createDate >= :weekAgo and n.title = :title
 		""")
 	List<NotificationListDto> findAllTypeByUserIdAndDate(long userId, String title, LocalDateTime weekAgo);

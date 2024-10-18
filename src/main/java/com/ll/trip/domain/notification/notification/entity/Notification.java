@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 
 import jakarta.persistence.Entity;
@@ -32,10 +33,6 @@ public class Notification {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private Long tripId;
-
-	private Character tripType;
-
 	@NotBlank
 	private String title;
 
@@ -44,11 +41,7 @@ public class Notification {
 
 	private boolean isRead;
 
-	private String type;
-
-	private Long typeId;
-
-	private String labelColor;
+	private String destination;
 
 	@CreatedDate
 	private LocalDateTime createDate;
@@ -56,4 +49,8 @@ public class Notification {
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private UserEntity user;
+
+	@ManyToOne
+	@JoinColumn(name = "trip_id")
+	private Trip trip;
 }

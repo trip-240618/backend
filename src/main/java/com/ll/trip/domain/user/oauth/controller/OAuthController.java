@@ -56,7 +56,7 @@ public class OAuthController {
 
 				UserInfoDto userInfoDto = oAuth2Service.whenLogin(oauthId, name, null, profileImageUrl, "KAKAO",
 					fcmToken, response);
-				log.info("name : {}", properties.getNickname());
+				log.info("애플 로그인\nname : {}", name);
 				log.info("oauthId : {}", oauthId);
 				log.info("profileImageUrl : {}", profileImageUrl);
 
@@ -79,6 +79,10 @@ public class OAuthController {
 		String email = requestBody.getEmail();
 		String fcmToken = requestBody.getFcmToken();
 
+		log.info("애플 로그인\nname : {}", name);
+		log.info("oauthId : {}", oauthId);
+		log.info("profileImageUrl : {}", profileImg);
+
 		UserInfoDto userInfoDto = oAuth2Service.whenLogin(oauthId, name, email, profileImg, "GOOGLE", fcmToken,
 			response);
 
@@ -96,6 +100,9 @@ public class OAuthController {
 		String profileImg = null;
 		String email = requestBody.getEmail();
 		String fcmToken = requestBody.getFcmToken();
+
+		log.info("애플 로그인\nname : {}", name);
+		log.info("oauthId : {}", oauthId);
 
 		UserInfoDto userInfoDto = oAuth2Service.whenLogin(oauthId, name, email, profileImg, "APPLE", fcmToken,
 			response);

@@ -15,10 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.history.history.dto.HistoriesCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryDto;
-import com.ll.trip.domain.history.history.dto.HistoryListDto;
+import com.ll.trip.domain.history.history.dto.HistoryDayDto;
 import com.ll.trip.domain.history.history.dto.HistoryModifyDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
@@ -58,26 +57,39 @@ public class HistoryController {
 	@GetMapping("/{tripId}/history/list")
 	@Operation(summary = "History 리스트")
 	@ApiResponse(responseCode = "200", description = "History 리스트")
-	public ResponseEntity<List<HistoryListDto>> showHistoryList(
+	public ResponseEntity<List<HistoryDayDto>> showHistoryList(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
 		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
-		List<HistoryListDto> response = historyService.findAllByTripId(tripId, securityUser.getId());
+		List<HistoryDayDto> response = historyService.findAllByTripId(tripId, securityUser.getId());
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/{tripId}/history/{historyId}")
+	@Operation(summary = "History 단일 상세")
+	@ApiResponse(responseCode = "200", description = "History 단일 상세")
+	public ResponseEntity<HistoryDto> showHistoryList(
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
+		@PathVariable @Parameter(description = "기록 id", example = "1", in = ParameterIn.PATH) long historyId,
+		@AuthenticationPrincipal SecurityUser securityUser
+	) {
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
+		HistoryDto response = historyService.findByHistoryId(historyId, securityUser.getId());
 		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping("/{tripId}/history/create/many")
 	@Operation(summary = "History 일괄 생성")
 	@ApiResponse(responseCode = "200", description = "History 생성")
-	public ResponseEntity<List<HistoryListDto>> createManyHistories(
+	public ResponseEntity<List<HistoryDayDto>> createManyHistories(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestBody HistoriesCreateRequestDto requestDto
 	) {
 		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
-		List<HistoryListDto> response = historyService.createManyHistories(requestDto.getHistoryCreateRequestDtos(),
+		List<HistoryDayDto> response = historyService.createManyHistories(requestDto.getHistoryCreateRequestDtos(),
 			tripId, securityUser.getId());
 
 		return ResponseEntity.ok(response);
@@ -86,7 +98,7 @@ public class HistoryController {
 	@PutMapping("/{tripId}/history/modify/{historyId}")
 	@Operation(summary = "History 수정")
 	@ApiResponse(responseCode = "200", description = "History 수정")
-	public ResponseEntity<List<HistoryListDto>> modifyHistory(
+	public ResponseEntity<List<HistoryDayDto>> modifyHistory(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@PathVariable @Parameter(description = "히스토리 id", example = "1", in = ParameterIn.PATH) long historyId,
 		@AuthenticationPrincipal SecurityUser securityUser,
@@ -97,7 +109,7 @@ public class HistoryController {
 		History history = historyService.findById(historyId);
 
 		historyService.modifyHistory(tripId, history, requestDto);
-		List<HistoryListDto> response = historyService.showHistoryDetail(historyId, securityUser.getId());
+		List<HistoryDayDto> response = historyService.showHistoryDetail(historyId, securityUser.getId());
 
 		return ResponseEntity.ok(response);
 	}

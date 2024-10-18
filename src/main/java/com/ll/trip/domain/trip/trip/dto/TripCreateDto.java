@@ -49,7 +49,7 @@ public class TripCreateDto {
 
 	@Schema(
 		description = "여행방 라벨 컬러",
-		example = "#FFEFF3")
+		example = "FFEFF3")
 	@NotBlank
 	private String labelColor;
 }

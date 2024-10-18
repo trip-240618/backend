@@ -15,8 +15,6 @@ import lombok.NonNull;
 public interface TripMemberRepository extends JpaRepository<TripMember, TripMemberId> {
 	boolean existsById(@NonNull TripMemberId tripMemberId);
 
-	int countByUser_Id(long userId);
-
 	boolean existsTripMemberByTripIdAndUserId(long tripId, long userId);
 
 	@Query("""
@@ -35,7 +33,11 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 	void deleteByTripIdAndUuid(long tripId, String uuid);
 
 	@Modifying
-	@Query(value = "UPDATE trip_member tm SET tm.is_leader = 1 WHERE tm.trip_id = :tripId LIMIT 1", nativeQuery = true)
+	@Query(value = """
+		UPDATE trip_member tm
+		SET tm.is_leader = 1
+		WHERE tm.id = (SELECT id FROM trip_member tm1 WHERE tm1.trip_id = :tripId LIMIT 1)
+		""", nativeQuery = true)
 	void handLeaderToMember(long tripId);
 
 	@Query("""

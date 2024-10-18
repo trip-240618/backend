@@ -93,7 +93,7 @@ public class PlanJController {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanJInfoDto.class)))})
 	public ResponseEntity<?> showPlanJList(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
-		@RequestParam @Parameter(description = "day", example = "1") int day,
+		@RequestParam(required = false) @Parameter(description = "day", example = "1") Integer day,
 		@RequestParam @Parameter(description = "보관함 여부", example = "false") boolean locker
 	) {
 		List<PlanJListDto> response;

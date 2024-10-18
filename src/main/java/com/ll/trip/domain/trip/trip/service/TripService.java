@@ -208,6 +208,7 @@ public class TripService {
 		return tripRepository.findVisitedCountry(userId, LocalDate.now());
 	}
 
+	@Transactional
 	public void deleteTripMemberByUuid(long tripId, String uuid) {
 		tripMemberRepository.deleteByTripIdAndUuid(tripId, uuid);
 	}

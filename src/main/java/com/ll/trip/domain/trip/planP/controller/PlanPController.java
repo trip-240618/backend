@@ -1,6 +1,5 @@
 package com.ll.trip.domain.trip.planP.controller;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -22,12 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPEditRegisterDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPListDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPLockerDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPMoveDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPOrderDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPWeekDto;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
 import com.ll.trip.domain.trip.planP.service.PlanPEditService;
 import com.ll.trip.domain.trip.planP.service.PlanPService;
@@ -67,15 +64,16 @@ public class PlanPController {
 	public ResponseEntity<?> createPlanP(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@RequestBody PlanPCreateRequestDto requestDto
+		@RequestBody PlanPInfoDto requestDto
 	) {
-		PlanP plan = planPService.createPlanP(tripId, requestDto, securityUser.getUuid());
+		PlanP plan = planPService.createPlanP(tripId, requestDto);
 		PlanPInfoDto response = planPService.convertPlanPToDto(plan);
 
-		template.convertAndSend(
-			"/topic/api/trip/p/" + tripId,
-			new SocketResponseBody<>("create", response)
-		);
+		if (!response.isLocker())
+			template.convertAndSend(
+				"/topic/api/trip/p/" + tripId,
+				new SocketResponseBody<>("create", response)
+			);
 
 		notificationService.createPlanCreateNotification(tripId);
 		return ResponseEntity.ok("created");
@@ -83,11 +81,12 @@ public class PlanPController {
 
 	@GetMapping("/list")
 	@Operation(summary = "Plan 리스트 요청")
-	public ResponseEntity<List<PlanPListDto>> showPlanPList(
+	public ResponseEntity<PlanPWeekDto<PlanPInfoDto>> showPlanPList(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
+		@RequestParam(required = false) @Parameter(description = "주차(플랜B일 땐 안줘도 됌)", example = "1") Integer week,
 		@RequestParam @Parameter(description = "보관함 여부", example = "false") boolean locker
 	) {
-		List<PlanPListDto> response = planPService.findAllByTripId(tripId, locker);
+		PlanPWeekDto<PlanPInfoDto> response = new PlanPWeekDto<>(week, planPService.findAllByTripId(tripId, week, locker));
 		return ResponseEntity.ok(response);
 	}
 
@@ -146,7 +145,7 @@ public class PlanPController {
 			examples = {
 				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"check\", \"data\": \"PlanPCheckBoxResponseDto\"}"),
 				@ExampleObject(name = "http 응답", value = "checked")}
-			,schema = @Schema(implementation = PlanPCheckBoxResponseDto.class)
+			, schema = @Schema(implementation = PlanPCheckBoxResponseDto.class)
 		)})
 	public ResponseEntity<?> modifyPlanP(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
@@ -226,21 +225,19 @@ public class PlanPController {
 	@ApiResponse(responseCode = "200", description = "Plan P 이동", content = {
 		@Content(mediaType = "application/json", examples = {
 			@ExampleObject(description = "웹소켓 응답",
-				value = "{\"command\": \"move\", \"data\": {\"planId\": 1, \"dayFrom\": 1, \"dayTo\": 2, \"orderFrom\": 1, \"orderTo\": 1}}"),
+				value = "{\"command\": \"move\", \"data\": PlanPWeekDto}"),
 			@ExampleObject(description = "http 응답",
 				value = "moved")
-		})})
+		}, schema = @Schema(implementation = PlanPWeekDto.class)
+		)})
 	public ResponseEntity<?> movePlanP(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@RequestBody PlanPMoveDto moveDto
+		@RequestBody PlanPWeekDto<PlanPOrderDto> requestDto
 	) {
 		planPEditService.checkIsEditor(tripId, securityUser.getUuid());
 
-		planPEditService.movePlanByDayAndOrder(tripId, moveDto.getPlanId(), moveDto.getDayFrom(),
-			moveDto.getDayTo(), moveDto.getOrderFrom(), moveDto.getOrderTo());
-
-		template.convertAndSend("/topic/api/trip/p/" + tripId, new SocketResponseBody<>("move", moveDto));
+		planPService.movePlanByDayAndOrder(tripId, requestDto);
 
 		notificationService.createPlanMoveNotification(tripId);
 		return ResponseEntity.ok("moved");
@@ -252,30 +249,16 @@ public class PlanPController {
 		, content = {
 		@Content(mediaType = "application/json",
 			examples = {
-				@ExampleObject(
-					description = "보관함으로 이동",
-					value = "{\"command\": \"locker in\", \"data\": {\"planId\": 1, \"dayTo\": 2, \"order\": 22, \"locker\": false}}"
-				),
-				@ExampleObject(
-					description = "일정으로 이동",
-					value = "{\"command\": \"locker out\", \"data\": {\"planId\": 1, \"dayTo\": 2, \"order\": 22, \"locker\": false}}"
-				)
-			},
-			schema = @Schema(implementation = PlanPLockerDto.class)
+				@ExampleObject(description = "보관함으로 이동", value = "{\n  \"command\": \"delete\",\n  \"data\": {\n    \"dayAfterStart\": 1,\n    \"planId\": 1\n  }\n}"),
+				@ExampleObject(description = "일정으로 이동", value = "{\"command\": \"create\", \"data\": PlanPInfoDto}")},
+			schema = @Schema(implementation = PlanPOrderDto.class)
 		)})
 	public ResponseEntity<?> moveByLocker(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
-		@RequestBody PlanPLockerDto lockerDto
+		@RequestBody PlanPInfoDto request
 	) {
-		PlanPLockerDto response = planPService.moveLocker(tripId, lockerDto.getPlanId(), lockerDto.getDayTo(),
-			lockerDto.isLocker());
-
-		if (lockerDto.isLocker())
-			template.convertAndSend("/topic/api/trip/p/" + tripId,
-				new SocketResponseBody<>("locker in", response));
-		else
-			template.convertAndSend("/topic/api/trip/p/" + tripId,
-				new SocketResponseBody<>("locker out", response));
+		planPService.moveLocker(tripId, request.getPlanId(), request.getDayAfterStart(),
+			request.isLocker());
 
 		return ResponseEntity.ok("moved");
 	}

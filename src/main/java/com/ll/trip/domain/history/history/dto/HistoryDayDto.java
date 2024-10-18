@@ -10,7 +10,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class HistoryListDto {
+public class HistoryDayDto {
 	@Schema(
 		description = "사진 날짜",
 		example = "2024-08-22")
@@ -18,7 +18,7 @@ public class HistoryListDto {
 
 	private List<HistoryDto> historyList;
 
-	public HistoryListDto(LocalDate photoDate) {
+	public HistoryDayDto(LocalDate photoDate) {
 		this.photoDate = photoDate;
 		this.historyList = new ArrayList<>();
 	}

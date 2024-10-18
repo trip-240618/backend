@@ -100,7 +100,7 @@ public class TripController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PostMapping("/enter")
+	@GetMapping("/enter")
 	@Operation(summary = "여행방 입장")
 	@ApiResponse(responseCode = "200", description = "여행방 입장", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = TripInfoDto.class))})

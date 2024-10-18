@@ -18,7 +18,7 @@ public class HistoryTagDto {
 
 	@Schema(
 		description = "히스토리 태그 컬러",
-		example = "#FFEFF3")
+		example = "FFEFF3")
 	private String tagColor;
 
 	@Schema(

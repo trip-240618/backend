@@ -48,8 +48,7 @@ public class UserController {
 	) {
 		log.info("uuid : " + securityUser.getUsername());
 		UserEntity user = userService.findUserByUserId(securityUser.getId());
-
-		UserInfoDto userInfoDto = new UserInfoDto(user, "login");
+		UserInfoDto userInfoDto = new UserInfoDto(user);
 
 		return ResponseEntity.ok(userInfoDto);
 	}
@@ -73,7 +72,7 @@ public class UserController {
 		userService.createAndSetTokens(user.getId(), user.getUuid(), user.getNickname(),
 			user.getAuthorities(), response);
 
-		return ResponseEntity.ok(new UserInfoDto(user, "modify"));
+		return ResponseEntity.ok(new UserInfoDto(user));
 	}
 
 	@PutMapping("/register")
@@ -97,7 +96,7 @@ public class UserController {
 		userService.createAndSetTokens(user.getId(), user.getUuid(), user.getNickname(),
 			user.getAuthorities(), response);
 
-		return ResponseEntity.ok(new UserInfoDto(user, "modify"));
+		return ResponseEntity.ok(new UserInfoDto(user));
 	}
 
 	@PutMapping("/update/fcmToken")
@@ -106,7 +105,7 @@ public class UserController {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = Integer.class))})
 	public ResponseEntity<?> updateFcmToken(
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@RequestParam String fcmToken
+		@RequestParam(required = false) String fcmToken
 	) {
 		int updated = userService.updateFcmTokenByUserId(securityUser.getId(), fcmToken);
 

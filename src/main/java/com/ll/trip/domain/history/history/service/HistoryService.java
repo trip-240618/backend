@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.history.history.dto.HistoryCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryDto;
-import com.ll.trip.domain.history.history.dto.HistoryListDto;
+import com.ll.trip.domain.history.history.dto.HistoryDayDto;
 import com.ll.trip.domain.history.history.dto.HistoryModifyDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
@@ -49,14 +49,14 @@ public class HistoryService {
 	private final EntityManager entityManager;
 	private final AwsAuthService awsAuthService;
 
-	public List<HistoryListDto> findAllByTripId(long tripId, long userId) {
+	public List<HistoryDayDto> findAllByTripId(long tripId, long userId) {
 		Pageable pageable = PageRequest.of(0, 50);
 		List<HistoryServiceDto> serviceDtos = historyRepository.findAllByTripId(tripId, userId, pageable);
 		return parseToMapResponse(serviceDtos);
 	}
 
-	private List<HistoryListDto> parseToMapResponse(List<HistoryServiceDto> serviceDtos) {
-		List<HistoryListDto> response = new ArrayList<>();
+	private List<HistoryDayDto> parseToMapResponse(List<HistoryServiceDto> serviceDtos) {
+		List<HistoryDayDto> response = new ArrayList<>();
 		Map<Long, HistoryDto> idMap = new HashMap<>();
 		Map<LocalDate, List<HistoryDto>> dateMap = new HashMap<>();
 
@@ -65,7 +65,7 @@ public class HistoryService {
 				HistoryDto newHistoryDto = new HistoryDto(dto);
 
 				dateMap.computeIfAbsent(dto.getPhotoDate(), date -> {
-					HistoryListDto ListDto = new HistoryListDto(date);
+					HistoryDayDto ListDto = new HistoryDayDto(date);
 					response.add(ListDto);
 					return ListDto.getHistoryList();
 				}).add(newHistoryDto);
@@ -141,7 +141,7 @@ public class HistoryService {
 	}
 
 	@Transactional
-	public List<HistoryListDto> createManyHistories(List<HistoryCreateRequestDto> dtos, long tripId,
+	public List<HistoryDayDto> createManyHistories(List<HistoryCreateRequestDto> dtos, long tripId,
 		long userId) {
 		UserEntity user = entityManager.getReference(UserEntity.class, userId);
 		Trip trip = entityManager.getReference(Trip.class, tripId);
@@ -268,8 +268,12 @@ public class HistoryService {
 		return historyRepository.findById(historyId).orElseThrow(() -> new NoSuchDataException("can't find such data, historyId: " + historyId));
 	}
 
-	public List<HistoryListDto> showHistoryDetail(long historyId, long userId) {
+	public List<HistoryDayDto> showHistoryDetail(long historyId, long userId) {
 		List<HistoryServiceDto> dtos = historyRepository.findHistoryById(historyId, userId);
 		return parseToMapResponse(dtos);
+	}
+
+	public HistoryDto findByHistoryId(long historyId, long userId) {
+		return new HistoryDto(historyRepository.findServiceDtoByHistoryIdAndUserId(historyId, userId));
 	}
 }

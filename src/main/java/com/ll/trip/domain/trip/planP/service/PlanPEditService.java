@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.trip.planP.dto.PlanPEditRegisterDto;
-import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
+import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
 
 import lombok.Getter;
@@ -49,42 +49,6 @@ public class PlanPEditService {
 
 	public String[] getEditorByTripId(long tripId) {
 		return destinationMap.getOrDefault(tripId, null);
-	}
-
-	@Transactional
-	public int movePlanByDayAndOrder(long tripId, long planId, int dayFrom, int dayTo, int orderFrom, int orderTo) {
-		if (dayFrom == dayTo) {
-			return movePlanPInSameDay(tripId, planId, dayTo, orderFrom, orderTo);
-		} else {
-			return movePlanPInAnotherDay(tripId, planId, dayTo, orderTo);
-		}
-	}
-
-	@Transactional
-	public int movePlanPInSameDay(long tripId, long planId, int dayTo, int orderFrom, int orderTo) {
-		int updated = 0;
-
-		if (orderTo > orderFrom) {
-			updated += planPRepository.reduceOrderFromToByTripIdAndDay(tripId, dayTo, orderFrom + 1,
-				orderTo);
-		} else {
-			updated += planPRepository.increaseOrderFromToByTripIdAndDay(tripId, dayTo, orderTo,
-				orderFrom - 1);
-
-		}
-		updated += planPRepository.updateDayOrderById(planId, dayTo, orderTo);
-
-		return updated;
-	}
-
-	@Transactional
-	public int movePlanPInAnotherDay(long tripId, long planId, int dayTo, int orderTo) {
-		int updated = 0;
-
-		updated += planPRepository.increaseOrderFromByTripIdAndDay(tripId, dayTo, orderTo);
-		updated += planPRepository.updateDayOrderById(planId, dayTo, orderTo);
-
-		return updated;
 	}
 
 	public void checkIsEditor(long tripId, String uuid) {

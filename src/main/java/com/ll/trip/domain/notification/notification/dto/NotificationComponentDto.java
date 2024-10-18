@@ -17,5 +17,4 @@ public class NotificationComponentDto {
 	private boolean planActive;
 	private boolean historyActive;
 	private boolean marketingActive;
-
 }

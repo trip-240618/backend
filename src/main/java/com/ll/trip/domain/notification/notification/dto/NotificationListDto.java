@@ -13,18 +13,12 @@ public class NotificationListDto {
 	@Schema(description = "알림 id", example = "1")
 	private long id;
 
-	@Schema(description = "알림이 발생한 Trip의 id (이동하는 url에 필요함)", example = "1")
-	private Long tripId;
-
-	@Schema(description = "알림이 발생한 Trip의 type (이동하는 url에 필요할 수 있음)", example = "j")
-	private Character tripType;
+	@Schema(description = "라벨 색상", example = "FFEFF3")
+	private String labelColor;
 
 	@NotBlank
-	@Schema(description = "알림을 확인하는데 필요한 테이블 이름", example = "trip")
-	private String type;
-
-	@Schema(description = "보게될 데이터의 id (이동이 필요한 경우에만 포함됨)", example = "15")
-	private Long typeId;
+	@Schema(description = "알림 내용으로 이동하는 url")
+	private String destination;
 
 	@NotBlank
 	@Schema(description = "알림의 제목", example = "여행 일정")

@@ -26,11 +26,6 @@ public class PlanPInfoDto {
 	private Integer orderByDate;
 
 	@Schema(
-		description = "작성자 uuid",
-		example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4")
-	private String writerUuid;
-
-	@Schema(
 		description = "플랜 내용",
 		example = "호텔 체크인 하기")
 	@NotBlank
@@ -41,5 +36,8 @@ public class PlanPInfoDto {
 		example = "true")
 	private boolean checkbox;
 
-
+	@Schema(
+		description = "보관함 여부",
+		example = "false")
+	private boolean locker;
 }

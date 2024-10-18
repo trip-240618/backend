@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import com.ll.trip.domain.file.file.dto.DeleteImageDto;
 import com.ll.trip.domain.history.history.dto.HistoryServiceDto;
 import com.ll.trip.domain.history.history.entity.History;
-import com.ll.trip.domain.trip.trip.entity.Trip;
 
 public interface HistoryRepository extends JpaRepository<History, Long> {
 
@@ -25,8 +24,6 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 		ORDER BY h.photoDate ASC, h.id DESC
 		""")
 	List<HistoryServiceDto> findAllByTripId(long tripId, long userId, Pageable pageable);
-
-	long countByTrip(Trip trip);
 
 	@Query("""
 		    select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
@@ -97,6 +94,18 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 		ORDER BY h.photoDate ASC, h.id DESC
 		""")
 	List<HistoryServiceDto> findHistoryByTripIdAndTagName(long tripId, long userId, String tagName, Pageable pageable);
+
+	@Query("""
+		select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
+		h.id, u.uuid, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
+		h.longitude, h.memo, h.likeCnt, h.replyCnt, coalesce(l.toggle, false), h.photoDate, t.id, t.tagColor, t.tagName)
+		FROM History h
+		inner join h.historyTags t on h.id = :historyId
+		left JOIN h.user u
+		left join h.historyLikes l on l.user.id = :userId
+		ORDER BY h.photoDate ASC, h.id DESC
+		""")
+	HistoryServiceDto findServiceDtoByHistoryIdAndUserId(long historyId, long userId);
 
 	@Query("""
 		select new com.ll.trip.domain.file.file.dto.DeleteImageDto(
