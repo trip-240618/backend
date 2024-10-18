@@ -6,4 +6,5 @@ import lombok.Data;
 public class PlanPOrderDto {
 	private long id;
 	private Integer dayAfterStart;
+	private Integer orderByDate;
 }

@@ -154,24 +154,26 @@ public class PlanPService {
 				idMap.put(dto.getPlanId(), dto);
 		}
 
-		for (PlanPDayDto<PlanPInfoDto> dayDto : response.getDayList()) {
+		for (PlanPDayDto<PlanPOrderDto> dayDto : request.getDayList()) {
 			int requestSize = dayDto.getPlanList().size();
 			PlanPDayDto<PlanPInfoDto> responseDay = new PlanPDayDto<>(dayDto.getDay());
 			response.getDayList().add(responseDay); //새로운 day 생성
 			List<PlanPInfoDto> list = responseDay.getPlanList();
-			for (PlanPInfoDto dto : dayDto.getPlanList()) {
-				if (!idMap.containsKey(dto.getPlanId())) {
+			for (PlanPOrderDto dto : dayDto.getPlanList()) {
+				if (!idMap.containsKey(dto.getId())) {
 					requestSize--;
 					continue;
 				}
-
+				PlanPInfoDto plan = idMap.remove(dto.getId());
+				plan.setOrderByDate(dto.getOrderByDate());
+				plan.setDayAfterStart(dto.getDayAfterStart());
+				list.add(plan);
 			}
 
-			if (dayList.size() > requestSize) {
-				for (int i = requestSize; i < dayList.size(); i++) {
-					list.add(dayDto.getPlanList().get(i));
-				}
-			}
+		}
+
+		for (PlanPInfoDto dto : idMap.values()) {
+
 		}
 
 		template.convertAndSend("/topic/api/trip/p/" + tripId, new SocketResponseBody<>("move", response));

@@ -11,7 +11,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class PlanPWeekDto<T> {
 	@Schema(example = "1")
-	private int week;
+	private Integer week;
 
 	private List<PlanPDayDto<T>> dayList = new ArrayList<>();
 
