@@ -147,7 +147,9 @@ public class PlanPService {
 		PlanPWeekDto<PlanPInfoDto> response = new PlanPWeekDto<>(request.getWeek());
 		List<PlanPDayDto<PlanPInfoDto>> dayList = findAllByTripId(tripId, request.getWeek(), false);
 		Map<Long, PlanPInfoDto> idMap = new HashMap<>();
+		Map<Integer, List<PlanPInfoDto>> dayMap = new HashMap<>();
 		for (PlanPDayDto<PlanPInfoDto> dayDto : dayList) {
+			dayMap.put(dayDto.getDay(), dayDto.getPlanList());
 			for (PlanPInfoDto dto : dayDto.getPlanList())
 				idMap.put(dto.getPlanId(), dto);
 		}
@@ -165,6 +167,8 @@ public class PlanPService {
 
 
 			}
+
+			if(dayList.size() > requestSize) continue;
 		}
 
 		template.convertAndSend("/topic/api/trip/p/" + tripId, new SocketResponseBody<>("move", response));

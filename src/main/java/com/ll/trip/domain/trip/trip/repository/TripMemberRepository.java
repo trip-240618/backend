@@ -34,10 +34,14 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 
 	@Modifying
 	@Query(value = """
-		UPDATE TripMember tm
-		SET tm.isLeader = 1
-		WHERE tm.id = (SELECT MIN(tm1.id) FROM TripMember tm1 WHERE tm1.trip.id = :tripId)
-		""")
+    UPDATE trip_member
+    SET is_leader = 1
+    WHERE id = (
+        SELECT MIN(id)
+        FROM trip_member
+        WHERE trip_id = :tripId
+    )
+    """, nativeQuery = true)
 	void handLeaderToMember(long tripId);
 
 	@Query("""
