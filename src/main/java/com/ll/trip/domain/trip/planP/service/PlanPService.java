@@ -165,10 +165,13 @@ public class PlanPService {
 					continue;
 				}
 
-
 			}
 
-			if(dayList.size() > requestSize) continue;
+			if (dayList.size() > requestSize) {
+				for (int i = requestSize; i < dayList.size(); i++) {
+					list.add(dayDto.getPlanList().get(i));
+				}
+			}
 		}
 
 		template.convertAndSend("/topic/api/trip/p/" + tripId, new SocketResponseBody<>("move", response));

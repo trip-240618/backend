@@ -37,8 +37,8 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
     UPDATE trip_member
     SET is_leader = 1
     WHERE id = (
-        SELECT MIN(id)
-        FROM trip_member
+        SELECT MIN(tm1.user_id)
+        FROM trip_member tm1
         WHERE trip_id = :tripId
     )
     """, nativeQuery = true)
