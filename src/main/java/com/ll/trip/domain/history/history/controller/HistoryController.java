@@ -145,7 +145,7 @@ public class HistoryController {
 		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
 		historyService.createHistoryReply(historyId, securityUser.getId(), requestDto);
-		notificationService.createHistoryReplyNotification(tripId, historyId, securityUser.getNickname(),
+		notificationService.createHistoryReplyNotification(tripId, historyId, securityUser.getId(), securityUser.getNickname(),
 			requestDto.getContent());
 		List<HistoryReplyDto> response = historyService.showHistoryReplyList(historyId);
 

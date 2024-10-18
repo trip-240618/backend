@@ -69,7 +69,7 @@ public class TripService {
 	public boolean joinTripById(Trip trip, UserEntity user, boolean isLeader) {
 		TripMemberId tripMemberId = TripMemberId.builder().tripId(trip.getId()).userId(user.getId()).build();
 
-		if (tripMemberRepository.existsById(tripMemberId)) {
+		if (tripMemberRepository.existsTripMemberByTripIdAndUserId(trip.getId(), user.getId())) {
 			return false;
 		}
 
@@ -170,11 +170,13 @@ public class TripService {
 			.orElseThrow(() -> new NoSuchDataException("Trip not found with invitation code: " + invitationCode));
 	}
 
+	@Transactional
 	public void deleteTripMember(long tripId, long userId) {
 		TripMemberDeleteDto dto = tripMemberRepository.findDeleteDtoBy(tripId, userId);
 		extractAndDeleteTripMember(List.of(dto), userId);
 	}
 
+	@Transactional
 	public void deleteAllTripMember(long userId) {
 		List<TripMemberDeleteDto> dtos = tripMemberRepository.findAllDeleteDtoBy(userId);
 		extractAndDeleteTripMember(dtos, userId);
@@ -182,12 +184,8 @@ public class TripService {
 
 	@Transactional
 	public void extractAndDeleteTripMember(List<TripMemberDeleteDto> dtos, long userId) {
-		List<TripMemberId> ids = new ArrayList<>();
 		for (TripMemberDeleteDto dto : dtos) {
-			ids.add(TripMemberId.builder()
-				.tripId(dto.getTripId())
-				.userId(userId)
-				.build());
+			tripMemberRepository.deleteByTripIdAndUserId(dto.getTripId(), userId);
 
 			if (dto.getMemberCnt() == 1) {
 				deleteTripById(dto.getTripId());
@@ -195,8 +193,6 @@ public class TripService {
 				handLeaderToMember(dto.getTripId());
 			}
 		}
-
-		tripMemberRepository.deleteAllById(ids);
 	}
 
 	@Transactional

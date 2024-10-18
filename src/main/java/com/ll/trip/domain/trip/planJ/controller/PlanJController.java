@@ -30,6 +30,7 @@ import com.ll.trip.domain.trip.planJ.dto.PlanJSwapRequestDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.service.PlanJEditService;
 import com.ll.trip.domain.trip.planJ.service.PlanJService;
+import com.ll.trip.domain.trip.trip.service.TripService;
 import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
@@ -53,6 +54,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PlanJController {
 	private final PlanJService planJService;
 	private final PlanJEditService planJEditService;
+	private final TripService tripService;
 	private final SimpMessagingTemplate template;
 	private final NotificationService notificationService;
 
@@ -69,6 +71,7 @@ public class PlanJController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestBody PlanJCreateRequestDto requestDto
 	) {
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		int order = planJEditService.getLastOrderByTripId(tripId);
 
 		PlanJ plan = planJService.createPlan(tripId, requestDto, order, securityUser.getUuid());
@@ -93,9 +96,11 @@ public class PlanJController {
 		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanJInfoDto.class)))})
 	public ResponseEntity<?> showPlanJList(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
+		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam(required = false) @Parameter(description = "day", example = "1") Integer day,
 		@RequestParam @Parameter(description = "보관함 여부", example = "false") boolean locker
 	) {
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		List<PlanJListDto> response;
 		if (!locker)
 			response = planJService.findAllPlanAByTripIdAndDay(tripId, day);
@@ -118,6 +123,7 @@ public class PlanJController {
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody PlanJModifyRequestDto requestBody
 	) {
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		PlanJ plan = planJService.findPlanJById(requestBody.getPlanId());
 		int order = plan.getOrderByDate();
 		Integer dayFrom = plan.getDayAfterStart();
@@ -159,6 +165,7 @@ public class PlanJController {
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody PlanJSwapRequestDto requestBody
 	) {
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		int day = requestBody.getDayAfterStart();
 
 		planJEditService.checkIsEditor(tripId, day, securityUser.getUuid());
@@ -183,10 +190,12 @@ public class PlanJController {
 				@ExampleObject(name = "http 응답", value = "deleted")}
 		)})
 	public ResponseEntity<?> deletePlanJ(
+		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId,
 		@RequestParam @Parameter(description = "dayAfterStart", example = "1") Integer day
 	) {
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		planJService.deletePlanJById(day, planId);
 
 		template.convertAndSend(

@@ -33,6 +33,13 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 	void deleteByTripIdAndUuid(long tripId, String uuid);
 
 	@Modifying
+	@Query("""
+		delete from TripMember tm
+		where tm.trip.id = :tripId and tm.user.id = :userId
+		""")
+	void deleteByTripIdAndUserId(long tripId, long userId);
+
+	@Modifying
 	@Query(value = """
     UPDATE trip_member
     SET is_leader = 1

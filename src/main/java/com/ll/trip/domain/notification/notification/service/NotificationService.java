@@ -126,9 +126,9 @@ public class NotificationService {
 	}
 
 	@Transactional
-	public void createHistoryReplyNotification(long tripId, long historyId, String nickname, String reply) {
+	public void createHistoryReplyNotification(long tripId, long historyId, long userId, String nickname, String reply) {
 		NotificationComponentDto componentDto = getHistoryNotificationDto(historyId);
-		if (!componentDto.isHistoryActive())
+		if (componentDto.getUserId() == userId || !componentDto.isHistoryActive())
 			return;
 
 		String content = nickname + "님이 여행자님의 게시물에 댓글을 남겼습니다:" + " \"" +
