@@ -100,12 +100,11 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 		h.id, u.uuid, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
 		h.longitude, h.memo, h.likeCnt, h.replyCnt, coalesce(l.toggle, false), h.photoDate, t.id, t.tagColor, t.tagName)
 		FROM History h
-		inner join h.historyTags t on h.id = :historyId
-		left JOIN h.user u
+		inner JOIN h.user u on h.id = :historyId
+		left join h.historyTags t
 		left join h.historyLikes l on l.user.id = :userId
-		ORDER BY h.photoDate ASC, h.id DESC
 		""")
-	HistoryServiceDto findServiceDtoByHistoryIdAndUserId(long historyId, long userId);
+	List<HistoryServiceDto> findServiceDtoByHistoryIdAndUserId(long historyId, long userId);
 
 	@Query("""
 		select new com.ll.trip.domain.file.file.dto.DeleteImageDto(

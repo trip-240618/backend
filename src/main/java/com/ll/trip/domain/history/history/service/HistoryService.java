@@ -78,6 +78,9 @@ public class HistoryService {
 	}
 
 	private List<HistoryDto> parseToListResponse(List<HistoryServiceDto> serviceDtos) {
+		if (serviceDtos == null || serviceDtos.size() == 0) {
+			throw new NoSuchDataException("check the params");
+		}
 		List<HistoryDto> response = new ArrayList<>();
 		Map<Long, HistoryDto> idMap = new HashMap<>();
 
@@ -265,7 +268,8 @@ public class HistoryService {
 	}
 
 	public History findById(long historyId) {
-		return historyRepository.findById(historyId).orElseThrow(() -> new NoSuchDataException("can't find such data, historyId: " + historyId));
+		return historyRepository.findById(historyId)
+			.orElseThrow(() -> new NoSuchDataException("can't find such data, historyId: " + historyId));
 	}
 
 	public List<HistoryDayDto> showHistoryDetail(long historyId, long userId) {
@@ -274,6 +278,9 @@ public class HistoryService {
 	}
 
 	public HistoryDto findByHistoryId(long historyId, long userId) {
-		return new HistoryDto(historyRepository.findServiceDtoByHistoryIdAndUserId(historyId, userId));
+		List<HistoryServiceDto> serviceDtoList = historyRepository.findServiceDtoByHistoryIdAndUserId(historyId,
+			userId);
+		List<HistoryDto> response = parseToListResponse(serviceDtoList);
+		return response.get(0);
 	}
 }
