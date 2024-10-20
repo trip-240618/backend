@@ -6,15 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.history.history.dto.HistoryCreateRequestDto;
-import com.ll.trip.domain.history.history.dto.HistoryDto;
 import com.ll.trip.domain.history.history.dto.HistoryDayDto;
+import com.ll.trip.domain.history.history.dto.HistoryDto;
 import com.ll.trip.domain.history.history.dto.HistoryModifyDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyCreateRequestDto;
 import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
@@ -50,8 +48,7 @@ public class HistoryService {
 	private final AwsAuthService awsAuthService;
 
 	public List<HistoryDayDto> findAllByTripId(long tripId, long userId) {
-		Pageable pageable = PageRequest.of(0, 50);
-		List<HistoryServiceDto> serviceDtos = historyRepository.findAllByTripId(tripId, userId, pageable);
+		List<HistoryServiceDto> serviceDtos = historyRepository.findAllByTripId(tripId, userId);
 		return parseToMapResponse(serviceDtos);
 	}
 
@@ -232,21 +229,17 @@ public class HistoryService {
 	}
 
 	public List<HistoryDto> searchHistoryByUuid(long tripId, long userId, String uuid) {
-		Pageable pageable = PageRequest.of(0, 50);
-		List<HistoryServiceDto> serviceDtos = historyRepository.findHistoryByTripIdAndUuid(tripId, userId, uuid,
-			pageable);
+		List<HistoryServiceDto> serviceDtos = historyRepository.findHistoryByTripIdAndUuid(tripId, userId, uuid);
 		return parseToListResponse(serviceDtos);
 	}
 
 	public List<HistoryDto> searchHistoryByTagNameAndColor(long tripId, long userId, String tagName,
 		String tagColor) {
-		Pageable pageable = PageRequest.of(0, 50);
 		List<HistoryServiceDto> serviceDtos;
 		if (tagColor != null)
-			serviceDtos = historyRepository.findHistoryByTripIdAndTagNameAndColor(tripId, userId, tagName, tagColor,
-				pageable);
+			serviceDtos = historyRepository.findHistoryByTripIdAndTagNameAndColor(tripId, userId, tagName, tagColor);
 		else
-			serviceDtos = historyRepository.findHistoryByTripIdAndTagName(tripId, userId, tagName, pageable);
+			serviceDtos = historyRepository.findHistoryByTripIdAndTagName(tripId, userId, tagName);
 		return parseToListResponse(serviceDtos);
 	}
 
@@ -282,5 +275,11 @@ public class HistoryService {
 			userId);
 		List<HistoryDto> response = parseToListResponse(serviceDtoList);
 		return response.get(0);
+	}
+
+	public void checkHistoryCount(long tripId, int size) {
+		int count = historyRepository.countByTrip_Id(tripId);
+		if (count + size > 50)
+			throw new PermissionDeniedException("등록가능한 최대 개수: " + (50 - count));
 	}
 }

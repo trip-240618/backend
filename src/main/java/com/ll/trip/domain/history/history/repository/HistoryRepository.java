@@ -2,7 +2,6 @@ package com.ll.trip.domain.history.history.repository;
 
 import java.util.List;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +11,8 @@ import com.ll.trip.domain.history.history.dto.HistoryServiceDto;
 import com.ll.trip.domain.history.history.entity.History;
 
 public interface HistoryRepository extends JpaRepository<History, Long> {
+
+	int countByTrip_Id(long tripId);
 
 	@Query("""
 		select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
@@ -23,7 +24,7 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 		left join h.historyLikes l on l.user.id = :userId
 		ORDER BY h.photoDate ASC, h.id DESC
 		""")
-	List<HistoryServiceDto> findAllByTripId(long tripId, long userId, Pageable pageable);
+	List<HistoryServiceDto> findAllByTripId(long tripId, long userId);
 
 	@Query("""
 		    select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
@@ -69,31 +70,33 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 		 left join h.historyLikes l on l.user.id = :userId
 		 ORDER BY h.photoDate ASC, h.id DESC
 		 """)
-	List<HistoryServiceDto> findHistoryByTripIdAndUuid(long tripId, long userId, String uuid, Pageable pageable);
+	List<HistoryServiceDto> findHistoryByTripIdAndUuid(long tripId, long userId, String uuid);
 
 	@Query("""
 		select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
 			 h.id, u.uuid, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
-			 h.longitude, h.memo, h.likeCnt, h.replyCnt, coalesce(l.toggle, false), h.photoDate, t.id, t.tagColor, t.tagName)
+			 h.longitude, h.memo, h.likeCnt, h.replyCnt, coalesce(l.toggle, false), h.photoDate, t2.id, t2.tagColor, t2.tagName)
 		FROM History h
 		inner join h.historyTags t on t.trip.id = :tripId and t.tagName = :tagName and t.tagColor = :tagColor
+		left join h.historyTags t2
 		left JOIN h.user u
 		left join h.historyLikes l on l.user.id = :userId
 		ORDER BY h.photoDate ASC, h.id DESC
 		""")
-	List<HistoryServiceDto> findHistoryByTripIdAndTagNameAndColor(long tripId, long userId, String tagName, String tagColor, Pageable pageable);
+	List<HistoryServiceDto> findHistoryByTripIdAndTagNameAndColor(long tripId, long userId, String tagName, String tagColor);
 
 	@Query("""
 		select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
 		h.id, u.uuid, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
-		h.longitude, h.memo, h.likeCnt, h.replyCnt, coalesce(l.toggle, false), h.photoDate, t.id, t.tagColor, t.tagName)
+		h.longitude, h.memo, h.likeCnt, h.replyCnt, coalesce(l.toggle, false), h.photoDate, t2.id, t2.tagColor, t2.tagName)
 		FROM History h
 		inner join h.historyTags t on t.trip.id = :tripId and t.tagName = :tagName
+		left join h.historyTags t2
 		left JOIN h.user u
 		left join h.historyLikes l on l.user.id = :userId
 		ORDER BY h.photoDate ASC, h.id DESC
 		""")
-	List<HistoryServiceDto> findHistoryByTripIdAndTagName(long tripId, long userId, String tagName, Pageable pageable);
+	List<HistoryServiceDto> findHistoryByTripIdAndTagName(long tripId, long userId, String tagName);
 
 	@Query("""
 		select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(

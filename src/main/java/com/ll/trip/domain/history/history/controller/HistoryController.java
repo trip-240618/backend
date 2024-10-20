@@ -88,7 +88,7 @@ public class HistoryController {
 		@RequestBody HistoriesCreateRequestDto requestDto
 	) {
 		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
-
+		historyService.checkHistoryCount(tripId, requestDto.getHistoryCreateRequestDtos().size());
 		List<HistoryDayDto> response = historyService.createManyHistories(requestDto.getHistoryCreateRequestDtos(),
 			tripId, securityUser.getId());
 
