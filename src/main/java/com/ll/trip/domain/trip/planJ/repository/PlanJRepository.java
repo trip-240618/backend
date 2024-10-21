@@ -61,5 +61,5 @@ public interface PlanJRepository extends JpaRepository<PlanJ, Long> {
 		""")
 	void deleteByTripIdAndDuration(Long tripId, int duration);
 
-	void deleteByIdAndDayAfterStart(long id, int day);
+	void deleteByIdAndDayAfterStart(long id, Integer day);
 }
