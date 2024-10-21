@@ -122,14 +122,16 @@ public class PlanJService {
 
 		List<PlanJInfoDto> response = new ArrayList<>();
 		for (PlanJOrderDto dto : orderDtos) {
-			if (dto.getOrderByDate() == null || dto.getStartTime() == null)
+			long planId = dto.getPlanId();
+			Integer order = dto.getOrderByDate();
+			LocalTime startTime = dto.getStartTime();
+			if (order == null || startTime == null || !planJMap.containsKey(planId))
 				continue;
-			PlanJInfoDto plan = planJMap.remove(dto.getPlanId());
-			if (!dto.getStartTime().equals(plan.getStartTime()) || !dto.getOrderByDate()
-				.equals(plan.getOrderByDate())) {
-				plan.setStartTime(dto.getStartTime());
-				plan.setOrderByDate(dto.getOrderByDate());
-				planJRepository.updateStartTimeAndOrder(dto.getPlanId(), dto.getStartTime(), dto.getOrderByDate());
+			PlanJInfoDto plan = planJMap.remove(planId);
+			if (!startTime.equals(plan.getStartTime()) || !order.equals(plan.getOrderByDate())) {
+				plan.setStartTime(startTime);
+				plan.setOrderByDate(order);
+				planJRepository.updateStartTimeAndOrder(planId, startTime, order);
 			}
 			response.add(plan);
 		}
@@ -139,6 +141,7 @@ public class PlanJService {
 			.comparing(PlanJInfoDto::getStartTime)
 			.thenComparing(PlanJInfoDto::getOrderByDate));
 
+		//planJRepository.flush(); 배치 추가시 주석해제
 		return List.of(new PlanJListDto(day, response));
 	}
 }

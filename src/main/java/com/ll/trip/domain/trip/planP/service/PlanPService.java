@@ -205,7 +205,7 @@ public class PlanPService {
 					nullQue.add(dto);
 					continue;
 				}
-				Integer last = dto.getOrderByDate();
+				int last = dto.getOrderByDate();
 				if (last - pre <= nullQue.size()) {
 					pre = -1;
 					break;

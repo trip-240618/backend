@@ -193,7 +193,7 @@ public class PlanJController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId,
-		@RequestParam @Parameter(description = "dayAfterStart", example = "1") Integer day
+		@RequestParam(required = false) @Parameter(description = "dayAfterStart", example = "1") Integer day
 	) {
 		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		planJService.deletePlanJById(day, planId);

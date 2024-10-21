@@ -306,4 +306,12 @@ public class HistoryController {
 		return ResponseEntity.ok(response);
 	}
 
+	@PostMapping("/history/{historyId}/report")
+	public ResponseEntity<?> reportHistory(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam(required = false) @Parameter(description = "신고 사유") String reason
+	) {
+		return ResponseEntity.ok(reason);
+	}
+
 }
