@@ -161,8 +161,9 @@ public class TripService {
 		return tripRepository.findTripDetailById(tripId).orElseThrow(NullPointerException::new);
 	}
 
-	public boolean isLeaderOfTrip(long userId, long tripId) {
-		return tripMemberRepository.isLeaderOfTrip(userId, tripId);
+	public void checkIsLeaderOfTrip(long userId, long tripId) {
+		if (!tripMemberRepository.isLeaderOfTrip(userId, tripId))
+			throw new PermissionDeniedException("해당 여행방에 대한 수정/삭제 권한이 없습니다.");
 	}
 
 	public long findTripIdByInvitationCode(String invitationCode) {

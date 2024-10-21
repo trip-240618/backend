@@ -129,7 +129,7 @@ public class PlanJController {
 		Integer dayFrom = plan.getDayAfterStart();
 		Integer dayTo = requestBody.getDayAfterStart();
 
-		if (!plan.getStartTime().equals(requestBody.getStartTime()) || !dayFrom.equals(dayTo)) {
+		if (!Objects.equals(plan.getStartTime(), requestBody.getStartTime()) || !Objects.equals(dayFrom, dayTo)) {
 			if (!requestBody.isLocker()) {
 				planJEditService.checkHasEditor(tripId, dayFrom, securityUser.getUuid());
 				if (!dayTo.equals(dayFrom)) {

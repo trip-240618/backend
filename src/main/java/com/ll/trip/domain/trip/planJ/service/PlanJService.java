@@ -18,6 +18,7 @@ import com.ll.trip.domain.trip.planJ.dto.PlanJOrderDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.repository.PlanJRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
+import com.ll.trip.global.handler.exception.NoSuchDataException;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -102,7 +103,7 @@ public class PlanJService {
 	}
 
 	public PlanJ findPlanJById(long planId) {
-		return planJRepository.findById(planId).orElseThrow(NullPointerException::new);
+		return planJRepository.findById(planId).orElseThrow(() -> new NoSuchDataException("대상을 찾을 수 없습니다. planId: " + planId));
 	}
 
 	@Transactional

@@ -6,24 +6,24 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.ll.trip.global.handler.dto.ErrorResponseDto;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
+import com.ll.trip.global.handler.exception.ServerApiException;
+
+import lombok.extern.slf4j.Slf4j;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
-	// @ExceptionHandler(NoSuchElementException.class)
-	// public ResponseEntity<?> handleNoSuchElementException(NoSuchElementException e) {
-	// 	// 404 상태 코드와 함께 예외 메시지를 반환
-	// 	return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto(e.getMessage()));
-	// }
-	//
-	// @ExceptionHandler(IllegalArgumentException.class)
-	// public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
-	// 	// 400 상태 코드와 함께 예외 메시지를 반환
-	// 	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponseDto(e.getMessage()));
-	// }
 
 	@ExceptionHandler(PermissionDeniedException.class)
 	public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
 		// 400 상태 코드와 함께 예외 메시지를 반환
 		return ResponseEntity.status(421).body(new ErrorResponseDto(e.getMessage()));
 	}
+
+	@ExceptionHandler(ServerApiException.class)
+	public void handleServerApiException(ServerApiException e) {
+		// 400 상태 코드와 함께 예외 메시지를 반환
+		log.error(e.getMessage());
+	}
+
 }

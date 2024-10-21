@@ -55,7 +55,7 @@ public class PlanJEditService {
 		}
 	}
 
-	public void checkHasEditor(long tripId, int day, String uuid) {
+	public void checkHasEditor(long tripId, Integer day, String uuid) {
 		String[] editor = destinationMap.getOrDefault(tripId + "/" + day, null);
 		if(editor != null && !editor[1].equals(uuid)) {
 			log.info("there are editor at trip :" + tripId + "day : " + day + "\nuuid : " + uuid);

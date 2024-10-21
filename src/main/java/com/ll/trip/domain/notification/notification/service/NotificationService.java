@@ -3,11 +3,14 @@ package com.ll.trip.domain.notification.notification.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.notification.firebase.dto.MessageDto;
+import com.ll.trip.domain.notification.firebase.service.FcmMessageUtil;
 import com.ll.trip.domain.notification.notification.dto.NotificationComponentDto;
 import com.ll.trip.domain.notification.notification.dto.NotificationListDto;
 import com.ll.trip.domain.notification.notification.entity.Notification;
@@ -30,6 +33,7 @@ public class NotificationService {
 	private final NotificationRepository notificationRepository;
 	private final NotificationConfigRepository notificationConfigRepository;
 	private final EntityManager entityManager;
+	private final FcmMessageUtil fcmMessageUtil;
 
 	@Transactional
 	public void createNotificationConfig(UserEntity userRef) {
@@ -74,15 +78,26 @@ public class NotificationService {
 		String destination) {
 		List<Notification> notifications = new ArrayList<>();
 		Trip tripRef = entityManager.getReference(Trip.class, tripId);
+		String title = "여행 일정";
+
+		MessageDto messageDto = MessageDto.builder()
+			.title(title)
+			.body(content)
+			.data(Map.of("destination", destination))
+			.build();
 
 		for (NotificationComponentDto dto : dtos) {
 			if (!dto.isPlanActive())
 				continue;
 			UserEntity userRef = entityManager.getReference(UserEntity.class, dto.getUserId());
 			notifications.add(
-				buildNotification(tripRef, userRef, destination, "여행 일정", content)
+				buildNotification(tripRef, userRef, destination, title, content)
 			);
+
+			messageDto.getTokenList().add(dto.getFcmToken());
 		}
+
+		fcmMessageUtil.sendMessage(messageDto);
 		return notifications;
 	}
 
@@ -126,21 +141,29 @@ public class NotificationService {
 	}
 
 	@Transactional
-	public void createHistoryReplyNotification(long tripId, long historyId, long userId, String nickname, String reply) {
+	public void createHistoryReplyNotification(long tripId, long historyId, long userId, String nickname,
+		String reply) {
 		NotificationComponentDto componentDto = getHistoryNotificationDto(historyId);
 		if (componentDto.getUserId() == userId || !componentDto.isHistoryActive())
 			return;
-
+		String title = "여행 기록";
 		String content = nickname + "님이 여행자님의 게시물에 댓글을 남겼습니다:" + " \"" +
 						 (reply.length() > 10 ? reply.substring(0, 10) : reply)
 						 + "\"";
 		String destination = "/trip/history?tripId=" + tripId + "&historyId=" + historyId;
 
+		fcmMessageUtil.sendMessage(MessageDto.builder()
+			.tokenList(List.of(componentDto.getFcmToken()))
+			.title(title)
+			.body(content)
+			.data(Map.of("destination", destination))
+			.build());
+
 		notificationRepository.save(
 			Notification.builder()
 				.trip(entityManager.getReference(Trip.class, tripId))
 				.user(entityManager.getReference(UserEntity.class, componentDto.getUserId()))
-				.title("여행 기록")
+				.title(title)
 				.content(content)
 				.isRead(false)
 				.destination(destination)

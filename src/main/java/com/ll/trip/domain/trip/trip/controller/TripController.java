@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,7 +27,6 @@ import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.trip.service.TripService;
 import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.domain.user.user.entity.UserEntity;
-import com.ll.trip.global.handler.dto.ErrorResponseDto;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -155,8 +153,7 @@ public class TripController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId
 	) {
-		if (!tripService.isLeaderOfTrip(securityUser.getId(), tripId))
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("해당 여행방에 대한 수정/삭제 권한이 없습니다."));
+		tripService.checkIsLeaderOfTrip(securityUser.getId(), tripId);
 
 		tripService.deleteTripById(tripId);
 		return ResponseEntity.ok("deleted");
@@ -190,8 +187,7 @@ public class TripController {
 		@RequestParam @Parameter(description = "트립 타입", example = "j") char tripType,
 		@RequestParam @Parameter(description = "강퇴 대상의 uuid", example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4") String uuid
 	) {
-		if (!tripService.isLeaderOfTrip(securityUser.getId(), tripId))
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("해당 여행방에 대한 수정/삭제 권한이 없습니다."));
+		tripService.checkIsLeaderOfTrip(securityUser.getId(), tripId);
 
 		tripService.deleteTripMemberByUuid(tripId, uuid);
 
@@ -211,8 +207,7 @@ public class TripController {
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId,
 		@RequestBody TripModifyDto requestBody
 	) {
-		if (!tripService.isLeaderOfTrip(securityUser.getId(), tripId))
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponseDto("해당 여행방에 대한 수정/삭제 권한이 없습니다."));
+		tripService.checkIsLeaderOfTrip(securityUser.getId(), tripId);
 		Trip trip = tripService.findTripByTripId(tripId);
 
 		if (requestBody.getThumbnail() != null && !requestBody.getThumbnail().equals(trip.getThumbnail()))
