@@ -9,7 +9,6 @@ import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.notification.firebase.dto.MessageDto;
 import com.ll.trip.domain.notification.firebase.service.FcmMessageUtil;
 import com.ll.trip.domain.notification.notification.dto.NotificationComponentDto;
 import com.ll.trip.domain.notification.notification.dto.NotificationListDto;
@@ -80,12 +79,7 @@ public class NotificationService {
 		Trip tripRef = entityManager.getReference(Trip.class, tripId);
 		String title = "여행 일정";
 
-		MessageDto messageDto = MessageDto.builder()
-			.title(title)
-			.body(content)
-			.data(Map.of("destination", destination))
-			.build();
-
+		List<String> tokenList = new ArrayList<>();
 		for (NotificationComponentDto dto : dtos) {
 			if (!dto.isPlanActive())
 				continue;
@@ -93,11 +87,11 @@ public class NotificationService {
 			notifications.add(
 				buildNotification(tripRef, userRef, destination, title, content)
 			);
-
-			messageDto.getTokenList().add(dto.getFcmToken());
+			if (dto.getFcmToken() != null)
+				tokenList.add(dto.getFcmToken());
 		}
 
-		fcmMessageUtil.sendMessage(messageDto);
+		fcmMessageUtil.sendMessage(tokenList, title, content, Map.of("destination", destination));
 		return notifications;
 	}
 
@@ -152,12 +146,9 @@ public class NotificationService {
 						 + "\"";
 		String destination = "/trip/history?tripId=" + tripId + "&historyId=" + historyId;
 
-		fcmMessageUtil.sendMessage(MessageDto.builder()
-			.tokenList(List.of(componentDto.getFcmToken()))
-			.title(title)
-			.body(content)
-			.data(Map.of("destination", destination))
-			.build());
+		if (!componentDto.getFcmToken().isBlank())
+			fcmMessageUtil.sendMessage(List.of(componentDto.getFcmToken()), title, content,
+				Map.of("destination", destination));
 
 		notificationRepository.save(
 			Notification.builder()

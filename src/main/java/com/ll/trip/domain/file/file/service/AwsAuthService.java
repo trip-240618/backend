@@ -67,7 +67,7 @@ public class AwsAuthService {
 	public List<String> findImageByTripId(List<String> urls, long tripId) {
 		List<TripImageDeleteDto> dtos = tripRepository.findTripAndHistoryByTripId(tripId);
 
-		if (dtos != null) {
+		if (dtos != null && !dtos.isEmpty()) {
 			urls.add(dtos.get(0).getTripThumbnail());
 
 			for (TripImageDeleteDto dto : dtos) {

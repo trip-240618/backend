@@ -1,14 +1,14 @@
 package com.ll.trip.domain.notification.firebase.service;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
-import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.MulticastMessage;
 import com.google.firebase.messaging.Notification;
-import com.ll.trip.domain.notification.firebase.dto.MessageDto;
-import com.ll.trip.global.handler.exception.ServerApiException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,23 +16,25 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FcmMessageUtil {
 
-	public MulticastMessage buildMulticastMessage(MessageDto messageDto) {
+	public MulticastMessage buildMulticastMessage(List<String> tokenList, String title, String body,
+		Map<String, String> data) {
 		return MulticastMessage.builder()
-			.addAllTokens(messageDto.getTokenList())
+			.addAllTokens(tokenList)
 			.setNotification(Notification.builder()
-				.setTitle(messageDto.getTitle())
-				.setBody(messageDto.getBody())
+				.setTitle(title)
+				.setBody(body)
 				.build())
-			.putAllData(messageDto.getData())
+			.putAllData(data)
 			.build();
 	}
 
-	public BatchResponse sendMessage(MessageDto messageDto){
-		MulticastMessage message = buildMulticastMessage(messageDto);
+	public void sendMessage(List<String> tokenList, String title, String body, Map<String, String> data) {
+		if(tokenList.isEmpty()) return;
+		MulticastMessage message = buildMulticastMessage(tokenList, title, body, data);
 		try {
-			return FirebaseMessaging.getInstance().sendEachForMulticast(message);
+			FirebaseMessaging.getInstance().sendEachForMulticast(message);
 		} catch (FirebaseMessagingException e) {
-			throw new ServerApiException(e);
+			log.error(e.getMessage());
 		}
 	}
 }
