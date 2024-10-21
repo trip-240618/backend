@@ -229,7 +229,7 @@ public class HistoryController {
 		HistoryLike like = historyService.findHistoryLikeByHistoryIdAndUserId(historyId, securityUser.getId());
 		boolean toggle;
 		if (like == null) {
-			notificationService.createHistoryLikeNotification(tripId, historyId, securityUser.getNickname());
+			notificationService.createHistoryLikeNotification(tripId, historyId, securityUser.getId(), securityUser.getNickname());
 			toggle = historyService.createHistoryLike(historyId, securityUser.getId());
 		} else
 			toggle = historyService.toggleHistoryLike(historyId, securityUser.getId(), like);

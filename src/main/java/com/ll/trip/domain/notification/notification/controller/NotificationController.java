@@ -38,6 +38,15 @@ public class NotificationController {
 		return ResponseEntity.ok(response);
 	}
 
+	@GetMapping("/count")
+	@Operation(summary = "알림 개수(홈 화면용)")
+	public ResponseEntity<Long> showNotification(
+		@AuthenticationPrincipal SecurityUser securityUser
+	) {
+		long response = notificationService.countUnReadByUserId(securityUser.getId());
+		return ResponseEntity.ok(response);
+	}
+
 	@PutMapping("/read")
 	@Operation(summary = "단일 읽음 처리")
 	@ApiResponses(value = {

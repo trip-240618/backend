@@ -70,4 +70,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 		where n.user.id = :userId and n.isRead = false
 		""")
 	int updateAllIsReadByIdAndUserID(long userId);
+
+	int countByUser_IdAndIsRead(long userId, boolean isRead);
 }
+

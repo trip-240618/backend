@@ -149,13 +149,13 @@ public class NotificationService {
 	}
 
 	@Transactional
-	public void createHistoryLikeNotification(long tripId, long historyId, String nickname) {
+	public void createHistoryLikeNotification(long tripId, long historyId, long userId, String nickname) {
 		NotificationComponentDto componentDto = getHistoryNotificationDto(historyId);
-		if (!componentDto.isHistoryActive())
+		if (!componentDto.isHistoryActive() || userId == componentDto.getUserId())
 			return;
 		log.info("userId: " + componentDto.getUserId());
 		String content = nickname + "님이 여행자님의 게시물을 좋아합니다";
-		String destination = "/trip/...";
+		String destination = "/trip/history?tripId=" + tripId + "&historyId=" + historyId;
 
 		notificationRepository.save(
 			Notification.builder()
@@ -169,4 +169,7 @@ public class NotificationService {
 		);
 	}
 
+	public long countUnReadByUserId(long userId) {
+		return notificationRepository.countByUser_IdAndIsRead(userId, false);
+	}
 }

@@ -237,8 +237,8 @@ public class PlanPController {
 	) {
 		planPEditService.checkIsEditor(tripId, securityUser.getUuid());
 
-		planPService.movePlanByDayAndOrder(tripId, requestDto);
-
+		PlanPWeekDto<PlanPInfoDto> response = planPService.movePlanByDayAndOrder(tripId, requestDto);
+		template.convertAndSend("/topic/api/trip/p/" + tripId, new SocketResponseBody<>("move", response));
 		notificationService.createPlanMoveNotification(tripId);
 		return ResponseEntity.ok("moved");
 	}

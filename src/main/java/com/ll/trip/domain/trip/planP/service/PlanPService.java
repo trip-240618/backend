@@ -1,9 +1,12 @@
 package com.ll.trip.domain.trip.planP.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -19,13 +22,13 @@ import com.ll.trip.domain.trip.planP.repository.PlanPRepository;
 import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
 import com.ll.trip.global.handler.exception.NoSuchDataException;
+import com.ll.trip.global.handler.exception.PermissionDeniedException;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class PlanPService {
 
 	private final PlanPRepository planPRepository;
@@ -50,6 +53,7 @@ public class PlanPService {
 		return planPRepository.save(plan);
 	}
 
+	@Transactional(readOnly = true)
 	public int getNextIdx(long tripId, Integer day, boolean locker) {
 		Integer maxOrder = planPRepository.findMaxOrder(tripId, day, locker);
 		return maxOrder == null ? 0 : maxOrder + 1_048_576;
@@ -66,6 +70,7 @@ public class PlanPService {
 		);
 	}
 
+	@Transactional(readOnly = true)
 	public List<PlanPDayDto<PlanPInfoDto>> findAllByTripId(long tripId, Integer week, boolean locker) {
 		List<PlanPInfoDto> dtos;
 		if (locker) {
@@ -143,40 +148,123 @@ public class PlanPService {
 	}
 
 	@Transactional
-	public void movePlanByDayAndOrder(long tripId, PlanPWeekDto<PlanPOrderDto> request) {
+	public PlanPWeekDto<PlanPInfoDto> movePlanByDayAndOrder(long tripId, PlanPWeekDto<PlanPOrderDto> request) {
 		PlanPWeekDto<PlanPInfoDto> response = new PlanPWeekDto<>(request.getWeek());
-		List<PlanPDayDto<PlanPInfoDto>> dayList = findAllByTripId(tripId, request.getWeek(), false);
-		Map<Long, PlanPInfoDto> idMap = new HashMap<>();
-		Map<Integer, List<PlanPInfoDto>> dayMap = new HashMap<>();
+		List<PlanPDayDto<PlanPInfoDto>> dayList = findAllByTripId(tripId, request.getWeek(), false); //db
+		Map<Long, PlanPInfoDto> idMap = new HashMap<>(); // db
+		Map<Integer, List<PlanPInfoDto>> dayMap = new HashMap<>(); //response
+
 		for (PlanPDayDto<PlanPInfoDto> dayDto : dayList) {
-			dayMap.put(dayDto.getDay(), dayDto.getPlanList());
+			PlanPDayDto<PlanPInfoDto> responseDay = new PlanPDayDto<>(dayDto.getDay());
+			response.getDayList().add(responseDay); //새로운 day 생성
+			dayMap.put(dayDto.getDay(), responseDay.getPlanList()); //db의 데이터에 기반해서 day생성
 			for (PlanPInfoDto dto : dayDto.getPlanList())
 				idMap.put(dto.getPlanId(), dto);
 		}
 
 		for (PlanPDayDto<PlanPOrderDto> dayDto : request.getDayList()) {
-			int requestSize = dayDto.getPlanList().size();
-			PlanPDayDto<PlanPInfoDto> responseDay = new PlanPDayDto<>(dayDto.getDay());
-			response.getDayList().add(responseDay); //새로운 day 생성
-			List<PlanPInfoDto> list = responseDay.getPlanList();
+			List<PlanPInfoDto> list = dayMap.getOrDefault(dayDto.getDay(), new ArrayList<>()); //접근을 빠르게 하기 위해 선언
 			for (PlanPOrderDto dto : dayDto.getPlanList()) {
-				if (!idMap.containsKey(dto.getId())) {
-					requestSize--;
+				if (!idMap.containsKey(dto.getId())) { //db에는 없는 plan일 경우 응답에 포함하지 않고 넘어감
 					continue;
 				}
-				PlanPInfoDto plan = idMap.remove(dto.getId());
+				PlanPInfoDto plan = idMap.remove(dto.getId()); //응답에 포함된 plan은 idMap에서 제거
 				plan.setOrderByDate(dto.getOrderByDate());
 				plan.setDayAfterStart(dto.getDayAfterStart());
 				list.add(plan);
 			}
-
 		}
 
-		for (PlanPInfoDto dto : idMap.values()) {
-
+		for (PlanPInfoDto dto : idMap.values()) { //요청에는 없지만 db에는 있는 plan
+			List<PlanPInfoDto> sortedList = dayMap.get(dto.getDayAfterStart());
+			int index = Collections.binarySearch(sortedList, dto,
+				((o1, o2) -> {
+					if (o1.getOrderByDate() == null) return -1;
+					return o1.getOrderByDate() - o2.getOrderByDate();
+				}));
+			if (index < 0)
+				index = -(index + 1);
+			sortedList.add(index, dto);
 		}
 
-		template.convertAndSend("/topic/api/trip/p/" + tripId, new SocketResponseBody<>("move", response));
+		for (List<PlanPInfoDto> list : dayMap.values()) {
+			if (list.isEmpty())
+				continue;
+			List<PlanPInfoDto> updateList = new ArrayList<>();
+			PlanPInfoDto firstDto = list.get(0);
+			Integer pre = firstDto.getOrderByDate();
+			if (pre == null) {
+				firstDto.setOrderByDate(0);
+				updateList.add(firstDto);
+				pre = 0;
+			}
+
+			Queue<PlanPInfoDto> nullQue = new LinkedList<>();
+			for (PlanPInfoDto dto : list) {
+				if (dto.getOrderByDate() == null) {
+					nullQue.add(dto);
+					continue;
+				}
+				Integer last = dto.getOrderByDate();
+				if (last - pre <= nullQue.size()) {
+					pre = -1;
+					break;
+				}
+
+				int gap = (last - pre) / (nullQue.size() + 1);
+				while (!nullQue.isEmpty()) {
+					PlanPInfoDto plan = nullQue.poll();
+					pre += gap;
+					plan.setOrderByDate(pre);
+					updateList.add(plan);
+				}
+				pre = last;
+			}
+
+			if (pre == -1) {
+				bulkResetOrder(list);
+				continue;
+			}
+
+			while (!nullQue.isEmpty()) {
+				int gap = 1_048_576;
+				PlanPInfoDto plan = nullQue.poll();
+				pre += gap;
+				plan.setOrderByDate(pre);
+				updateList.add(plan);
+			}
+			bulkUpdateOrder(updateList);
+		}
+
+		return response;
+	}
+
+	@Transactional
+	public int updateOrder(long planId, Integer order) {
+		return planPRepository.updateOrderByPlanId(planId, order);
+	}
+
+	@Transactional
+	public void bulkUpdateOrder(List<PlanPInfoDto> list) {
+		int updateCnt = 0;
+		for (PlanPInfoDto dto : list) {
+			updateCnt += updateOrder(dto.getPlanId(), dto.getOrderByDate());
+		}
+		if (updateCnt != list.size())
+			throw new PermissionDeniedException("순서 변경 실패: " + (list.size() - updateCnt));
+	}
+
+	@Transactional
+	public void bulkResetOrder(List<PlanPInfoDto> list) {
+		int order = 0;
+		int updateCnt = 0;
+		for (PlanPInfoDto dto : list) {
+			dto.setOrderByDate(order);
+			updateCnt += updateOrder(dto.getPlanId(), order);
+			order += 1_048_576;
+		}
+		if (updateCnt != list.size())
+			throw new PermissionDeniedException("순서 변경 실패 개수: " + (list.size() - updateCnt));
 	}
 
 }

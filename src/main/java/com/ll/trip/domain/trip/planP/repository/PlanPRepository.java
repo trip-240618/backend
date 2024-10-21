@@ -61,11 +61,10 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 	@Modifying
 	@Query("""
 		update PlanP p
-		set p.dayAfterStart = :day,
-		p.orderByDate = :order
+		set p.orderByDate = :order
 		where p.id = :planId
 		""")
-	int updateOrderByPlanId(long planId, int day, int order);
+	int updateOrderByPlanId(long planId, int order);
 
 	@Modifying
 	@Query("""
