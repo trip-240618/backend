@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJListDto;
-import com.ll.trip.domain.trip.planJ.dto.PlanJModifyRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJOrderDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.repository.PlanJRepository;
@@ -45,7 +44,6 @@ public class PlanJService {
 			.trip(trip)
 			.dayAfterStart(requestDto.getDayAfterStart())
 			.orderByDate(order)
-			.writerUuid(uuid)
 			.startTime(startTime == null ? LocalTime.now() : startTime)
 			.latitude(requestDto.getLatitude())
 			.longitude(requestDto.getLongitude())
@@ -88,18 +86,22 @@ public class PlanJService {
 	}
 
 	@Transactional
-	public PlanJ updatePlanJByPlanId(PlanJ plan, PlanJModifyRequestDto requestBody, int order) {
-		plan.setTitle(requestBody.getTitle());
-		plan.setMemo(requestBody.getMemo());
-		plan.setDayAfterStart(requestBody.getDayAfterStart());
-		plan.setStartTime(requestBody.getStartTime());
-		plan.setLatitude(requestBody.getLatitude());
-		plan.setLongitude(requestBody.getLongitude());
-		plan.setPlace(requestBody.getPlace());
-		plan.setOrderByDate(order);
-		plan.setLocker(requestBody.isLocker());
+	public PlanJInfoDto updatePlanJByPlanId(long planId, PlanJInfoDto requestBody, Integer order) {
+		planJRepository.updatePlan(
+			planId,
+			requestBody.getTitle(),
+			requestBody.getMemo(),
+			requestBody.getDayAfterStart(),
+			requestBody.getStartTime(),
+			requestBody.getLatitude(),
+			requestBody.getLongitude(),
+			requestBody.getPlace(),
+			order,
+			requestBody.isLocker()
+		);
+		requestBody.setOrderByDate(order);
 
-		return planJRepository.save(plan);
+		return requestBody;
 	}
 
 	public PlanJ findPlanJById(long planId) {

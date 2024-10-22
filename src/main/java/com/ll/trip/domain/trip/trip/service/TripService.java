@@ -145,20 +145,21 @@ public class TripService {
 	}
 
 	@Transactional
-	public TripInfoDto modifyTripByDto(Trip trip, TripModifyDto requestBody) {
-		trip.setName(requestBody.getName());
-		trip.setThumbnail(requestBody.getThumbnail());
-		trip.setStartDate(requestBody.getStartDate());
-		trip.setEndDate(requestBody.getEndDate());
-		trip.setLabelColor(requestBody.getLabelColor());
+	public TripInfoDto modifyTripByDto(long tripId, TripModifyDto requestBody) {
+		tripRepository.updateTripById(
+			tripId,
+			requestBody.getName(),
+			requestBody.getThumbnail(),
+			requestBody.getStartDate(),
+			requestBody.getEndDate(),
+			requestBody.getLabelColor()
+		);
 
-		Trip modifiedTrip = tripRepository.save(trip);
-
-		return new TripInfoDto(modifiedTrip);
+		return new TripInfoDto(findTripByTripId(tripId));
 	}
 
 	public Trip findTripByTripId(long tripId) {
-		return tripRepository.findTripDetailById(tripId).orElseThrow(NullPointerException::new);
+		return tripRepository.findTripDetailById(tripId).orElseThrow(() -> new NoSuchDataException("여행방을 찾을 수 없습니다. tripId: " + tripId));
 	}
 
 	public void checkIsLeaderOfTrip(long userId, long tripId) {

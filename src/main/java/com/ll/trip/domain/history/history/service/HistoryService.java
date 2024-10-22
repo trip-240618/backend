@@ -219,9 +219,7 @@ public class HistoryService {
 
 	@Transactional
 	public void modifyHistoryReply(long replyId, String content) {
-		HistoryReply replyRef = entityManager.getReference(HistoryReply.class, replyId);
-		replyRef.setContent(content);
-		historyReplyRepository.save(replyRef);
+		historyReplyRepository.modifyReply(replyId, content);
 	}
 
 	public List<HistoryTagDto> showAllTagsByTripId(long tripId) {

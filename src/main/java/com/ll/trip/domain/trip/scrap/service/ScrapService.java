@@ -2,6 +2,8 @@ package com.ll.trip.domain.trip.scrap.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,13 +60,13 @@ public class ScrapService {
 		return scrap;
 	}
 
-	private List<ScrapImage> buildScrapImages(Trip tripRef, Scrap scrap, List<String> photoList) {
+	private List<ScrapImage> buildScrapImages(Trip tripRef, Scrap scrapRef, List<String> photoList) {
 		List<ScrapImage> imageList = new ArrayList<>();
 		for (String img : photoList) {
 			imageList.add(
 				ScrapImage.builder()
 					.trip(tripRef)
-					.scrap(scrap)
+					.scrap(scrapRef)
 					.imgKey(img)
 					.build()
 			);
@@ -152,24 +154,35 @@ public class ScrapService {
 	}
 
 	@Transactional
-	public Scrap modifyScrap(long scrapId, String title, String content, String color, boolean hasImage,
+	public void modifyScrap(long tripId, long scrapId, String title, String content, String color, boolean hasImage,
 		List<ScrapImageDto> photoList) {
-		Scrap scrap = entityManager.getReference(Scrap.class, scrapId);
-		scrap.setTitle(title);
-		scrap.setContent(content);
-		scrap.setPreview(parseToPreviewContent(content));
-		scrap.setHasImage(hasImage);
-		scrap.setColor(color);
+		scrapRepository.updateScrapFields(scrapId, title, content, parseToPreviewContent(content), hasImage, color);
 
-		List<ScrapImage> imageList = new ArrayList<>();
-		for (int i = 0; i < photoList.size(); i++) {
-			ScrapImage scrapImage = entityManager.getReference(ScrapImage.class, photoList.get(i).getId());
-			imageList.add(scrapImage);
+		List<ScrapImage> imageList = scrapImageRepository.findByScrap_Id(scrapId);
+
+		Map<Long, ScrapImage> idMap = imageList.stream()
+			.collect(Collectors.toMap(
+				ScrapImage::getId,    // 키: id
+				image -> image
+			));
+
+		for (ScrapImageDto dto : photoList) {
+			long id = dto.getId();
+			String url = idMap.computeIfAbsent(id, key -> {
+				return scrapImageRepository.saveAll(
+					buildScrapImages(
+						entityManager.getReference(Trip.class, tripId),
+						entityManager.getReference(Scrap.class, scrapId),
+						List.of(dto.getImageUrl()))
+					).get(0);
+			}).getImgKey();
+			idMap.remove(id);
+			if(!url.equals(dto.getImageUrl())) scrapImageRepository.updateScrapImageById(id, dto.getImageUrl());
 		}
 
-		scrap.setScrapImageList(imageList);
-
-		return scrapRepository.save(scrap);
+		for (ScrapImage s : idMap.values()) {
+			scrapImageRepository.deleteById(s.getId());
+		}
 	}
 
 	@Transactional

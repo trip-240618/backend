@@ -37,14 +37,8 @@ public class FaqService {
 
 	@Transactional
 	public Faq modifyFaq(long faqId, FaqCreateDto dto) {
-		Faq faqRef = faqRepository.getReferenceById(faqId);
-		if (!dto.getContent().isBlank())
-			faqRef.setContent(dto.getContent());
-		if (!dto.getType().isBlank())
-			faqRef.setType(dto.getType());
-		if (!dto.getTitle().isBlank())
-			faqRef.setTitle(dto.getTitle());
-		return faqRepository.save(faqRef);
+		faqRepository.modifyFaq(faqId, dto.getContent(), dto.getType(), dto.getTitle());
+		return findFaqById(faqId);
 	}
 
 	@Transactional

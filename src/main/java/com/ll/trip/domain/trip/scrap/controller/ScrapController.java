@@ -89,12 +89,12 @@ public class ScrapController {
 	) {
 		scrapService.checkIsWriterOfScrap(modifyDto.getId(), securityUser.getId());
 
-		Scrap scrap = scrapService.modifyScrap(
+		scrapService.modifyScrap(tripId,
 			modifyDto.getId(), modifyDto.getTitle(), modifyDto.getContent(),
 			modifyDto.getColor(), modifyDto.isHasImage(), modifyDto.getPhotoList()
 		);
 
-		ScrapDetailDto response = scrapService.findByIdWithScrapImage(scrap.getId(), securityUser.getId());
+		ScrapDetailDto response = scrapService.findByIdWithScrapImage(modifyDto.getId(), securityUser.getId());
 
 		return ResponseEntity.ok(response);
 	}

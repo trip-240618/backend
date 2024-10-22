@@ -218,7 +218,7 @@ public class TripController {
 			(int)ChronoUnit.DAYS.between(requestBody.getStartDate(), requestBody.getEndDate()) + 1
 		);
 
-		TripInfoDto response = tripService.modifyTripByDto(trip, requestBody);
+		TripInfoDto response = tripService.modifyTripByDto(tripId, requestBody);
 
 		return ResponseEntity.ok(response);
 	}

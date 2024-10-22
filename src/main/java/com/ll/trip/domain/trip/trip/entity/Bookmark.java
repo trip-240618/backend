@@ -11,6 +11,7 @@ import com.ll.trip.domain.user.user.entity.UserEntity;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
@@ -31,12 +32,12 @@ public class Bookmark {
 	@EmbeddedId
 	private BookmarkId id;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@MapsId("userId") // BookmarkId에 정의된 필드명과 일치해야 함
 	@JoinColumn(name = "user_id")
 	private UserEntity user;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@MapsId("tripId") // BookmarkId에 정의된 필드명과 일치해야 함
 	@JoinColumn(name = "trip_id")
 	private Trip trip;

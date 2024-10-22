@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +15,7 @@ import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.user.user.dto.VisitedCountryDto;
 
 @Repository
-public interface TripRepository extends JpaRepository<Trip, Long>{
+public interface TripRepository extends JpaRepository<Trip, Long> {
 
 	boolean existsByInvitationCode(String invitationCode);
 
@@ -81,4 +82,17 @@ public interface TripRepository extends JpaRepository<Trip, Long>{
 		 group by t.country
 		""")
 	List<VisitedCountryDto> findVisitedCountry(long userId, LocalDate date);
+
+	@Modifying
+	@Query("""
+		    UPDATE Trip t
+		    SET t.name = :name,
+		        t.thumbnail = :thumbnail,
+		        t.startDate = :startDate,
+		        t.endDate = :endDate,
+		        t.labelColor = :labelColor
+		    WHERE t.id = :tripId
+		""")
+	void updateTripById(long tripId, String name, String thumbnail,
+		LocalDate startDate, LocalDate endDate, String labelColor);
 }

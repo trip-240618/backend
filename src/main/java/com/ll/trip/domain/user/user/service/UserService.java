@@ -68,16 +68,13 @@ public class UserService {
 	}
 
 	@Transactional
-	public UserEntity modifyUserInfo(UserEntity userRef, String nickname, String profileImage, String thumbnail,
+	public UserEntity modifyUserInfo(SecurityUser securityUser, String nickname, String profileImage, String thumbnail,
 		String memo) {
-		if (nickname != null)
-			userRef.setNickname(nickname);
+		userRepository.modifyUser(securityUser.getId(), nickname.isBlank()? securityUser.getNickname() : nickname,
+			profileImage, thumbnail, memo
+		);
 
-		userRef.setProfileImg(profileImage);
-		userRef.setThumbnail(thumbnail);
-		userRef.setMemo(memo);
-
-		return userRepository.save(userRef);
+		return findUserByUserId(securityUser.getId());
 	}
 
 	public UserEntity findUserByUserId(long userId) {
@@ -90,10 +87,9 @@ public class UserService {
 	}
 
 	@Transactional
-	public UserEntity registerUserInfo(long userId, String nickname, String profileImg, String thumbnail,
+	public UserEntity registerUserInfo(SecurityUser securityUser, String nickname, String profileImg, String thumbnail,
 		String memo, boolean marketing) {
-		UserEntity userRef = userRepository.getReferenceById(userId);
-		UserEntity user = modifyUserInfo(userRef, nickname, profileImg, thumbnail, memo);
+		UserEntity user = modifyUserInfo(securityUser, nickname, profileImg, thumbnail, memo);
 		notificationConfigRepository.updateMarketingAgree(user.getId(), marketing);
 		return user;
 	}

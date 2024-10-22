@@ -100,13 +100,10 @@ public class PlanPService {
 	}
 
 	@Transactional
-	public PlanP updatePlanPByPlanId(PlanPInfoDto requestBody) {
-		PlanP plan = planPRepository.findPlanPById(requestBody.getPlanId()).orElseThrow(NullPointerException::new);
-
-		plan.setContent(requestBody.getContent());
-		plan.setCheckbox(requestBody.isCheckbox());
-
-		return planPRepository.save(plan);
+	public PlanPInfoDto updatePlanPByPlanId(PlanPInfoDto requestBody) {
+		long planId = requestBody.getPlanId();
+		planPRepository.modifyPlanP(planId, requestBody.getContent(), requestBody.isCheckbox());
+		return requestBody;
 	}
 
 	@Transactional
@@ -133,18 +130,17 @@ public class PlanPService {
 			return;
 		Integer dayFrom = plan.getDayAfterStart();
 
-		plan.setDayAfterStart(dayTo);
-		plan.setOrderByDate(getNextIdx(tripId, dayTo, locker));
-		plan.setLocker(locker);
-		plan = planPRepository.save(plan);
+		planPRepository.moveLocker(planId, dayTo, getNextIdx(tripId, dayTo, locker), locker);
+		PlanPInfoDto response = convertPlanPToDto(plan);
+		response.setLocker(locker);
+		response.setDayAfterStart(dayTo);
 
 		if (locker)
 			template.convertAndSend("/topic/api/trip/p/" + tripId,
 				new SocketResponseBody<>("delete", Map.of("dayAfterStart", dayFrom, "planId", planId)));
 		else
 			template.convertAndSend("/topic/api/trip/p/" + tripId,
-				new SocketResponseBody<>("create", convertPlanPToDto(plan)));
-
+				new SocketResponseBody<>("create", response));
 	}
 
 	@Transactional
@@ -179,7 +175,8 @@ public class PlanPService {
 			List<PlanPInfoDto> sortedList = dayMap.get(dto.getDayAfterStart());
 			int index = Collections.binarySearch(sortedList, dto,
 				((o1, o2) -> {
-					if (o1.getOrderByDate() == null) return -1;
+					if (o1.getOrderByDate() == null)
+						return -1;
 					return o1.getOrderByDate() - o2.getOrderByDate();
 				}));
 			if (index < 0)

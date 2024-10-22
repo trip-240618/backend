@@ -11,6 +11,7 @@ import com.ll.trip.global.base.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -38,7 +39,7 @@ public class PlanJ extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "trip_id")
 	private Trip trip;
 
@@ -53,8 +54,6 @@ public class PlanJ extends BaseEntity {
 
 	@Setter
 	private boolean locker;
-
-	private String writerUuid;
 
 	@Setter
 	private String place;

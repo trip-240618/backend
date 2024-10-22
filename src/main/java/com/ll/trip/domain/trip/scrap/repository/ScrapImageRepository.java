@@ -3,6 +3,7 @@ package com.ll.trip.domain.trip.scrap.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.ll.trip.domain.trip.scrap.entity.ScrapImage;
@@ -26,4 +27,10 @@ public interface ScrapImageRepository extends JpaRepository<ScrapImage, Long> {
 		inner join s.scrapImageList i on s.user.id = :userId
 		""")
 	List<String> findScrapImagesByUserId(long userId);
+
+	List<ScrapImage> findByScrap_Id(long scrapId);
+
+	@Modifying
+	@Query("UPDATE ScrapImage s SET s.imgKey = :imgKey WHERE s.id = :id")
+	void updateScrapImageById(long id, String imgKey);
 }

@@ -77,4 +77,23 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 	int updatePlanPDayAndLockerByPlanId(long planId, Integer dayTo, int order, boolean locker);
 
 	void deleteByIdAndDayAfterStart(long planId, int day);
+
+	@Modifying
+	@Query("""
+		update PlanP p
+		set p.content = :content,
+		p.checkbox = :checkbox
+		where p.id = :planId
+		""")
+	void modifyPlanP(long planId, String content, boolean checkbox);
+
+	@Modifying
+	@Query("""
+		update PlanP p
+		set p.dayAfterStart = :day,
+		p.orderByDate = :order,
+		p.locker = :locker
+		where p.id = :planId
+		""")
+	void moveLocker(long planId, Integer day, int order, boolean locker);
 }

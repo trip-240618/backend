@@ -103,8 +103,7 @@ public class PlanPController {
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody PlanPInfoDto requestBody
 	) {
-		PlanP plan = planPService.updatePlanPByPlanId(requestBody);
-		PlanPInfoDto response = planPService.convertPlanPToDto(plan);
+		PlanPInfoDto response = planPService.updatePlanPByPlanId(requestBody);
 
 		template.convertAndSend(
 			"/topic/api/trip/p/" + tripId,

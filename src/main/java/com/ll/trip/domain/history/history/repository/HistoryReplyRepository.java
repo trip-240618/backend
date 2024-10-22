@@ -3,6 +3,7 @@ package com.ll.trip.domain.history.history.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
@@ -23,4 +24,11 @@ public interface HistoryReplyRepository extends JpaRepository<HistoryReply, Long
 		""")
 	boolean existsByReplyIdAndUserId(long replyId, long userId);
 
+	@Modifying
+	@Query("""
+		update HistoryReply r
+		set r.content = :content
+		where r.id = :replyId
+		""")
+	void modifyReply(long replyId, String content);
 }

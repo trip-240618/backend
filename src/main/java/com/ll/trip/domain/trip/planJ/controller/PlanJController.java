@@ -25,7 +25,6 @@ import com.ll.trip.domain.trip.planJ.dto.PlanJCreateRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJEditorRegisterDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJListDto;
-import com.ll.trip.domain.trip.planJ.dto.PlanJModifyRequestDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJSwapRequestDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planJ.service.PlanJEditService;
@@ -121,7 +120,7 @@ public class PlanJController {
 	public ResponseEntity<?> modifyPlanJ(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
-		@RequestBody PlanJModifyRequestDto requestBody
+		@RequestBody PlanJInfoDto requestBody
 	) {
 		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		PlanJ plan = planJService.findPlanJById(requestBody.getPlanId());
@@ -140,8 +139,7 @@ public class PlanJController {
 			notificationService.createPlanMoveNotification(tripId);
 		}
 
-		plan = planJService.updatePlanJByPlanId(plan, requestBody, order);
-		PlanJInfoDto response = planJService.convertPlanJToDto(plan);
+		PlanJInfoDto response = planJService.updatePlanJByPlanId(plan.getId(), requestBody, order);
 
 		template.convertAndSend(
 			"/topic/api/trip/j/" + tripId,

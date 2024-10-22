@@ -63,13 +63,12 @@ public class UserController {
 		@RequestBody UserModifyDto modifyDto
 	) {
 		log.info("uuid : " + securityUser.getUsername());
-		UserEntity user = userService.findUserByUserId(securityUser.getId());
 
-		user = userService.modifyUserInfo(
-			user, modifyDto.getNickname(), modifyDto.getProfileImg(), modifyDto.getThumbnail(),
+		UserEntity user = userService.modifyUserInfo(
+			securityUser, modifyDto.getNickname(), modifyDto.getProfileImg(), modifyDto.getThumbnail(),
 			modifyDto.getMemo());
 
-		userService.createAndSetTokens(user.getId(), user.getUuid(), user.getNickname(),
+		userService.createAndSetTokens(securityUser.getId(), user.getUuid(), user.getNickname(),
 			user.getAuthorities(), response);
 
 		return ResponseEntity.ok(new UserInfoDto(user));
@@ -87,7 +86,7 @@ public class UserController {
 		log.info("uuid : " + securityUser.getUsername());
 
 		UserEntity user = userService.registerUserInfo(
-			securityUser.getId(), registerDto.getNickname(),
+			securityUser, registerDto.getNickname(),
 			registerDto.getProfileImg(),
 			registerDto.getThumbnail(),
 			registerDto.getMemo(),

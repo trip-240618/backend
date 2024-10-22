@@ -43,18 +43,9 @@ public class NoticeService {
 
 	@Transactional
 	public NoticeDetailDto modifyNotice(long noticeId, NoticeCreateDto dto) {
-		Notice noticeRef = noticeRepository.getReferenceById(noticeId);
-		if (!dto.getContent().isBlank())
-			noticeRef.setContent(dto.getContent());
-		if (!dto.getType().isBlank())
-			noticeRef.setType(dto.getType());
-		if (!dto.getDuration().isBlank())
-			noticeRef.setDuration(dto.getDuration());
-		if (!dto.getTitle().isBlank())
-			noticeRef.setTitle(dto.getTitle());
-		if (!dto.getReason().isBlank())
-			noticeRef.setReason(dto.getReason());
-		return new NoticeDetailDto(noticeRepository.save(noticeRef));
+		noticeRepository.modifyNotice(noticeId, dto.getContent(), dto.getType(), dto.getDuration(), dto.getTitle(),
+			dto.getReason());
+		return showNoticeDetail(noticeId);
 	}
 
 	@Transactional

@@ -3,6 +3,7 @@ package com.ll.trip.domain.mypage.faq.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.ll.trip.domain.mypage.faq.dto.FaqListDto;
@@ -30,4 +31,14 @@ public interface FaqRepository extends JpaRepository<Faq, Long> {
 		order by f.createDate desc
 		""")
 	List<FaqListDto> findAllDto();
+
+	@Modifying
+	@Query("""
+		update Faq f
+		set f.content = :content,
+		f.type = :type,
+		f.title = :title
+		where f.id = :faqId
+		""")
+	void modifyFaq(long faqId, String content, String type, String title);
 }

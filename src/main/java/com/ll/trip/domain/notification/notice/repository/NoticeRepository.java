@@ -27,4 +27,15 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 		order by n.createDate desc
 		""")
 	List<NoticeListDto> findAllDto();
+
+	@Query("""
+		update Notice n
+		set n.content = :content,
+		n.type = :type,
+		n.duration = :duration,
+		n.title = :title,
+		n.reason = :reason
+		where n.id = :noticeId
+		""")
+	void modifyNotice(long noticeId, String content, String type, String duration, String title, String reason);
 }

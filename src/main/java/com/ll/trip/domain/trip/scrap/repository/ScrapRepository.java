@@ -3,6 +3,7 @@ package com.ll.trip.domain.trip.scrap.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.ll.trip.domain.trip.scrap.dto.ScrapDetailServiceDto;
@@ -45,4 +46,17 @@ public interface ScrapRepository extends JpaRepository<Scrap, Long> {
 		left join ScrapBookmark b on b.user.id = :userId and b.scrap.id = :scrapId
 		""")
 	List<ScrapDetailServiceDto> findDetailDtoByScrapIdAndUserId(long scrapId, long userId);
+
+	@Modifying
+	@Query("""
+    UPDATE Scrap s
+    SET s.title = :title,
+        s.content = :content,
+        s.preview = :preview,
+        s.hasImage = :hasImage,
+        s.color = :color
+    WHERE s.id = :scrapId
+    """)
+	void updateScrapFields(long scrapId, String title, String content,
+		String preview, boolean hasImage, String color);
 }

@@ -35,11 +35,6 @@ public class PlanJInfoDto {
 		example = "14:30")
 	private LocalTime startTime;
 
-	@Schema(
-		description = "작성자 uuid",
-		example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4")
-	private String writerUuid;
-
 	@NotBlank
 	@Schema(
 		description = "플랜 내용",
@@ -74,7 +69,6 @@ public class PlanJInfoDto {
 		this.dayAfterStart = plan.getDayAfterStart();
 		this.orderByDate = plan.getOrderByDate();
 		this.startTime = plan.getStartTime();
-		this.writerUuid = plan.getWriterUuid();
 		this.place = plan.getPlace();
 		this.title = plan.getTitle();
 		this.memo = plan.getMemo();

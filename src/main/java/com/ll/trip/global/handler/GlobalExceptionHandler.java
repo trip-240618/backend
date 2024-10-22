@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(PermissionDeniedException.class)
-	public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
+	public ResponseEntity<?> handlePermissionDeniedException(PermissionDeniedException e) {
 		// 400 상태 코드와 함께 예외 메시지를 반환
 		return ResponseEntity.status(421).body(new ErrorResponseDto(e.getMessage()));
 	}
