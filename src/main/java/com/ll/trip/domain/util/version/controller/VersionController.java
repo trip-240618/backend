@@ -1,11 +1,11 @@
-package com.ll.trip.domain.version.controller;
+package com.ll.trip.domain.util.version.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ll.trip.domain.version.entity.Version;
-import com.ll.trip.domain.version.service.VersionService;
+import com.ll.trip.domain.util.version.entity.Version;
+import com.ll.trip.domain.util.version.service.VersionService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

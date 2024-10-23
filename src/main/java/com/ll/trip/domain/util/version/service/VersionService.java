@@ -1,10 +1,10 @@
-package com.ll.trip.domain.version.service;
+package com.ll.trip.domain.util.version.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ll.trip.domain.version.entity.Version;
-import com.ll.trip.domain.version.repository.VersionRepository;
+import com.ll.trip.domain.util.version.entity.Version;
+import com.ll.trip.domain.util.version.repository.VersionRepository;
 
 import lombok.RequiredArgsConstructor;
 

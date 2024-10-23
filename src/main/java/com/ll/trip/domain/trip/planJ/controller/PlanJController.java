@@ -140,12 +140,13 @@ public class PlanJController {
 		}
 
 		PlanJInfoDto response = planJService.updatePlanJByPlanId(plan.getId(), requestBody, order);
-		if (dayTo == -1)
-			template.convertAndSend(
-				"/topic/api/trip/j/" + tripId, new SocketResponseBody<>("delete",
+
+		if (requestBody.isLocker()) {
+			if (!plan.isLocker())
+				template.convertAndSend("/topic/api/trip/j/" + tripId, new SocketResponseBody<>("delete",
 					Map.of("dayAfterStart", response.getDayAfterStart(), "planId", response.getPlanId())));
-		else {
-			if(dayFrom == -1)
+		} else {
+			if (plan.isLocker())
 				template.convertAndSend("/topic/api/trip/j/" + tripId,
 					new SocketResponseBody<>("create", response));
 			else

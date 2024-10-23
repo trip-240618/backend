@@ -34,7 +34,7 @@ public class SpringSecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenUtil);
 
-		http
+		return http
 			.cors(withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -43,16 +43,15 @@ public class SpringSecurityConfig {
 					"/user/oauth2/**",
 					"/env",
 					"/swagger-ui/**",
-					"/swagger-ui.html",
+					"*.html",
 					"/api-docs/**",
 					"/api-docs.yaml",
-					"/trip/location/**"
+					"/policy/**"
 				).permitAll()
 				.anyRequest().authenticated()
 			)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-		;
-		return http.build();
+			.build();
 	}
 
 	@Bean

@@ -1,4 +1,4 @@
-package com.ll.trip.domain.version.entity;
+package com.ll.trip.domain.util.version.entity;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
