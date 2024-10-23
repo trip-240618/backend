@@ -210,8 +210,9 @@ public class TripController {
 		tripService.checkIsLeaderOfTrip(securityUser.getId(), tripId);
 		Trip trip = tripService.findTripByTripId(tripId);
 
-		if (requestBody.getThumbnail() != null && !requestBody.getThumbnail().equals(trip.getThumbnail()))
-			awsAuthService.deleteUrls(List.of(requestBody.getThumbnail()));
+		if (requestBody.getThumbnail() != null && trip.getThumbnail() != null &&
+			!requestBody.getThumbnail().equals(trip.getThumbnail()))
+			awsAuthService.deleteUrls(List.of(trip.getThumbnail()));
 
 		planJService.updatePlanJDay(trip.getId(),
 			(int)ChronoUnit.DAYS.between(trip.getStartDate(), requestBody.getStartDate()),
