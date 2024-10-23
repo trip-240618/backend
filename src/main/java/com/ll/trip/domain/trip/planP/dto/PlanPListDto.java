@@ -7,10 +7,10 @@ import lombok.Data;
 
 @Data
 public class PlanPListDto {
-	private Integer dayAfterStart;
+	private int dayAfterStart;
 	private List<PlanPInfoDto> planList;
 
-	public PlanPListDto(Integer day){
+	public PlanPListDto(int day){
 		this.dayAfterStart = day;
 		planList = new ArrayList<>();
 	}

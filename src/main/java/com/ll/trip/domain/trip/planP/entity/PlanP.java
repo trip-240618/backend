@@ -39,7 +39,7 @@ public class PlanP extends BaseEntity {
 	private Trip trip;
 
 	@Setter
-	private Integer dayAfterStart;
+	private int dayAfterStart;
 
 	@Setter
 	private Integer orderByDate;

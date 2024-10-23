@@ -23,7 +23,7 @@ public class PlanJInfoDto {
 	@Schema(
 		description = "시작일 기준 몇일째인지",
 		example = "1")
-	private Integer dayAfterStart;
+	private int dayAfterStart;
 
 	@Schema(
 		description = "예정일 별 순서",

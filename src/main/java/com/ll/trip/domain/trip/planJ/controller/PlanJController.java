@@ -125,13 +125,13 @@ public class PlanJController {
 		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		PlanJ plan = planJService.findPlanJById(requestBody.getPlanId());
 		int order = plan.getOrderByDate();
-		Integer dayFrom = plan.getDayAfterStart();
-		Integer dayTo = requestBody.getDayAfterStart();
+		int dayFrom = plan.getDayAfterStart();
+		int dayTo = requestBody.getDayAfterStart();
 
-		if (!Objects.equals(plan.getStartTime(), requestBody.getStartTime()) || !Objects.equals(dayFrom, dayTo)) {
+		if (!plan.getStartTime().equals(requestBody.getStartTime()) || dayFrom != dayTo) {
 			if (!requestBody.isLocker()) {
 				planJEditService.checkHasEditor(tripId, dayFrom, securityUser.getUuid());
-				if (!dayTo.equals(dayFrom)) {
+				if (dayFrom != dayTo) {
 					planJEditService.checkHasEditor(tripId, dayTo, securityUser.getUuid());
 				}
 			}
@@ -191,7 +191,7 @@ public class PlanJController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId,
-		@RequestParam(required = false) @Parameter(description = "dayAfterStart", example = "1") Integer day
+		@RequestParam @Parameter(description = "날짜미정시 -1", example = "1") int day
 	) {
 		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		planJService.deletePlanJById(day, planId);

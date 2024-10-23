@@ -9,10 +9,10 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class PlanJListDto {
-	private Integer dayAfterStart;
+	private int dayAfterStart;
 	private List<PlanJInfoDto> planList;
 
-	public PlanJListDto(Integer day){
+	public PlanJListDto(int day){
 		this.dayAfterStart = day;
 		this.planList = new ArrayList<>();
 	}

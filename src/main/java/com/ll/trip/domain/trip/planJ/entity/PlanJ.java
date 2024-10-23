@@ -20,6 +20,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,9 +45,10 @@ public class PlanJ extends BaseEntity {
 	private Trip trip;
 
 	@Setter
-	private Integer dayAfterStart;
+	private int dayAfterStart;
 
 	@Setter
+	@NotNull
 	private LocalTime startTime;
 
 	@Setter

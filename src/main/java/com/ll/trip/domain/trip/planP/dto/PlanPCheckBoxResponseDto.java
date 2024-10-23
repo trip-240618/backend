@@ -17,7 +17,7 @@ public class PlanPCheckBoxResponseDto {
 	@Schema(
 		description = "예정일",
 		example = "1")
-	private Integer dayAfterStart;
+	private int dayAfterStart;
 
 	@Schema(
 		description = "변경 후 check 여부",

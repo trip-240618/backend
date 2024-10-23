@@ -71,7 +71,7 @@ public class PlanPService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<PlanPDayDto<PlanPInfoDto>> findAllByTripId(long tripId, Integer week, boolean locker) {
+	public List<PlanPDayDto<PlanPInfoDto>> findAllByTripId(long tripId, int week, boolean locker) {
 		List<PlanPInfoDto> dtos;
 		if (locker) {
 			dtos = planPRepository.findAllLockerByTripId(tripId);
@@ -112,7 +112,7 @@ public class PlanPService {
 	}
 
 	@Transactional
-	public PlanPCheckBoxResponseDto updateCheckBoxById(Long planId) {
+	public PlanPCheckBoxResponseDto updateCheckBoxById(long planId) {
 		PlanP planp = planPRepository.findById(planId).orElseThrow(() -> new NoSuchDataException("no such plan"));
 		int cnt = planPRepository.updateCheckBoxByPlanId(planId, !planp.isCheckbox());
 
@@ -123,12 +123,12 @@ public class PlanPService {
 	}
 
 	@Transactional
-	public void moveLocker(long tripId, long planId, Integer dayTo, boolean locker) {
+	public void moveLocker(long tripId, long planId, int dayTo, boolean locker) {
 		PlanP plan = planPRepository.findPlanPById(planId)
 			.orElseThrow(() -> new NoSuchDataException("plan을 찾을 수 없습니다. planId: " + planId));
 		if (plan.isLocker() == locker)
 			return;
-		Integer dayFrom = plan.getDayAfterStart();
+		int dayFrom = plan.getDayAfterStart();
 
 		planPRepository.moveLocker(planId, dayTo, getNextIdx(tripId, dayTo, locker), locker);
 		PlanPInfoDto response = convertPlanPToDto(plan);

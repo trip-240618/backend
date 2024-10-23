@@ -16,7 +16,7 @@ public class PlanJCreateRequestDto {
 	@Schema(
 		description = "시작일 기준 몇일째인지",
 		example = "1")
-	private Integer dayAfterStart;
+	private int dayAfterStart;
 
 	@Schema(
 		description = "일정 시작 시간",

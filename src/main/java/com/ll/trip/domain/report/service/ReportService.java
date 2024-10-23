@@ -1,8 +1,8 @@
-package com.ll.trip.domain.trip.report.service;
+package com.ll.trip.domain.report.service;
 
 import org.springframework.stereotype.Service;
 
-import com.ll.trip.domain.trip.report.repository.ReportRepository;
+import com.ll.trip.domain.report.repository.ReportRepository;
 
 import lombok.RequiredArgsConstructor;
 

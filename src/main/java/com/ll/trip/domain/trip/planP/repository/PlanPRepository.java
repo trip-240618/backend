@@ -95,5 +95,5 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		p.locker = :locker
 		where p.id = :planId
 		""")
-	void moveLocker(long planId, Integer day, int order, boolean locker);
+	void moveLocker(long planId, int day, int order, boolean locker);
 }

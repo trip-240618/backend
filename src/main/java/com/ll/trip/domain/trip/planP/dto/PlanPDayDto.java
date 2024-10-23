@@ -10,13 +10,13 @@ import lombok.Data;
 @Data
 public class PlanPDayDto<T> {
 	@Schema(example = "1")
-	private Integer day;
+	private int day;
 
 	@ArraySchema(schema = @Schema(
 		oneOf = {PlanPInfoDto.class}))
 	private List<T> planList = new ArrayList<>();
 
-	public PlanPDayDto(Integer day) {
+	public PlanPDayDto(int day) {
 		this.day = day;
 	}
 }

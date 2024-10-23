@@ -1,5 +1,8 @@
-package com.ll.trip.domain.trip.report.entity;
+package com.ll.trip.domain.report.entity;
 
+import java.time.LocalDateTime;
+
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Entity;
@@ -28,9 +31,16 @@ public class Report {
 	@NotBlank
 	private String type; //history, reply, scrap
 
+	private long typeId;
+
 	@NotBlank
 	private String jsonData; //신고내용 dto
 
 	@NotBlank
 	private String deleteUrl;
+
+	private boolean complete;
+
+	@CreatedDate
+	private LocalDateTime createDate;
 }

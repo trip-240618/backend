@@ -123,8 +123,8 @@ public class PlanPController {
 		)})
 	public ResponseEntity<?> deletePlanP(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
-		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId,
-		@RequestParam @Parameter(description = "dayAfterStart", example = "1") Integer day
+		@RequestParam @Parameter(description = "plan pk", example = "1") long planId,
+		@RequestParam @Parameter(description = "날짜 미정시 -1", example = "1") int day
 	) {
 		planPService.deletePlanPByPlanId(day, planId);
 
@@ -148,7 +148,7 @@ public class PlanPController {
 		)})
 	public ResponseEntity<?> modifyPlanP(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
-		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId
+		@RequestParam @Parameter(description = "plan pk", example = "1") long planId
 	) {
 		PlanPCheckBoxResponseDto response = planPService.updateCheckBoxById(planId);
 
