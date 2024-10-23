@@ -140,11 +140,18 @@ public class PlanJController {
 		}
 
 		PlanJInfoDto response = planJService.updatePlanJByPlanId(plan.getId(), requestBody, order);
-
-		template.convertAndSend(
-			"/topic/api/trip/j/" + tripId,
-			new SocketResponseBody<>("modify", response)
-		);
+		if (dayTo == -1)
+			template.convertAndSend(
+				"/topic/api/trip/j/" + tripId, new SocketResponseBody<>("delete",
+					Map.of("dayAfterStart", response.getDayAfterStart(), "planId", response.getPlanId())));
+		else {
+			if(dayFrom == -1)
+				template.convertAndSend("/topic/api/trip/j/" + tripId,
+					new SocketResponseBody<>("create", response));
+			else
+				template.convertAndSend("/topic/api/trip/j/" + tripId,
+					new SocketResponseBody<>("modify", response));
+		}
 
 		return ResponseEntity.ok("modified");
 	}
