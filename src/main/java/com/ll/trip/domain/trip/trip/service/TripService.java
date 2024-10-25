@@ -54,6 +54,7 @@ public class TripService {
 			.startDate(tripCreateDto.getStartDate())
 			.endDate(tripCreateDto.getEndDate())
 			.country(tripCreateDto.getCountry())
+			.regionCode(tripCreateDto.getRegionCode())
 			.thumbnail(tripCreateDto.getThumbnail())
 			.labelColor(tripCreateDto.getLabelColor())
 			.build();

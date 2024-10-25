@@ -16,6 +16,7 @@ import com.ll.trip.domain.trip.scrap.entity.Scrap;
 import com.ll.trip.global.base.entity.BaseEntity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -62,6 +63,9 @@ public class Trip extends BaseEntity {
 
 	@NotBlank
 	private String country;
+
+	@Column(length = 2)
+	private String regionCode;
 
 	@Setter
 	private String thumbnail;

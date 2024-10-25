@@ -46,6 +46,11 @@ public class TripInfoDto {
 	private String country;
 
 	@Schema(
+		description = "ccTLD 지역 코드",
+		example = "jp")
+	private String regionCode;
+
+	@Schema(
 		description = "여행방 썸네일",
 		example = "https://trip-story.s3.ap-northeast-2.amazonaws.com/photoTest/c3396416-1e2e-4d0d-9a82-788831e5ac1f")
 	private String thumbnail;
@@ -89,6 +94,7 @@ public class TripInfoDto {
 		this.type = dto.getType();
 		this.invitationCode = dto.getInvitationCode();
 		this.country = dto.getCountry();
+		this.regionCode = dto.getRegionCode();
 		this.startDate = dto.getStartDate();
 		this.endDate = dto.getEndDate();
 		this.thumbnail = dto.getThumbnail();

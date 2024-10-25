@@ -18,6 +18,8 @@ public class TripInfoServiceDto {
 
 	private String country;
 
+	private String regionCode;
+
 	private String thumbnail;
 
 	private String invitationCode;
@@ -28,7 +30,7 @@ public class TripInfoServiceDto {
 
 	TripMemberDto tripMemberDto;
 
-	public TripInfoServiceDto(long id, String name, char type, LocalDate startDate, LocalDate endDate, String country,
+	public TripInfoServiceDto(long id, String name, char type, LocalDate startDate, LocalDate endDate, String country, String regionCode,
 		String thumbnail, String invitationCode, String labelColor, boolean bookmark, String uuid, String nickname, String memberThumbnail, boolean isLeader) {
 		this.id = id;
 		this.name = name;
@@ -36,6 +38,7 @@ public class TripInfoServiceDto {
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.country = country;
+		this.regionCode = regionCode;
 		this.thumbnail = thumbnail;
 		this.invitationCode = invitationCode;
 		this.labelColor = labelColor;

@@ -103,19 +103,19 @@ public class JwtTokenUtil {
 			Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
 			return true;
 		} catch (ExpiredJwtException e) {
-			log.error("만료된 토큰: " + e.getMessage());
+			log.info("만료된 토큰: " + e.getMessage());
 			return false;
 		} catch (UnsupportedJwtException e) {
-			log.error("지원되지 않는 토큰: " + e.getMessage());
+			log.info("지원되지 않는 토큰: " + e.getMessage());
 			return false;
 		} catch (MalformedJwtException e) {
-			log.error("잘못된 구조의 토큰: " + e.getMessage());
+			log.info("잘못된 구조의 토큰: " + e.getMessage());
 			return false;
 		} catch (SignatureException e) {
-			log.error("서명이 유효하지 않은 토큰: " + e.getMessage());
+			log.info("서명이 유효하지 않은 토큰: " + e.getMessage());
 			return false;
 		} catch (IllegalArgumentException e) {
-			log.error("잘못된 입력이나 null 값: " + e.getMessage());
+			log.info("잘못된 입력이나 null 값: " + e.getMessage());
 			return false;
 		}
 
