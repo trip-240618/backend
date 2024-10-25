@@ -280,4 +280,9 @@ public class HistoryService {
 		if (count + size > 50)
 			throw new PermissionDeniedException("등록가능한 최대 개수: " + (50 - count));
 	}
+
+	public HistoryReplyDto findReplyById(long replyId) {
+		return historyReplyRepository.findDtoById(replyId)
+			.orElseThrow(() -> new NoSuchDataException("댓글을 찾을 수 없습니다. replyId: " + replyId));
+	}
 }

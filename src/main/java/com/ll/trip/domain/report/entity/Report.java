@@ -32,7 +32,7 @@ public class Report {
 	@NotBlank
 	private String type; //history, reply, scrap
 
-	private long typeId;
+	private long userId; //유저가 지워져도 유지해야함
 
 	@NotBlank
 	private String jsonData; //신고내용 dto

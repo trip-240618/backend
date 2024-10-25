@@ -1,6 +1,7 @@
 package com.ll.trip.domain.history.history.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -31,4 +32,11 @@ public interface HistoryReplyRepository extends JpaRepository<HistoryReply, Long
 		where r.id = :replyId
 		""")
 	void modifyReply(long replyId, String content);
+
+	@Query("""
+		select new com.ll.trip.domain.history.history.dto.HistoryReplyDto(r.id, u.uuid, u.profileImg, u.nickname, r.createDate, r.modifyDate, r.content)
+		from HistoryReply r
+		inner join r.user u on r.id = :replyId
+		""")
+	Optional<HistoryReplyDto> findDtoById(long replyId);
 }

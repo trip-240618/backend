@@ -3,7 +3,7 @@ package com.ll.trip.global.handler.exception;
 public class PermissionDeniedException extends RuntimeException {
 	// 기본 생성자
 	public PermissionDeniedException() {
-		super("Server token is invalid.");  // 기본 예외 메시지 설정
+		super("permission denied");  // 기본 예외 메시지 설정
 	}
 
 	// 메시지를 받을 수 있는 생성자
