@@ -1,5 +1,7 @@
 package com.ll.trip.global.handler;
 
+import java.util.concurrent.ExecutionException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -37,5 +39,16 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<?> handleServerException(ServerException e) {
 		log.error(e.getMessage());
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponseDto(e.getMessage()));
+	}
+
+	@ExceptionHandler(ExecutionException.class)
+	public void handleExecutionException(ExecutionException e) {
+		Throwable cause = e.getCause(); // 원본 예외 추출
+
+		if (cause != null) {
+			log.error("ExecutionException occurred: {}", cause.getMessage(), cause);
+		} else {
+			log.error("ExecutionException with no cause: {}", e.getMessage(), e);
+		}
 	}
 }
