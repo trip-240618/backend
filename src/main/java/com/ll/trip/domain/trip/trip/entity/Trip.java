@@ -9,12 +9,14 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.ll.trip.domain.flight.entity.Flight;
 import com.ll.trip.domain.history.history.entity.History;
 import com.ll.trip.domain.history.history.entity.HistoryTag;
+import com.ll.trip.domain.notification.notification.entity.Notification;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
 import com.ll.trip.domain.trip.scrap.entity.Scrap;
 import com.ll.trip.global.base.entity.BaseEntity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -62,6 +64,9 @@ public class Trip extends BaseEntity {
 	@NotBlank
 	private String country;
 
+	@Column(length = 2)
+	private String regionCode;
+
 	@Setter
 	private String thumbnail;
 
@@ -100,4 +105,8 @@ public class Trip extends BaseEntity {
 	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<Flight> flights = new ArrayList<>();
+
+	@OneToMany(mappedBy = "trip",cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
+	private List<Notification> notificationList = new ArrayList<>();
 }

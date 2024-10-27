@@ -11,6 +11,7 @@ import com.ll.trip.domain.flight.entity.Flight;
 public interface FlightRepository extends JpaRepository<Flight, Long> {
 	@Query("""
 		select new com.ll.trip.domain.flight.dto.ScheduleResponseDto(
+			f.id,
 			f.airlineCode,
 			f.airlineNumber,
 			f.departureDate,

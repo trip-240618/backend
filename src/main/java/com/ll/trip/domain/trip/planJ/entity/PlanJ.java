@@ -11,6 +11,7 @@ import com.ll.trip.global.base.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,6 +20,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,14 +40,15 @@ public class PlanJ extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "trip_id")
 	private Trip trip;
 
 	@Setter
-	private Integer dayAfterStart;
+	private int dayAfterStart;
 
 	@Setter
+	@NotNull
 	private LocalTime startTime;
 
 	@Setter
@@ -54,7 +57,8 @@ public class PlanJ extends BaseEntity {
 	@Setter
 	private boolean locker;
 
-	private String writerUuid;
+	@Setter
+	private String place;
 
 	@Setter
 	@Column(precision = 10, scale = 8)

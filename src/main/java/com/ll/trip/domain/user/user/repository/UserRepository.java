@@ -22,4 +22,15 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 		where u.id = :userId
 		""")
 	int updateFcmTokenByUserId(Long userId, String fcmToken);
+
+	@Modifying
+	@Query("""
+		update UserEntity u
+		set u.nickname = :nickname,
+		u.profileImg = :profileImage,
+		u.thumbnail = :thumbnail,
+		u.memo = :memo
+		where u.id = :userId
+		""")
+	void modifyUser(long userId, String nickname, String profileImage, String thumbnail, String memo);
 }

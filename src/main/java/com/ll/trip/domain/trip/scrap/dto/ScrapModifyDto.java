@@ -1,5 +1,8 @@
 package com.ll.trip.domain.trip.scrap.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
@@ -39,8 +42,5 @@ public class ScrapModifyDto {
 		example = "#FFEFF3")
 	private String color;
 
-	@Schema(
-		description = "수정x 응답에 북마크 조인시키기 싫어서 만듬",
-		example = "true")
-	private boolean bookmark;
+	private List<ScrapImageDto> photoList = new ArrayList<>();
 }

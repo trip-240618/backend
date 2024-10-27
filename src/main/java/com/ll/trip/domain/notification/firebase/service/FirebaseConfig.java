@@ -1,6 +1,7 @@
 package com.ll.trip.domain.notification.firebase.service;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -20,9 +21,15 @@ public class FirebaseConfig {
 
 	@PostConstruct
 	public void initialize() throws IOException {
-		GoogleCredentials credentials = GoogleCredentials.fromStream(new ClassPathResource(secretPath).getInputStream());
+		GoogleCredentials credentials = GoogleCredentials
+			.fromStream(new ClassPathResource(secretPath).getInputStream())
+			.createScoped(Arrays.asList(
+				"https://www.googleapis.com/auth/firebase",
+				"https://www.googleapis.com/auth/cloud-platform",
+				"https://www.googleapis.com/auth/firebase.readonly"));
+		credentials.refreshAccessToken();
 
-		FirebaseOptions options = new FirebaseOptions.Builder()
+		FirebaseOptions options = FirebaseOptions.builder()
 			.setCredentials(credentials)
 			.build();
 

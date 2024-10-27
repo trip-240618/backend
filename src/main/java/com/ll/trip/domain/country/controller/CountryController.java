@@ -16,10 +16,8 @@ import com.ll.trip.domain.user.user.dto.VisitedCountryDto;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,35 +25,27 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/country")
+@Tag(name = "Country")
 public class CountryController {
 	private final CountryService countryService;
 	private final TripService tripService;
 
 	@GetMapping("/search")
 	@Operation(summary = "나라 검색")
-	@ApiResponse(responseCode = "200", description = "db에서 country필드에 있는 나라이름으로 검색", content = {
-		@Content(mediaType = "application/json",
-			schema = @Schema(implementation = Country.class))})
-	public ResponseEntity<?> searchCountry(
+	@ApiResponse(responseCode = "200", description = "db에서 country필드에 있는 나라이름으로 검색")
+	public ResponseEntity<Country> searchCountry(
 		@RequestParam String countryName
 	){
 		log.info("검색 국가: " + countryName);
-		Country response;
-		try {
-			 response = countryService.findCountryByName(countryName);
-			 log.info(response.getCountryCode());
-		} catch (NullPointerException n) {
-			return ResponseEntity.badRequest().body("국가를 찾을 수 없습니다.");
-		}
+		Country response = countryService.findCountryByName(countryName);
+
 		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/search/autocomplete")
 	@Operation(summary = "나라 검색")
-	@ApiResponse(responseCode = "200", description = "db에서 country필드에 있는 나라이름으로 검색", content = {
-		@Content(mediaType = "application/json",
-			schema = @Schema(implementation = Country.class))})
-	public ResponseEntity<?> autocompleteCountry(
+	@ApiResponse(responseCode = "200", description = "db에서 country필드에 있는 나라이름으로 검색")
+	public ResponseEntity<List<String>> autocompleteCountry(
 		@RequestParam String keyword
 	){
 		List<String> response = countryService.findAllCountryNameLike(keyword);
@@ -64,9 +54,8 @@ public class CountryController {
 
 	@GetMapping("/visited")
 	@Operation(summary = "방문한 나라")
-	@ApiResponse(responseCode = "200", description = "방문한 나라", content = {
-		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = VisitedCountryDto.class)))})
-	public ResponseEntity<?> showVisitedCountry(
+	@ApiResponse(responseCode = "200", description = "방문한 나라")
+	public ResponseEntity<List<VisitedCountryDto>> showVisitedCountry(
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
 		List<VisitedCountryDto> response = tripService.findVisitedCountry(securityUser.getId());

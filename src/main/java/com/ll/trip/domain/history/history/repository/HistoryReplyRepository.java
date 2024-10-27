@@ -1,8 +1,10 @@
 package com.ll.trip.domain.history.history.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
@@ -10,9 +12,9 @@ import com.ll.trip.domain.history.history.entity.HistoryReply;
 
 public interface HistoryReplyRepository extends JpaRepository<HistoryReply, Long> {
 	@Query("""
-		select new com.ll.trip.domain.history.history.dto.HistoryReplyDto(r.id, u.uuid, r.createDate, r.modifyDate, r.content)
+		select new com.ll.trip.domain.history.history.dto.HistoryReplyDto(r.id, u.uuid, u.profileImg, u.nickname, r.createDate, r.modifyDate, r.content)
 		from HistoryReply r
-		left join r.user u on r.history.id = :historyId
+		inner join r.user u on r.history.id = :historyId
 		""")
 	List<HistoryReplyDto> findByHistoryId(long historyId);
 
@@ -23,4 +25,18 @@ public interface HistoryReplyRepository extends JpaRepository<HistoryReply, Long
 		""")
 	boolean existsByReplyIdAndUserId(long replyId, long userId);
 
+	@Modifying
+	@Query("""
+		update HistoryReply r
+		set r.content = :content
+		where r.id = :replyId
+		""")
+	void modifyReply(long replyId, String content);
+
+	@Query("""
+		select new com.ll.trip.domain.history.history.dto.HistoryReplyDto(r.id, u.uuid, u.profileImg, u.nickname, r.createDate, r.modifyDate, r.content)
+		from HistoryReply r
+		inner join r.user u on r.id = :replyId
+		""")
+	Optional<HistoryReplyDto> findDtoById(long replyId);
 }

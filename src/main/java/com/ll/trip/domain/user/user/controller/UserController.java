@@ -2,6 +2,7 @@ package com.ll.trip.domain.user.user.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.file.file.service.AwsAuthService;
+import com.ll.trip.domain.trip.trip.service.TripService;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.dto.UserModifyDto;
 import com.ll.trip.domain.user.user.dto.UserRegisterDto;
@@ -21,7 +24,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
 
 	private final UserService userService;
-	private final EntityManager entityManager;
+	private final TripService tripService;
+	private final AwsAuthService awsAuthService;
 
 	@GetMapping("/info")
 	@Operation(summary = "유저 정보 반환")
@@ -45,8 +48,7 @@ public class UserController {
 	) {
 		log.info("uuid : " + securityUser.getUsername());
 		UserEntity user = userService.findUserByUserId(securityUser.getId());
-
-		UserInfoDto userInfoDto = new UserInfoDto(user, "login");
+		UserInfoDto userInfoDto = new UserInfoDto(user);
 
 		return ResponseEntity.ok(userInfoDto);
 	}
@@ -61,16 +63,15 @@ public class UserController {
 		@RequestBody UserModifyDto modifyDto
 	) {
 		log.info("uuid : " + securityUser.getUsername());
-		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 
-		user = userService.modifyUserInfo(
-			user, modifyDto.getNickname(), modifyDto.getProfileImg(), modifyDto.getThumbnail(),
+		UserEntity user = userService.modifyUserInfo(
+			securityUser, modifyDto.getNickname(), modifyDto.getProfileImg(), modifyDto.getThumbnail(),
 			modifyDto.getMemo());
 
-		userService.createAndSetTokens(user.getId(), user.getUuid(), user.getNickname(),
+		userService.createAndSetTokens(securityUser.getId(), user.getUuid(), user.getNickname(),
 			user.getAuthorities(), response);
 
-		return ResponseEntity.ok(new UserInfoDto(user, "modify"));
+		return ResponseEntity.ok(new UserInfoDto(user));
 	}
 
 	@PutMapping("/register")
@@ -83,10 +84,9 @@ public class UserController {
 		@RequestBody UserRegisterDto registerDto
 	) {
 		log.info("uuid : " + securityUser.getUsername());
-		UserEntity userRef = entityManager.getReference(UserEntity.class, securityUser.getId());
 
 		UserEntity user = userService.registerUserInfo(
-			userRef, registerDto.getNickname(),
+			securityUser, registerDto.getNickname(),
 			registerDto.getProfileImg(),
 			registerDto.getThumbnail(),
 			registerDto.getMemo(),
@@ -95,7 +95,7 @@ public class UserController {
 		userService.createAndSetTokens(user.getId(), user.getUuid(), user.getNickname(),
 			user.getAuthorities(), response);
 
-		return ResponseEntity.ok(new UserInfoDto(user, "modify"));
+		return ResponseEntity.ok(new UserInfoDto(user));
 	}
 
 	@PutMapping("/update/fcmToken")
@@ -104,14 +104,14 @@ public class UserController {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = Integer.class))})
 	public ResponseEntity<?> updateFcmToken(
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@RequestParam String fcmToken
+		@RequestParam(required = false) String fcmToken
 	) {
 		int updated = userService.updateFcmTokenByUserId(securityUser.getId(), fcmToken);
 
 		return ResponseEntity.ok(updated);
 	}
 
-	@PutMapping("/delete/account")
+	@DeleteMapping("/delete/account")
 	@Operation(summary = "회원 탈퇴")
 	@ApiResponse(responseCode = "200", description = "회원 탈퇴, 토큰을 삭제해야함", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = Integer.class))})
@@ -119,9 +119,10 @@ public class UserController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		HttpServletResponse response
 	) {
-		if (!userService.validateUser(securityUser))
-			return ResponseEntity.badRequest().body("너 누구야");
-		userService.deleteUserById(securityUser.getId());
+		UserEntity user = userService.validateUser(securityUser);
+		awsAuthService.deleteImagesByUserId(securityUser.getId());
+		tripService.deleteAllTripMember(securityUser.getId());
+		userService.deleteUserByUser(user);
 		userService.setTokenInCookie("", "", response);
 		return ResponseEntity.ok("deleted");
 	}

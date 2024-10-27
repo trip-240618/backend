@@ -1,6 +1,7 @@
 package com.ll.trip.domain.trip.planP.controller;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -18,11 +19,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.domain.trip.planP.dto.PlanPCheckBoxResponseDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPCreateRequestDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPEditRegisterDto;
 import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPLockerDto;
-import com.ll.trip.domain.trip.planP.dto.PlanPMoveDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPOrderDto;
+import com.ll.trip.domain.trip.planP.dto.PlanPWeekDto;
 import com.ll.trip.domain.trip.planP.entity.PlanP;
 import com.ll.trip.domain.trip.planP.service.PlanPEditService;
 import com.ll.trip.domain.trip.planP.service.PlanPService;
@@ -32,7 +34,6 @@ import com.ll.trip.global.security.userDetail.SecurityUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -43,15 +44,16 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/trip/p")
+@RequestMapping("/trip/{tripId}/plan/p")
 @Slf4j
 @Tag(name = "Plan P", description = "P타입 플랜 API")
 public class PlanPController {
 	private final PlanPService planPService;
 	private final PlanPEditService planPEditService;
 	private final SimpMessagingTemplate template;
+	private final NotificationService notificationService;
 
-	@PostMapping("/{tripId}/plan/create")
+	@PostMapping("/create")
 	@Operation(summary = "P형 Plan 생성")
 	@ApiResponse(responseCode = "200", description = "P형 Plan생성, 응답데이터는 websocket으로 전송", content = {
 		@Content(mediaType = "application/json",
@@ -62,33 +64,33 @@ public class PlanPController {
 	public ResponseEntity<?> createPlanP(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@RequestBody PlanPCreateRequestDto requestDto
+		@RequestBody PlanPInfoDto requestDto
 	) {
-		PlanP plan = planPService.createPlanP(tripId, requestDto, securityUser.getUuid());
+		PlanP plan = planPService.createPlanP(tripId, requestDto);
 		PlanPInfoDto response = planPService.convertPlanPToDto(plan);
 
-		template.convertAndSend(
-			"/topic/api/trip/p/" + tripId,
-			new SocketResponseBody<>("create", response)
-		);
+		if (!response.isLocker())
+			template.convertAndSend(
+				"/topic/api/trip/p/" + tripId,
+				new SocketResponseBody<>("create", response)
+			);
 
+		notificationService.createPlanCreateNotification(tripId);
 		return ResponseEntity.ok("created");
 	}
 
-	@GetMapping("/{tripId}/plan/list")
+	@GetMapping("/list")
 	@Operation(summary = "Plan 리스트 요청")
-	@ApiResponse(responseCode = "200", description = "Plan 리스트 요청", content = {
-		@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanPInfoDto.class)))})
-	public ResponseEntity<?> showPlanPList(
+	public ResponseEntity<PlanPWeekDto<PlanPInfoDto>> showPlanPList(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
+		@RequestParam(required = false) @Parameter(description = "주차(플랜B일 땐 안줘도 됌)", example = "1") Integer week,
 		@RequestParam @Parameter(description = "보관함 여부", example = "false") boolean locker
 	) {
-		List<PlanPInfoDto> response = planPService.findAllByTripId(tripId, locker);
-
+		PlanPWeekDto<PlanPInfoDto> response = new PlanPWeekDto<>(week, planPService.findAllByTripId(tripId, week, locker));
 		return ResponseEntity.ok(response);
 	}
 
-	@PutMapping("/{tripId}/plan/modify")
+	@PutMapping("/modify")
 	@Operation(summary = "planP 수정")
 	@ApiResponse(responseCode = "200", description = "planP 수정", content = {
 		@Content(
@@ -101,8 +103,7 @@ public class PlanPController {
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody PlanPInfoDto requestBody
 	) {
-		PlanP plan = planPService.updatePlanPByPlanId(requestBody);
-		PlanPInfoDto response = planPService.convertPlanPToDto(plan);
+		PlanPInfoDto response = planPService.updatePlanPByPlanId(requestBody);
 
 		template.convertAndSend(
 			"/topic/api/trip/p/" + tripId,
@@ -112,40 +113,42 @@ public class PlanPController {
 		return ResponseEntity.ok("modified");
 	}
 
-	@DeleteMapping("/{tripId}/plan/delete")
+	@DeleteMapping("/delete")
 	@Operation(summary = "planP 삭제")
 	@ApiResponse(responseCode = "200", description = "planP 삭제", content = {
 		@Content(mediaType = "application/json",
 			examples = {
-				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"delete\", \"data\": planId}"),
+				@ExampleObject(name = "웹소켓 응답", value = "{\n  \"command\": \"delete\",\n  \"data\": {\n    \"dayAfterStart\": 1,\n    \"planId\": 1\n  }\n}"),
 				@ExampleObject(name = "http 응답", value = "deleted")}
 		)})
 	public ResponseEntity<?> deletePlanP(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
-		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId
+		@RequestParam @Parameter(description = "plan pk", example = "1") long planId,
+		@RequestParam @Parameter(description = "날짜 미정시 -1", example = "1") int day
 	) {
-		planPService.deletePlanPByPlanId(planId);
+		planPService.deletePlanPByPlanId(day, planId);
 
 		template.convertAndSend(
 			"/topic/api/trip/p/" + tripId,
-			new SocketResponseBody<>("delete", planId)
+			new SocketResponseBody<>("delete", Map.of("dayAfterStart", day, "planId", planId))
 		);
 
 		return ResponseEntity.ok("deleted");
 	}
 
-	@PutMapping("/{tripId}/plan/check")
+	@PutMapping("/check")
 	@Operation(summary = "planP 체크박스")
 	@ApiResponse(responseCode = "200", description = "planP 체크박스 수정", content = {
 		@Content(
 			mediaType = "application/json",
 			examples = {
 				@ExampleObject(name = "웹소켓 응답", value = "{\"command\": \"check\", \"data\": \"PlanPCheckBoxResponseDto\"}"),
-				@ExampleObject(name = "http 응답", value = "checked")},
-			schema = @Schema(implementation = PlanPCheckBoxResponseDto.class))})
+				@ExampleObject(name = "http 응답", value = "checked")}
+			, schema = @Schema(implementation = PlanPCheckBoxResponseDto.class)
+		)})
 	public ResponseEntity<?> modifyPlanP(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
-		@RequestParam @Parameter(description = "plan pk", example = "1") Long planId
+		@RequestParam @Parameter(description = "plan pk", example = "1") long planId
 	) {
 		PlanPCheckBoxResponseDto response = planPService.updateCheckBoxById(planId);
 
@@ -157,30 +160,34 @@ public class PlanPController {
 		return ResponseEntity.ok("checked");
 	}
 
-	@MessageMapping("/{tripId}/edit/register")
+	@MessageMapping("trip/{tripId}/plan/p/edit/register")
 	public void addEditor(
 		SimpMessageHeaderAccessor headerAccessor,
 		@DestinationVariable long tripId
 	) {
-		String username = headerAccessor.getUser().getName();
-		log.info("uuid : " + username);
+		String sessionId = headerAccessor.getSessionId();
+		String nickname = (String)Objects.requireNonNull(headerAccessor.getSessionAttributes())
+			.getOrDefault("nickname", null);
+		String uuid = Objects.requireNonNull(headerAccessor.getUser()).getName();
+		log.info("uuid: " + uuid);
+		log.info("nickname: " + nickname);
 
-		String uuid = planPEditService.getEditorByTripId(tripId);
-		if (uuid != null) {
-			template.convertAndSendToUser(username, "/topic/api/trip/p/" + tripId,
-				new SocketResponseBody<>("wait", uuid)
+		String[] editor = planPEditService.getEditorByTripId(tripId);
+		if (editor != null) {
+			template.convertAndSend("/topic/api/trip/p/" + tripId,
+				new SocketResponseBody<>("wait", new PlanPEditRegisterDto(editor[1], editor[2]))
 			);
 			return;
 		}
 
-		planPEditService.addEditor(tripId, username);
+		planPEditService.addEditor(tripId, sessionId, uuid, nickname);
 
 		template.convertAndSend("/topic/api/trip/p/" + tripId,
-			new SocketResponseBody<>("edit start", username)
+			new SocketResponseBody<>("edit start", new PlanPEditRegisterDto(uuid, nickname))
 		);
 	}
 
-	@GetMapping("/{tripId}/edit/register")
+	@GetMapping("/edit/register")
 	@Operation(summary = "(웹소켓 설명용) 편집자 등록")
 	@ApiResponse(responseCode = "200", description = "웹소켓으로 요청해야함, 편집자가 없을 시 편집자로 등록", content = {
 		@Content(mediaType = "application/json",
@@ -189,18 +196,15 @@ public class PlanPController {
 				@ExampleObject(name = "편집중인 사람이 존재할 경우", value = "{\"command\": \"wait\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}")
 			}
 		)})
-	public SocketResponseBody<String> addEditor(
-		@AuthenticationPrincipal SecurityUser securityUser,
+	public ResponseEntity<SocketResponseBody<PlanPEditRegisterDto>> addEditor(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId
 	) {
-		template.convertAndSend("/topic/api/trip/p/" + tripId,
-			new SocketResponseBody<>("edit start", securityUser.getUuid())
-		);
 
-		return new SocketResponseBody<>("edit start", "uuid");
+		return ResponseEntity.ok(new SocketResponseBody<>("edit finish",
+			new PlanPEditRegisterDto("uuid", "nickname")));
 	}
 
-	@GetMapping("/{tripId}/edit/finish")
+	@GetMapping("/edit/finish")
 	@Operation(summary = "편집자 해제")
 	@ApiResponse(responseCode = "200", description = "편집자 목록에서 제거", content = {
 		@Content(mediaType = "application/json",
@@ -208,67 +212,52 @@ public class PlanPController {
 				@ExampleObject(value = "{\"command\": \"edit finish\", \"data\": \"123e4567-e89b-12d3-a456-426614174000\"}"),
 			}
 		)})
-	public SocketResponseBody<String> removeEditor(
+	public void removeEditor(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
-		planPEditService.removeEditor(tripId, securityUser.getUuid());
-
-		template.convertAndSend("/topic/api/trip/p/" + tripId,
-			new SocketResponseBody<>("edit finish", securityUser.getUuid())
-		);
-
-		return new SocketResponseBody<>("edit finish", "uuid");
+		planPEditService.removeEditorByDestination(tripId, securityUser.getUuid());
 	}
 
-	@PutMapping("/{tripId}/edit/move")
+	@PutMapping("/edit/move")
 	@Operation(summary = "Plan P 이동")
 	@ApiResponse(responseCode = "200", description = "Plan P 이동", content = {
-		@Content(mediaType = "application/json",
-			examples = {
-				@ExampleObject(value = "{\"command\": \"move\", \"data\": PlanPMoveDto}")},
-			schema = @Schema(implementation = PlanPMoveDto.class)
+		@Content(mediaType = "application/json", examples = {
+			@ExampleObject(description = "웹소켓 응답",
+				value = "{\"command\": \"move\", \"data\": PlanPWeekDto}"),
+			@ExampleObject(description = "http 응답",
+				value = "moved")
+		}, schema = @Schema(implementation = PlanPWeekDto.class)
 		)})
 	public ResponseEntity<?> movePlanP(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser,
-		@RequestBody PlanPMoveDto moveDto
+		@RequestBody PlanPWeekDto<PlanPOrderDto> requestDto
 	) {
-		if (!planPEditService.isEditor(tripId, securityUser.getUuid()))
-			return ResponseEntity.badRequest().body("편집자가 아닙니다.");
+		planPEditService.checkIsEditor(tripId, securityUser.getUuid());
 
-		planPEditService.movePlanByDayAndOrder(tripId, moveDto.getPlanId(), moveDto.getDayFrom(),
-			moveDto.getDayTo(), moveDto.getOrderFrom(), moveDto.getOrderTo());
-
-		template.convertAndSend("/topic/api/trip/p/" + tripId, new SocketResponseBody<>("move", moveDto));
-
+		PlanPWeekDto<PlanPInfoDto> response = planPService.movePlanByDayAndOrder(tripId, requestDto);
+		template.convertAndSend("/topic/api/trip/p/" + tripId, new SocketResponseBody<>("move", response));
+		notificationService.createPlanMoveNotification(tripId);
 		return ResponseEntity.ok("moved");
 	}
 
-	@PutMapping("/{tripId}/locker/move")
+	@PutMapping("/locker/move")
 	@Operation(summary = "Plan P 보관함으로 이동 또는 일정으로 이동")
 	@ApiResponse(responseCode = "200", description = "http응답은 \"moved\""
 		, content = {
 		@Content(mediaType = "application/json",
 			examples = {
-				@ExampleObject(description = "보관함으로 이동", value = "{\"command\": \"locker in\", \"data\": PlanPMoveDto}"),
-				@ExampleObject(description = "일정으로 이동", value = "{\"command\": \"locker out\", \"data\": PlanPMoveDto}")
-			},
-			schema = @Schema(implementation = PlanPLockerDto.class)
+				@ExampleObject(description = "보관함으로 이동", value = "{\n  \"command\": \"delete\",\n  \"data\": {\n    \"dayAfterStart\": 1,\n    \"planId\": 1\n  }\n}"),
+				@ExampleObject(description = "일정으로 이동", value = "{\"command\": \"create\", \"data\": PlanPInfoDto}")},
+			schema = @Schema(implementation = PlanPOrderDto.class)
 		)})
 	public ResponseEntity<?> moveByLocker(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
-		@RequestBody PlanPLockerDto lockerDto
+		@RequestBody PlanPInfoDto request
 	) {
-		PlanPLockerDto response = planPService.moveLocker(tripId, lockerDto.getPlanId(), lockerDto.getDayTo(),
-			lockerDto.isLocker());
-
-		if (lockerDto.isLocker())
-			template.convertAndSend("/topic/api/trip/p/" + tripId,
-				new SocketResponseBody<>("locker in", response));
-		else
-			template.convertAndSend("/topic/api/trip/p/" + tripId,
-				new SocketResponseBody<>("locker out", response));
+		planPService.moveLocker(tripId, request.getPlanId(), request.getDayAfterStart(),
+			request.isLocker());
 
 		return ResponseEntity.ok("moved");
 	}
@@ -276,8 +265,10 @@ public class PlanPController {
 	@GetMapping("/show/editors")
 	@Operation(summary = "플랜p editor권한 목록")
 	@ApiResponse(responseCode = "200", description = "플랜p editor권한 목록")
-	public ResponseEntity<?> showEditors() {
-		return ResponseEntity.ok(planPEditService.getActiveEditTopicsAndUuid());
+	public ResponseEntity<?> showEditors(
+		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId
+	) {
+		return ResponseEntity.ok(planPEditService.getSessionIdMap());
 	}
 
 }

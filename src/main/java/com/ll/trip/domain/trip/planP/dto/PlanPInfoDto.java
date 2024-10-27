@@ -18,17 +18,12 @@ public class PlanPInfoDto {
 	@Schema(
 		description = "시작일 기준 몇일째인지",
 		example = "1")
-	private Integer dayAfterStart;
+	private int dayAfterStart;
 
 	@Schema(
 		description = "예정일 별 순서",
 		example = "2")
 	private Integer orderByDate;
-
-	@Schema(
-		description = "작성자 uuid",
-		example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4")
-	private String writerUuid;
 
 	@Schema(
 		description = "플랜 내용",
@@ -41,5 +36,8 @@ public class PlanPInfoDto {
 		example = "true")
 	private boolean checkbox;
 
-
+	@Schema(
+		description = "보관함 여부",
+		example = "false")
+	private boolean locker;
 }

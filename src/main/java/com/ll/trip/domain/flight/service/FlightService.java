@@ -45,7 +45,7 @@ public class FlightService {
 		return flightStatus;
 	}
 
-	public ScheduleResponseDto parseToDto(DatedFlight[] flightStatus) {
+	public ScheduleResponseDto parseToDto(String airlineCode, int airlineNumber, DatedFlight[] flightStatus) {
 		int last = flightStatus[0].getFlightPoints().length - 1;
 
 		DatedFlight.FlightPoint flightPoint_d = flightStatus[0].getFlightPoints()[0];
@@ -60,14 +60,18 @@ public class FlightService {
 		String arrivalAirport_kr;
 
 		List<Airport> airports = airportRepository.findByIata(departureAirport, arrivalAirport);
-
-		if (airports.size() < 2)
-			return null;
-
-		departureAirport_kr = airports.get(0).getKorName();
-		arrivalAirport_kr = airports.get(1).getKorName();
+		if (airports.size() == 2) {
+			String departIata = airports.get(0).getIata();
+			departureAirport_kr = departIata.equals(departureAirport)? airports.get(0).getKorName() : airports.get(1).getKorName();
+			arrivalAirport_kr = departIata.equals(arrivalAirport)? airports.get(0).getKorName() : airports.get(1).getKorName();
+		} else {
+			departureAirport_kr = null;
+			arrivalAirport_kr = null;
+		}
 
 		return ScheduleResponseDto.builder()
+			.airlineCode(airlineCode)
+			.airlineNumber(airlineNumber)
 			.departureDate(departureDate)
 			.departureAirport(departureAirport)
 			.departureAirport_kr(departureAirport_kr)
@@ -78,28 +82,32 @@ public class FlightService {
 	}
 
 	@Transactional
-	public ScheduleResponseDto createFlight(DatedFlight[] flightStatus, long tripId) {
-		Trip trip = entityManager.getReference(Trip.class, tripId);
-		ScheduleResponseDto dto = parseToDto(flightStatus);
+	public ScheduleResponseDto createFlight(ScheduleResponseDto dto, long tripId) {
+		Trip tripRef = entityManager.getReference(Trip.class, tripId);
 
-		Flight flight = Flight.builder()
-			.airlineCode(dto.getAirlineCode())
-			.arrivalAirport(dto.getArrivalAirport())
-			.arrivalAirport_kr(dto.getArrivalAirport_kr())
-			.airlineNumber(dto.getAirlineNumber())
-			.arrivalDate(dto.getArrivalDate())
-			.departureAirport(dto.getDepartureAirport())
-			.departureAirport_kr(dto.getDepartureAirport_kr())
-			.departureDate(dto.getDepartureDate())
-			.trip(trip)
-			.build();
+		Flight flight = flightRepository.save(
+				Flight.builder()
+				.airlineCode(dto.getAirlineCode())
+				.arrivalAirport(dto.getArrivalAirport())
+				.arrivalAirport_kr(dto.getArrivalAirport_kr())
+				.airlineNumber(dto.getAirlineNumber())
+				.arrivalDate(dto.getArrivalDate())
+				.departureAirport(dto.getDepartureAirport())
+				.departureAirport_kr(dto.getDepartureAirport_kr())
+				.departureDate(dto.getDepartureDate())
+				.trip(tripRef)
+				.build());
 
-		flightRepository.save(flight);
-
+		dto.setFlightId(flight.getId());
 		return dto;
 	}
 
 	public List<ScheduleResponseDto> findByTripId(long tripId) {
 		return flightRepository.findByTrip_Id(tripId);
+	}
+
+	@Transactional
+	public void deleteFlight(long flightId) {
+		flightRepository.deleteById(flightId);
 	}
 }

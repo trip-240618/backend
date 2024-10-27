@@ -1,7 +1,7 @@
 package com.ll.trip.domain.history.history.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,17 +37,13 @@ public class HistoryCreateRequestDto {
 
 	@Schema(
 		description = "사진 날짜",
-		example = "2024-08-22T14:05")
-	private LocalDateTime photoDate;
+		example = "2024-08-22")
+	private LocalDate photoDate;
 
 	@Schema(
 		description = "메모",
 		example = "오사카에서 찍은 사진")
 	private String memo;
 
-	@Schema(
-		description = "태그 리스트",
-		example = "[\"tag1\", \"tag2\", \"tag3\"]"
-	)
 	private List<HistoryTagDto> tags = new ArrayList<>();
 }

@@ -3,19 +3,18 @@ package com.ll.trip.domain.user.user.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import com.ll.trip.domain.notification.notification.entity.Notification;
 import com.ll.trip.domain.history.history.entity.History;
 import com.ll.trip.domain.history.history.entity.HistoryLike;
 import com.ll.trip.domain.history.history.entity.HistoryReply;
+import com.ll.trip.domain.notification.notification.entity.Notification;
+import com.ll.trip.domain.notification.notification.entity.NotificationConfig;
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
 import com.ll.trip.domain.trip.trip.entity.TripMember;
-import com.ll.trip.domain.notification.notification.entity.NotificationConfig;
 import com.ll.trip.global.base.entity.BaseEntity;
 
 import jakarta.persistence.CascadeType;
@@ -114,7 +113,7 @@ public class UserEntity extends BaseEntity {
 
 		authorities.add(new SimpleGrantedAuthority("ROLE_MEMBER"));
 
-		if (Objects.equals("admin", roles)) {
+		if (this.roles.equals("admin")) {
 			authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
 		}
 

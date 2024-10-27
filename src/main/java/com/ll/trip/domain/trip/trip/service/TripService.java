@@ -9,10 +9,11 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
-import com.ll.trip.domain.trip.trip.dto.TripImageDeleteDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto;
+import com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto;
 import com.ll.trip.domain.trip.trip.dto.TripModifyDto;
 import com.ll.trip.domain.trip.trip.entity.Bookmark;
 import com.ll.trip.domain.trip.trip.entity.BookmarkId;
@@ -24,12 +25,16 @@ import com.ll.trip.domain.trip.trip.repository.TripMemberRepository;
 import com.ll.trip.domain.trip.trip.repository.TripRepository;
 import com.ll.trip.domain.user.user.dto.VisitedCountryDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
+import com.ll.trip.global.handler.exception.NoSuchDataException;
+import com.ll.trip.global.handler.exception.PermissionDeniedException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class TripService {
 
 	private final TripRepository tripRepository;
@@ -38,6 +43,7 @@ public class TripService {
 
 	//bookmark
 	private final BookmarkRepository bookmarkRepository;
+	private final AwsAuthService awsAuthService;
 
 	@Transactional
 	public Trip createTrip(TripCreateDto tripCreateDto, String invitationCode) {
@@ -48,6 +54,7 @@ public class TripService {
 			.startDate(tripCreateDto.getStartDate())
 			.endDate(tripCreateDto.getEndDate())
 			.country(tripCreateDto.getCountry())
+			.regionCode(tripCreateDto.getRegionCode())
 			.thumbnail(tripCreateDto.getThumbnail())
 			.labelColor(tripCreateDto.getLabelColor())
 			.build();
@@ -61,10 +68,9 @@ public class TripService {
 
 	@Transactional
 	public boolean joinTripById(Trip trip, UserEntity user, boolean isLeader) {
-
 		TripMemberId tripMemberId = TripMemberId.builder().tripId(trip.getId()).userId(user.getId()).build();
 
-		if (tripMemberRepository.existsById(tripMemberId)) {
+		if (tripMemberRepository.existsTripMemberByTripIdAndUserId(trip.getId(), user.getId())) {
 			return false;
 		}
 
@@ -74,8 +80,12 @@ public class TripService {
 		return true;
 	}
 
-	public boolean existTripMemberByTripIdAndUserId(long tripId, long userId) {
-		return tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId);
+	public void checkTripMemberByTripIdAndUserId(long tripId, long userId) {
+		if (!tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId)) {
+			log.info("user: " + userId + " isn't member of trip: " + tripId);
+			throw new PermissionDeniedException("user isn't member of trip");
+		}
+
 	}
 
 	public List<TripInfoDto> findAllIncomingByUserId(Long userId, LocalDate date) {
@@ -83,12 +93,12 @@ public class TripService {
 		return convertToTripInfoDto(serviceDtos);
 	}
 
-	public List<TripInfoDto> findAllLastByUserIdAndDate(Long userId, LocalDate date) {
+	public List<TripInfoDto> findAllLastByUserIdAndDate(long userId, LocalDate date) {
 		List<TripInfoServiceDto> serviceDtos = tripRepository.findTripLastByUserIdAndDate(userId, date);
 		return convertToTripInfoDto(serviceDtos);
 	}
 
-	public List<TripInfoDto> findBookmarkByUserId(Long userId) {
+	public List<TripInfoDto> findBookmarkByUserId(long userId) {
 		List<TripInfoServiceDto> serviceDtos = tripRepository.findAllBookmarkTrip(userId);
 		return convertToTripInfoDto(serviceDtos);
 	}
@@ -112,8 +122,9 @@ public class TripService {
 	}
 
 	@Transactional
-	public void deleteTripById(Long id) {
-		tripRepository.deleteById(id);
+	public void deleteTripById(long tripId) {
+		awsAuthService.deleteImagesByTripId(tripId);
+		tripRepository.deleteById(tripId);
 	}
 
 	@Transactional
@@ -135,60 +146,69 @@ public class TripService {
 	}
 
 	@Transactional
-	public TripInfoDto modifyTripByDto(Trip trip, TripModifyDto requestBody) {
-		trip.setName(requestBody.getName());
-		trip.setThumbnail(requestBody.getThumbnail());
-		trip.setStartDate(requestBody.getStartDate());
-		trip.setEndDate(requestBody.getEndDate());
-		trip.setLabelColor(requestBody.getLabelColor());
+	public TripInfoDto modifyTripByDto(long tripId, TripModifyDto requestBody) {
+		tripRepository.updateTripById(
+			tripId,
+			requestBody.getName(),
+			requestBody.getThumbnail(),
+			requestBody.getStartDate(),
+			requestBody.getEndDate(),
+			requestBody.getLabelColor()
+		);
 
-		Trip modifiedTrip = tripRepository.save(trip);
-
-		return new TripInfoDto(modifiedTrip);
+		return new TripInfoDto(findTripByTripId(tripId));
 	}
 
 	public Trip findTripByTripId(long tripId) {
-		return tripRepository.findTripDetailById(tripId).orElseThrow(NullPointerException::new);
+		return tripRepository.findTripDetailById(tripId).orElseThrow(() -> new NoSuchDataException("여행방을 찾을 수 없습니다. tripId: " + tripId));
 	}
 
-	public boolean isLeaderOfTrip(long userId, long tripId) {
-		return tripMemberRepository.isLeaderOfTrip(userId, tripId);
-	}
-
-	public List<String> findImageByTripId(long tripId) {
-		List<TripImageDeleteDto> dtos = tripRepository.findTripAndHistoryByTripId(tripId);
-		List<String> urls = new ArrayList<>();
-
-		if (dtos != null) {
-			urls.add(dtos.get(0).getTripThumbnail());
-
-			for (TripImageDeleteDto dto : dtos) {
-				urls.add(dto.getHistoryThumbnail());
-				urls.add(dto.getHistoryImage());
-			}
-		}
-
-		return urls;
+	public void checkIsLeaderOfTrip(long userId, long tripId) {
+		if (!tripMemberRepository.isLeaderOfTrip(userId, tripId))
+			throw new PermissionDeniedException("해당 여행방에 대한 수정/삭제 권한이 없습니다.");
 	}
 
 	public long findTripIdByInvitationCode(String invitationCode) {
-		return tripRepository.findTrip_idByInvitationCode(invitationCode);
+		return tripRepository.findTrip_idByInvitationCode(invitationCode)
+			.orElseThrow(() -> new NoSuchDataException("Trip not found with invitation code: " + invitationCode));
 	}
 
+	@Transactional
 	public void deleteTripMember(long tripId, long userId) {
-		tripMemberRepository.deleteById(
-			TripMemberId.builder()
-				.tripId(tripId)
-				.userId(userId)
-				.build()
-		);
+		TripMemberDeleteDto dto = tripMemberRepository.findDeleteDtoBy(tripId, userId);
+		extractAndDeleteTripMember(List.of(dto), userId);
 	}
 
-	public int countTripMember(long tripId) {
-		return tripMemberRepository.countTripMemberByTrip_Id(tripId);
+	@Transactional
+	public void deleteAllTripMember(long userId) {
+		List<TripMemberDeleteDto> dtos = tripMemberRepository.findAllDeleteDtoBy(userId);
+		extractAndDeleteTripMember(dtos, userId);
+	}
+
+	@Transactional
+	public void extractAndDeleteTripMember(List<TripMemberDeleteDto> dtos, long userId) {
+		for (TripMemberDeleteDto dto : dtos) {
+			tripMemberRepository.deleteByTripIdAndUserId(dto.getTripId(), userId);
+
+			if (dto.getMemberCnt() == 1) {
+				deleteTripById(dto.getTripId());
+			} else if (dto.isLeader()) {
+				handLeaderToMember(dto.getTripId());
+			}
+		}
+	}
+
+	@Transactional
+	public void handLeaderToMember(long tripId) {
+		tripMemberRepository.handLeaderToMember(tripId);
 	}
 
 	public List<VisitedCountryDto> findVisitedCountry(long userId) {
 		return tripRepository.findVisitedCountry(userId, LocalDate.now());
+	}
+
+	@Transactional
+	public void deleteTripMemberByUuid(long tripId, String uuid) {
+		tripMemberRepository.deleteByTripIdAndUuid(tripId, uuid);
 	}
 }

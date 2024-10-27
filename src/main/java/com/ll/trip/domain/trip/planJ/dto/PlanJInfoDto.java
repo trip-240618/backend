@@ -23,7 +23,7 @@ public class PlanJInfoDto {
 	@Schema(
 		description = "시작일 기준 몇일째인지",
 		example = "1")
-	private Integer dayAfterStart;
+	private int dayAfterStart;
 
 	@Schema(
 		description = "예정일 별 순서",
@@ -34,11 +34,6 @@ public class PlanJInfoDto {
 		description = "일정 시작 시간",
 		example = "14:30")
 	private LocalTime startTime;
-
-	@Schema(
-		description = "작성자 uuid",
-		example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4")
-	private String writerUuid;
 
 	@NotBlank
 	@Schema(
@@ -51,6 +46,11 @@ public class PlanJInfoDto {
 		example = "3시 이후에 체크인 가능"
 				  + "항공편의 경우 jsonString 항공편 정보")
 	private String memo;
+
+	@Schema(
+		description = "일정 장소",
+		example = "도쿄 디즈니")
+	private String place;
 
 	@Schema(description = "위도",
 		example = "37.4220541")
@@ -69,7 +69,7 @@ public class PlanJInfoDto {
 		this.dayAfterStart = plan.getDayAfterStart();
 		this.orderByDate = plan.getOrderByDate();
 		this.startTime = plan.getStartTime();
-		this.writerUuid = plan.getWriterUuid();
+		this.place = plan.getPlace();
 		this.title = plan.getTitle();
 		this.memo = plan.getMemo();
 		this.latitude = plan.getLatitude();

@@ -12,7 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ScheduleResponseDto {
 	@Schema(
-		description = "항공편명",
+		description = "저장된 항공편의 id (저장하기 전엔 null)",
+		example = "1")
+	private Long flightId;
+
+	@Schema(
+		description = "항공편명 (생성 시에는 \"대한항공(KE) 101\")",
 		example = "KE")
 	private String airlineCode;
 

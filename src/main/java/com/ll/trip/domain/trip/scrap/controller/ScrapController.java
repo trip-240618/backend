@@ -53,19 +53,29 @@ public class ScrapController {
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody ScrapCreateDto scrapCreateDto
 	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("해당 여행방에 대한 권한이 없습니다.");
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
 		Scrap scrap = scrapService.createScrap(
-			securityUser.getUuid(), tripId, scrapCreateDto.getTitle(), scrapCreateDto.getContent(),
-			scrapCreateDto.getColor(), scrapCreateDto.isHasImage()
+			securityUser.getId(), tripId, scrapCreateDto.getTitle(), scrapCreateDto.getContent(),
+			scrapCreateDto.getColor(), scrapCreateDto.isHasImage(), scrapCreateDto.getPhotoList()
 		);
 
-		return ResponseEntity.ok(new ScrapDetailDto(
-			scrap.getId(), securityUser.getUuid(), scrap.getTitle(),
-			scrap.getContent(), scrap.isHasImage(), scrap.getColor(),
-			false, scrap.getCreateDate()
-		));
+		return ResponseEntity.ok(scrapService.findAllByTripIdAndUserId(tripId, securityUser.getId()));
+	}
+
+	@GetMapping("/{tripId}/scrap/detail/{scrapId}")
+	@Operation(summary = "스크랩 상세")
+	@ApiResponse(responseCode = "200", description = "스크랩 상세", content = {
+		@Content(mediaType = "application/json", schema = @Schema(implementation = ScrapDetailDto.class))})
+	public ResponseEntity<?> showScrapDetail(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
+		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long scrapId
+	) {
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
+
+		ScrapDetailDto response = scrapService.findByIdWithScrapImage(scrapId, securityUser.getId());
+		return ResponseEntity.ok(response);
 	}
 
 	@PutMapping("/{tripId}/scrap/modify")
@@ -77,19 +87,16 @@ public class ScrapController {
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody ScrapModifyDto modifyDto
 	) {
-		if (!scrapService.existByScrapIdAndUuid(modifyDto.getId(), securityUser.getUuid()))
-			return ResponseEntity.badRequest().body("해당 스크랩에 대한 수정/삭제 권한이 없습니다.");
+		scrapService.checkIsWriterOfScrap(modifyDto.getId(), securityUser.getId());
 
-		Scrap scrap = scrapService.modifyScrap(
+		scrapService.modifyScrap(tripId,
 			modifyDto.getId(), modifyDto.getTitle(), modifyDto.getContent(),
-			modifyDto.getColor(), modifyDto.isHasImage()
+			modifyDto.getColor(), modifyDto.isHasImage(), modifyDto.getPhotoList()
 		);
 
-		return ResponseEntity.ok(new ScrapDetailDto(
-			scrap.getId(), securityUser.getUuid(), scrap.getTitle(),
-			scrap.getContent(), scrap.isHasImage(), scrap.getColor(),
-			modifyDto.isBookmark(), scrap.getCreateDate()
-		));
+		ScrapDetailDto response = scrapService.findByIdWithScrapImage(modifyDto.getId(), securityUser.getId());
+
+		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/{tripId}/scrap/delete")
@@ -104,17 +111,15 @@ public class ScrapController {
 		@RequestParam @Parameter(description = "스크랩 pk", example = "1")
 		long scrapId
 	) {
-		if (!scrapService.existByScrapIdAndUuid(scrapId, securityUser.getUuid()))
-			return ResponseEntity.badRequest().body("해당 스크랩에 대한 수정/삭제 권한이 없습니다.");
-
+		scrapService.checkIsWriterOfScrap(scrapId, securityUser.getId());
 		scrapService.deleteById(scrapId);
 
-		return ResponseEntity.ok("deleted");
+		return ResponseEntity.ok(scrapService.findAllByTripIdAndUserId(tripId, securityUser.getId()));
 	}
 
 	@PostMapping("/{tripId}/scrap/bookmark/toggle")
-	@Operation(summary = "스크랩 생성")
-	@ApiResponse(responseCode = "200", description = "스크랩 생성", content = {
+	@Operation(summary = "스크랩 북마크 토글")
+	@ApiResponse(responseCode = "200", description = "스크랩 북마크 토글", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = Boolean.class))})
 	public ResponseEntity<?> toggleBookmark(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,

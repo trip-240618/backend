@@ -1,5 +1,7 @@
 package com.ll.trip.domain.user.user.dto;
 
+import java.time.LocalDateTime;
+
 import com.ll.trip.domain.user.user.entity.UserEntity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,13 +48,24 @@ public class UserInfoDto {
 		example = "register or login or modify ...")
 	private String type;
 
-	public UserInfoDto(UserEntity user, String type) {
+	@Schema(
+		description = "생성 날짜",
+		example = "2024-08-22T14:05")
+	private LocalDateTime createDate;
+
+	public UserInfoDto(UserEntity user) {
 		this.uuid = user.getUuid();
 		this.name = user.getName();
 		this.nickName = user.getNickname();
 		this.profileImg = user.getProfileImg();
 		this.thumbnail = user.getThumbnail();
 		this.memo = user.getMemo();
-		this.type = type;
+		this.createDate = user.getCreateDate();
+		if (user.getNickname() == null) {
+			this.type = "register";
+		} else {
+			this.type = "login";
+		}
+
 	}
 }

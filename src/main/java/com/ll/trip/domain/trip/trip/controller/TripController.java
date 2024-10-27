@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import org.springframework.aop.AopInvocationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -67,10 +66,9 @@ public class TripController {
 	) {
 		String invitationCode = tripService.generateInvitationCode();
 		Trip trip = tripService.createTrip(tripCreateDto, invitationCode);
-		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
+		UserEntity userRef = entityManager.getReference(UserEntity.class, securityUser.getId());
 
-		tripService.joinTripById(trip, user, true);
-		notificationService.tripCreateNotifictaion(trip, user);
+		tripService.joinTripById(trip, userRef, true);
 		return ResponseEntity.ok(new TripCreateResponseDto(trip.getId(), invitationCode));
 	}
 
@@ -82,19 +80,14 @@ public class TripController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "초대코드", example = "1A2B3C4D") String invitationCode
 	) {
-		Long tripId = null;
-		try {
-			tripId = tripService.findTripIdByInvitationCode(invitationCode);
-		} catch (AopInvocationException ae) {
-			return ResponseEntity.badRequest().body(ae.getMessage());
-		}
-		Trip trip = entityManager.getReference(Trip.class, tripId);
+		long tripId = tripService.findTripIdByInvitationCode(invitationCode);
+		Trip tripRef = entityManager.getReference(Trip.class, tripId);
 		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
 
-		boolean isNewMember = tripService.joinTripById(trip, user, false);
+		boolean isNewMember = tripService.joinTripById(tripRef, user, false);
 
 		TripInfoDto response = new TripInfoDto(tripService.findTripByTripId(tripId));
-		notificationService.tripJoinNotifictaion(trip, response.getName(), user.getId(), securityUser.getNickname());
+		notificationService.tripJoinNotification(tripId, user.getId(), securityUser.getNickname());
 
 		if (isNewMember)
 			template.convertAndSend(
@@ -105,7 +98,7 @@ public class TripController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PostMapping("/enter")
+	@GetMapping("/enter")
 	@Operation(summary = "여행방 입장")
 	@ApiResponse(responseCode = "200", description = "여행방 입장", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = TripInfoDto.class))})
@@ -113,9 +106,7 @@ public class TripController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId
 	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("입장 권한이 없습니다.");
-
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		TripInfoDto response = new TripInfoDto(tripService.findTripByTripId(tripId));
 
 		return ResponseEntity.ok(response);
@@ -162,15 +153,9 @@ public class TripController {
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId
 	) {
-		if (!tripService.isLeaderOfTrip(securityUser.getId(), tripId))
-			return ResponseEntity.badRequest().body("해당 여행방에 대한 수정/삭제 권한이 없습니다.");
-
-		List<String> urls = tripService.findImageByTripId(tripId);
-		List<String> keys = awsAuthService.extractKeyFromUrl(urls);
-		awsAuthService.deleteObjectByKey(keys);
+		tripService.checkIsLeaderOfTrip(securityUser.getId(), tripId);
 
 		tripService.deleteTripById(tripId);
-
 		return ResponseEntity.ok("deleted");
 	}
 
@@ -179,20 +164,36 @@ public class TripController {
 	@ApiResponse(responseCode = "200", description = "Trip 여행방 나가기")
 	public ResponseEntity<?> leaveTrip(
 		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "트립 타입", example = "j") char tripType,
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId
 	) {
-		if (!tripService.existTripMemberByTripIdAndUserId(tripId, securityUser.getId()))
-			return ResponseEntity.badRequest().body("해당 여행방의 멤버가 아닙니다.");
+		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 
 		tripService.deleteTripMember(tripId, securityUser.getId());
 
-		if(tripService.countTripMember(tripId) == 0) {
-			List<String> urls = tripService.findImageByTripId(tripId);
-			List<String> keys = awsAuthService.extractKeyFromUrl(urls);
-			awsAuthService.deleteObjectByKey(keys);
-		}
+		template.convertAndSend("/topic/api/trip/" + Character.toLowerCase(tripType) + "/" + tripId,
+			new SocketResponseBody<>("member out",
+				securityUser.getUuid()));
 
-		tripService.deleteTripById(tripId);
+		return ResponseEntity.ok("deleted");
+	}
+
+	@DeleteMapping("/kick")
+	@Operation(summary = "Trip 여행방 강퇴")
+	@ApiResponse(responseCode = "200", description = "Trip 여행방 강퇴")
+	public ResponseEntity<?> kickTripMember(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId,
+		@RequestParam @Parameter(description = "트립 타입", example = "j") char tripType,
+		@RequestParam @Parameter(description = "강퇴 대상의 uuid", example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4") String uuid
+	) {
+		tripService.checkIsLeaderOfTrip(securityUser.getId(), tripId);
+
+		tripService.deleteTripMemberByUuid(tripId, uuid);
+
+		template.convertAndSend("/topic/api/trip/" + Character.toLowerCase(tripType) + "/" + tripId,
+			new SocketResponseBody<>("member out",
+				securityUser.getUuid()));
 
 		return ResponseEntity.ok("deleted");
 	}
@@ -206,16 +207,19 @@ public class TripController {
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId,
 		@RequestBody TripModifyDto requestBody
 	) {
-		if (!tripService.isLeaderOfTrip(securityUser.getId(), tripId))
-			return ResponseEntity.badRequest().body("해당 여행방에 대한 수정/삭제 권한이 없습니다.");
+		tripService.checkIsLeaderOfTrip(securityUser.getId(), tripId);
 		Trip trip = tripService.findTripByTripId(tripId);
+
+		if (requestBody.getThumbnail() != null && trip.getThumbnail() != null &&
+			!requestBody.getThumbnail().equals(trip.getThumbnail()))
+			awsAuthService.deleteUrls(List.of(trip.getThumbnail()));
 
 		planJService.updatePlanJDay(trip.getId(),
 			(int)ChronoUnit.DAYS.between(trip.getStartDate(), requestBody.getStartDate()),
 			(int)ChronoUnit.DAYS.between(requestBody.getStartDate(), requestBody.getEndDate()) + 1
 		);
 
-		TripInfoDto response = tripService.modifyTripByDto(trip, requestBody);
+		TripInfoDto response = tripService.modifyTripByDto(tripId, requestBody);
 
 		return ResponseEntity.ok(response);
 	}

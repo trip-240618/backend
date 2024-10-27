@@ -3,7 +3,6 @@ package com.ll.trip.domain.trip.scrap.dto;
 import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,13 +22,17 @@ public class ScrapListDto {
 		example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4")
 	private String writerUuid;
 
+	@Schema(
+		description = "작성자 닉네임",
+		example = "작성자")
+	private String nickname;
+
 	@NotBlank
 	@Schema(
 		description = "스크랩 제목",
 		example = "예수님이 입은 옷이 작을 때 뭐라하게")
 	private String title;
 
-	@Lob
 	@NotBlank
 	@Schema(
 		description = "스크랩 미리보기 내용",

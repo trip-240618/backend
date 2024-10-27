@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.notification.notification.service.NotificationService;
-import com.ll.trip.domain.user.jwt.JwtTokenUtil;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
@@ -20,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 public class OAuth2Service {
 	private final UserRepository userRepository;
 	private final UserService userService;
-	private final JwtTokenUtil jwtTokenUtil;
 	private final NotificationService notificationService;
 
 	@Transactional
@@ -36,17 +34,15 @@ public class OAuth2Service {
 			user = registerUser(name, profileImg, providerId, email, fcmToken);
 			notificationService.createNotificationConfig(user);
 			uuid = user.getUuid();
-			userInfoDto = new UserInfoDto(user, "register");
+			userInfoDto = new UserInfoDto(user);
 		} else {
 			user = optUser.get();
 			uuid = user.getUuid();
 
 			userService.updateFcmTokenByUserId(user.getId(), fcmToken);
 
-			if (user.getNickname() == null)
-				userInfoDto = new UserInfoDto(user, "register");
-			else
-				userInfoDto = new UserInfoDto(user, "login");
+
+			userInfoDto = new UserInfoDto(user);
 		}
 
 		userService.createAndSetTokens(user.getId(), uuid, user.getNickname(), user.getAuthorities(), response);
