@@ -7,6 +7,10 @@ import java.util.concurrent.Executors;
 
 import org.springframework.stereotype.Service;
 
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.MulticastMessage;
 import com.google.firebase.messaging.Notification;
@@ -29,6 +33,19 @@ public class FcmMessageUtil {
 				.setBody(body)
 				.build())
 			.putAllData(data)
+			// Android 소리 설정
+			.setAndroidConfig(AndroidConfig.builder()
+				.setNotification(AndroidNotification.builder()
+					.setSound("default")  // Android 기본 소리
+					.setChannelId("trips")
+					.build())
+				.build())
+			// iOS 소리 설정
+			.setApnsConfig(ApnsConfig.builder()
+				.setAps(Aps.builder()
+					.setSound("default")  // iOS 기본 소리
+					.build())
+				.build())
 			.build();
 	}
 

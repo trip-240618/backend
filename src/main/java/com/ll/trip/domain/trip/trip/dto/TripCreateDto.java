@@ -21,7 +21,7 @@ public class TripCreateDto {
 
 	@Schema(
 		description = "여행방 타입",
-		example = "J or P")
+		example = "j")
 	private char type;
 
 	@Schema(
