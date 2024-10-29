@@ -41,13 +41,14 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 
 	@Modifying
 	@Query(value = """
-    UPDATE trip_member
-    SET is_leader = 1
-    WHERE id = (
-        SELECT MIN(tm1.user_id)
-        FROM trip_member tm1
-        WHERE trip_id = :tripId
-    )
+		UPDATE trip_member tm
+        JOIN (
+            SELECT MIN(tm1.user_id) AS min_user_id
+            FROM trip_member tm1
+            WHERE tm1.trip_id = :tripId
+        ) AS subquery
+        ON tm.user_id = subquery.min_user_id and tm.trip_id = :tripId
+        SET tm.is_leader = 1
     """, nativeQuery = true)
 	void handLeaderToMember(long tripId);
 

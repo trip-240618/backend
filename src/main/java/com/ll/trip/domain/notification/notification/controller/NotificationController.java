@@ -6,10 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ll.trip.domain.notification.notification.dto.NotificationConfigDto;
 import com.ll.trip.domain.notification.notification.dto.NotificationListDto;
 import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.global.security.userDetail.SecurityUser;
@@ -74,4 +76,23 @@ public class NotificationController {
 		return ResponseEntity.ok("ok");
 	}
 
+	@GetMapping("/config")
+	@Operation(summary = "알림 설정")
+	public ResponseEntity<NotificationConfigDto> showConfig(
+		@AuthenticationPrincipal SecurityUser securityUser
+	) {
+		NotificationConfigDto response = notificationService.showNotificationConfig(securityUser.getId());
+		return ResponseEntity.ok(response);
+	}
+
+	@PutMapping("/config/modify")
+	@Operation(summary = "알림 설정 변경")
+	public ResponseEntity<NotificationConfigDto> modifyConfig(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestBody NotificationConfigDto request
+	) {
+		notificationService.modifyNotificationConfig(securityUser.getId(), request);
+		NotificationConfigDto response = notificationService.showNotificationConfig(securityUser.getId());
+		return ResponseEntity.ok(response);
+	}
 }

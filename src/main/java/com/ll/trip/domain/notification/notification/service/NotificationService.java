@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.notification.firebase.service.FcmMessageUtil;
 import com.ll.trip.domain.notification.notification.dto.NotificationComponentDto;
+import com.ll.trip.domain.notification.notification.dto.NotificationConfigDto;
 import com.ll.trip.domain.notification.notification.dto.NotificationListDto;
 import com.ll.trip.domain.notification.notification.entity.Notification;
 import com.ll.trip.domain.notification.notification.entity.NotificationConfig;
@@ -185,5 +186,15 @@ public class NotificationService {
 
 	public long countUnReadByUserId(long userId) {
 		return notificationRepository.countByUser_IdAndIsRead(userId, false);
+	}
+
+	public NotificationConfigDto showNotificationConfig(long userId) {
+		NotificationConfig config = notificationConfigRepository.findByUser_Id(userId);
+		return new NotificationConfigDto(config);
+	}
+
+	@Transactional
+	public void modifyNotificationConfig(long userId, NotificationConfigDto request) {
+		notificationConfigRepository.updateConfig(userId, request.isActivePlan(), request.isActiveLikeReply(), request.isActiveMarketing());
 	}
 }

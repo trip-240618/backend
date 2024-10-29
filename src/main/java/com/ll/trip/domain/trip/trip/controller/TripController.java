@@ -1,7 +1,6 @@
 package com.ll.trip.domain.trip.trip.controller;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -16,9 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.notification.notification.service.NotificationService;
-import com.ll.trip.domain.trip.planJ.service.PlanJService;
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
 import com.ll.trip.domain.trip.trip.dto.TripCreateResponseDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
@@ -48,8 +45,6 @@ import lombok.extern.slf4j.Slf4j;
 public class TripController {
 
 	private final TripService tripService;
-	private final PlanJService planJService;
-	private final AwsAuthService awsAuthService;
 	private final EntityManager entityManager;
 	private final SimpMessagingTemplate template;
 	private final NotificationService notificationService;
@@ -66,9 +61,8 @@ public class TripController {
 	) {
 		String invitationCode = tripService.generateInvitationCode();
 		Trip trip = tripService.createTrip(tripCreateDto, invitationCode);
-		UserEntity userRef = entityManager.getReference(UserEntity.class, securityUser.getId());
 
-		tripService.joinTripById(trip, userRef, true);
+		tripService.joinTripById(trip.getId(), securityUser.getId(), true);
 		return ResponseEntity.ok(new TripCreateResponseDto(trip.getId(), invitationCode));
 	}
 
@@ -81,13 +75,10 @@ public class TripController {
 		@RequestParam @Parameter(description = "초대코드", example = "1A2B3C4D") String invitationCode
 	) {
 		long tripId = tripService.findTripIdByInvitationCode(invitationCode);
-		Trip tripRef = entityManager.getReference(Trip.class, tripId);
-		UserEntity user = entityManager.getReference(UserEntity.class, securityUser.getId());
-
-		boolean isNewMember = tripService.joinTripById(tripRef, user, false);
+		boolean isNewMember = tripService.joinTripById(tripId, securityUser.getId(), false);
 
 		TripInfoDto response = new TripInfoDto(tripService.findTripByTripId(tripId));
-		notificationService.tripJoinNotification(tripId, user.getId(), securityUser.getNickname());
+		notificationService.tripJoinNotification(tripId, securityUser.getId(), securityUser.getNickname());
 
 		if (isNewMember)
 			template.convertAndSend(
@@ -200,9 +191,7 @@ public class TripController {
 
 	@PutMapping("/modify")
 	@Operation(summary = "Trip 수정")
-	@ApiResponse(responseCode = "200", description = "Trip 수정", content = {
-		@Content(mediaType = "application/json", schema = @Schema(implementation = TripInfoDto.class))})
-	public ResponseEntity<?> modifyTrip(
+	public ResponseEntity<TripInfoDto> modifyTrip(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId,
 		@RequestBody TripModifyDto requestBody
@@ -210,16 +199,7 @@ public class TripController {
 		tripService.checkIsLeaderOfTrip(securityUser.getId(), tripId);
 		Trip trip = tripService.findTripByTripId(tripId);
 
-		if (requestBody.getThumbnail() != null && trip.getThumbnail() != null &&
-			!requestBody.getThumbnail().equals(trip.getThumbnail()))
-			awsAuthService.deleteUrls(List.of(trip.getThumbnail()));
-
-		planJService.updatePlanJDay(trip.getId(),
-			(int)ChronoUnit.DAYS.between(trip.getStartDate(), requestBody.getStartDate()),
-			(int)ChronoUnit.DAYS.between(requestBody.getStartDate(), requestBody.getEndDate()) + 1
-		);
-
-		TripInfoDto response = tripService.modifyTripByDto(tripId, requestBody);
+		TripInfoDto response = tripService.modifyTripByDto(trip, requestBody);
 
 		return ResponseEntity.ok(response);
 	}

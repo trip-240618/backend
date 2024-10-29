@@ -25,6 +25,7 @@ public class ReportService {
 
 	@Transactional
 	public void createHistoryReport(String type, long typeId, long tripId, long userId, HistoryDto historyDto) {
+
 		String jsonData = parseToString(historyDto);
 		String deleteUrl = "/trip/" + tripId + "/history/delete/" + typeId;
 		buildAndSaveReport(type, jsonData, deleteUrl, userId);
