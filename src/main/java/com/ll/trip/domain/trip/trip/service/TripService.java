@@ -28,6 +28,7 @@ import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.global.handler.exception.NoSuchDataException;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,6 +41,7 @@ public class TripService {
 	private final TripRepository tripRepository;
 	private final TripMemberRepository tripMemberRepository;
 	private final InvitationCodeGenerator invitationCodeGenerator;
+	private final EntityManager entityManager;
 
 	//bookmark
 	private final BookmarkRepository bookmarkRepository;
@@ -67,14 +69,19 @@ public class TripService {
 	}
 
 	@Transactional
-	public boolean joinTripById(Trip trip, UserEntity user, boolean isLeader) {
-		TripMemberId tripMemberId = TripMemberId.builder().tripId(trip.getId()).userId(user.getId()).build();
+	public boolean joinTripById(long tripId, long userId, boolean isLeader) {
+		TripMemberId tripMemberId = TripMemberId.builder().tripId(tripId).userId(userId).build();
 
-		if (tripMemberRepository.existsTripMemberByTripIdAndUserId(trip.getId(), user.getId())) {
+		if (tripMemberRepository.existsTripMemberByTripIdAndUserId(tripId, userId)) {
 			return false;
 		}
 
-		TripMember tripMember = TripMember.builder().id(tripMemberId).user(user).trip(trip).isLeader(isLeader).build();
+		TripMember tripMember = TripMember.builder()
+			.id(tripMemberId)
+			.user(entityManager.getReference(UserEntity.class, userId))
+			.trip(tripRepository.getReferenceById(tripId))
+			.isLeader(isLeader)
+			.build();
 
 		tripMemberRepository.save(tripMember);
 		return true;
@@ -146,21 +153,24 @@ public class TripService {
 	}
 
 	@Transactional
-	public TripInfoDto modifyTripByDto(long tripId, TripModifyDto requestBody) {
+	public TripInfoDto modifyTripByDto(Trip trip, TripModifyDto requestBody) {
+		if (requestBody.getThumbnail() != null && trip.getThumbnail() != null &&
+			!requestBody.getThumbnail().equals(trip.getThumbnail()))
+			awsAuthService.deleteUrls(List.of(trip.getThumbnail()));
+
 		tripRepository.updateTripById(
-			tripId,
+			trip.getId(),
 			requestBody.getName(),
 			requestBody.getThumbnail(),
-			requestBody.getStartDate(),
-			requestBody.getEndDate(),
 			requestBody.getLabelColor()
 		);
 
-		return new TripInfoDto(findTripByTripId(tripId));
+		return new TripInfoDto(findTripByTripId(trip.getId()));
 	}
 
 	public Trip findTripByTripId(long tripId) {
-		return tripRepository.findTripDetailById(tripId).orElseThrow(() -> new NoSuchDataException("여행방을 찾을 수 없습니다. tripId: " + tripId));
+		return tripRepository.findTripDetailById(tripId)
+			.orElseThrow(() -> new NoSuchDataException("여행방을 찾을 수 없습니다. tripId: " + tripId));
 	}
 
 	public void checkIsLeaderOfTrip(long userId, long tripId) {

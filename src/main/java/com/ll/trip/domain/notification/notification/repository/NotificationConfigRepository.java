@@ -11,10 +11,22 @@ public interface NotificationConfigRepository extends JpaRepository<Notification
 	@Modifying
 	@Query(
 		"""
-			update NotificationConfig n
-			set n.activeAdNotification = :marketing
-			where n.user.id = :userId
-		"""
+				update NotificationConfig n
+				set n.activeAdNotification = :marketing
+				where n.user.id = :userId
+			"""
 	)
 	int updateMarketingAgree(long userId, boolean marketing);
+
+	NotificationConfig findByUser_Id(long userId);
+
+	@Modifying
+	@Query("""
+		update NotificationConfig n
+		set n.activePlanNotification = :activePlan,
+		n.activeHistoryNotification = :activeLikeReply,
+		n.activeAdNotification = :activeMarketing
+		where n.user.id = :userId
+		""")
+	void updateConfig(long userId, boolean activePlan, boolean activeLikeReply, boolean activeMarketing);
 }

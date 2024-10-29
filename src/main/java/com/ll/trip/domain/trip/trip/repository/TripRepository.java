@@ -88,11 +88,8 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
 		    UPDATE Trip t
 		    SET t.name = :name,
 		        t.thumbnail = :thumbnail,
-		        t.startDate = :startDate,
-		        t.endDate = :endDate,
 		        t.labelColor = :labelColor
 		    WHERE t.id = :tripId
 		""")
-	void updateTripById(long tripId, String name, String thumbnail,
-		LocalDate startDate, LocalDate endDate, String labelColor);
+	void updateTripById(long tripId, String name, String thumbnail, String labelColor);
 }
