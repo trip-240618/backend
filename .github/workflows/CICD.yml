@@ -91,8 +91,8 @@ jobs:
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/trip_prod:latest
             sudo docker-compose -f docker-compose-${{env.TARGET_UPSTREAM}}.yml up -d
 
-      - name: Wait for 20 seconds for application started
-        run: sleep 20
+      - name: Wait for 40 seconds for application started
+        run: sleep 40
 
       - name: Check deploy server URL
         uses: jtalk/url-health-check-action@v3
