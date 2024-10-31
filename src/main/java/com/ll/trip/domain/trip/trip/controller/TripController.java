@@ -139,7 +139,6 @@ public class TripController {
 
 	@DeleteMapping("/delete")
 	@Operation(summary = "Trip 삭제")
-	@ApiResponse(responseCode = "200", description = "Trip 삭제")
 	public ResponseEntity<?> deleteTrip(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId
@@ -152,7 +151,6 @@ public class TripController {
 
 	@DeleteMapping("/leave")
 	@Operation(summary = "Trip 여행방 나가기")
-	@ApiResponse(responseCode = "200", description = "Trip 여행방 나가기")
 	public ResponseEntity<?> leaveTrip(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "트립 타입", example = "j") char tripType,
@@ -171,7 +169,6 @@ public class TripController {
 
 	@DeleteMapping("/kick")
 	@Operation(summary = "Trip 여행방 강퇴")
-	@ApiResponse(responseCode = "200", description = "Trip 여행방 강퇴")
 	public ResponseEntity<?> kickTripMember(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestParam @Parameter(description = "트립 id", example = "1") long tripId,

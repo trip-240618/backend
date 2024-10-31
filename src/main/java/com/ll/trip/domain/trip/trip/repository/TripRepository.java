@@ -77,8 +77,7 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
 	@Query("""
 		 select new com.ll.trip.domain.user.user.dto.VisitedCountryDto(t.country, count(t.id))
 		 from TripMember tm
-		 left join tm.trip t on t.startDate <= :date
-		 where tm.user.id = :userId
+		 inner join tm.trip t on tm.user.id = :userId and t.startDate <= :date
 		 group by t.country
 		""")
 	List<VisitedCountryDto> findVisitedCountry(long userId, LocalDate date);

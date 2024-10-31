@@ -63,7 +63,6 @@ public class PlanPController {
 			schema = @Schema(implementation = PlanPInfoDto.class))})
 	public ResponseEntity<?> createPlanP(
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
-		@AuthenticationPrincipal SecurityUser securityUser,
 		@RequestBody PlanPInfoDto requestDto
 	) {
 		PlanP plan = planPService.createPlanP(tripId, requestDto);
