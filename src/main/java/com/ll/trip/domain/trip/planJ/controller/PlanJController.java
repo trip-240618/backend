@@ -129,12 +129,6 @@ public class PlanJController {
 		int dayTo = requestBody.getDayAfterStart();
 
 		if (!plan.getStartTime().equals(requestBody.getStartTime()) || dayFrom != dayTo) {
-			if (!requestBody.isLocker()) {
-				planEditService.checkHasEditor('j', tripId, dayFrom, securityUser.getUuid());
-				if (dayFrom != dayTo) {
-					planEditService.checkHasEditor('j', tripId, dayTo, securityUser.getUuid());
-				}
-			}
 			order = planEditService.getLastPlanJOrder(tripId);
 			notificationService.createPlanMoveNotification(tripId);
 		}

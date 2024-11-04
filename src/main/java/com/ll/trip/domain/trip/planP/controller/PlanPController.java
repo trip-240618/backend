@@ -104,11 +104,11 @@ public class PlanPController {
 		@RequestBody PlanPInfoDto requestBody
 	) {
 		PlanPInfoDto response = planPService.updatePlanPByPlanId(requestBody);
-
-		template.convertAndSend(
-			"/topic/api/trip/p/" + tripId,
-			new SocketResponseBody<>("modify", response)
-		);
+		if (!response.isLocker())
+			template.convertAndSend(
+				"/topic/api/trip/p/" + tripId,
+				new SocketResponseBody<>("modify", response)
+			);
 
 		return ResponseEntity.ok("modified");
 	}

@@ -76,6 +76,7 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		""")
 	int updatePlanPDayAndLockerByPlanId(long planId, Integer dayTo, int order, boolean locker);
 
+	@Modifying
 	void deleteByIdAndDayAfterStart(long planId, int day);
 
 	@Modifying

@@ -1,5 +1,6 @@
 package com.ll.trip.domain.history.history.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -290,7 +291,7 @@ public class HistoryController {
 		@RequestParam(required = false) @Parameter(description = "태그명", example = "긴자") String tagName,
 		@RequestParam(required = false) @Parameter(description = "태그 컬러", example = "FFEFF3") String tagColor
 	) {
-		List<HistoryDto> response = null;
+		List<HistoryDto> response = new ArrayList<>();
 		if (uuid != null) {
 			response = historyService.searchHistoryByUuid(tripId, securityUser.getId(), uuid);
 		} else if (tagName != null) {

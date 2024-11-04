@@ -175,7 +175,7 @@ public class PlanPService {
 			List<PlanPInfoDto> sortedList = dayMap.get(dto.getDayAfterStart());
 			int index = Collections.binarySearch(sortedList, dto,
 				((o1, o2) -> {
-					if (o1.getOrderByDate() == null)
+					if (o1.getOrderByDate() == 0)
 						return -1;
 					return o1.getOrderByDate() - o2.getOrderByDate();
 				}));
@@ -190,27 +190,27 @@ public class PlanPService {
 			List<PlanPInfoDto> updateList = new ArrayList<>();
 			PlanPInfoDto firstDto = list.get(0);
 			Integer pre = firstDto.getOrderByDate();
-			if (pre == null) {
+			if (pre == 0) {
 				firstDto.setOrderByDate(0);
 				updateList.add(firstDto);
 				pre = 0;
 			}
 
-			Queue<PlanPInfoDto> nullQue = new LinkedList<>();
+			Queue<PlanPInfoDto> zeroQue = new LinkedList<>();
 			for (PlanPInfoDto dto : list) {
-				if (dto.getOrderByDate() == null) {
-					nullQue.add(dto);
+				if (dto.getOrderByDate() == 0) {
+					zeroQue.add(dto);
 					continue;
 				}
 				int last = dto.getOrderByDate();
-				if (last - pre <= nullQue.size()) {
+				if (last - pre <= zeroQue.size()) {
 					pre = -1;
 					break;
 				}
 
-				int gap = (last - pre) / (nullQue.size() + 1);
-				while (!nullQue.isEmpty()) {
-					PlanPInfoDto plan = nullQue.poll();
+				int gap = (last - pre) / (zeroQue.size() + 1);
+				while (!zeroQue.isEmpty()) {
+					PlanPInfoDto plan = zeroQue.poll();
 					pre += gap;
 					plan.setOrderByDate(pre);
 					updateList.add(plan);
@@ -223,9 +223,9 @@ public class PlanPService {
 				continue;
 			}
 
-			while (!nullQue.isEmpty()) {
+			while (!zeroQue.isEmpty()) {
 				int gap = 1_048_576;
-				PlanPInfoDto plan = nullQue.poll();
+				PlanPInfoDto plan = zeroQue.poll();
 				pre += gap;
 				plan.setOrderByDate(pre);
 				updateList.add(plan);
