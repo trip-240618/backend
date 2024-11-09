@@ -24,6 +24,11 @@ public class HistoryDto {
 	private String writerUuid;
 
 	@Schema(
+		description = "작성자 닉네임",
+		example = "최순자")
+	private String nickname;
+
+	@Schema(
 		description = "프로필 축소버전",
 		example = "https://trip-story.s3.ap-northeast-2.amazonaws.com/photoTest/c3396416-1e2e-4d0d-9a82-788831e5ac1f")
 	private String profileImage;
@@ -74,6 +79,7 @@ public class HistoryDto {
 	public HistoryDto(HistoryServiceDto serviceDto) {
 		this.id = serviceDto.getId();
 		this.writerUuid = serviceDto.getWriterUuid();
+		this.nickname = serviceDto.getNickname();
 		this.profileImage = serviceDto.getProfileImage();
 		this.imageUrl = serviceDto.getImageUrl();
 		this.thumbnail = serviceDto.getThumbnail();

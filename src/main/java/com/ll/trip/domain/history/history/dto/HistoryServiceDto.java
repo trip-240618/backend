@@ -13,6 +13,8 @@ public class HistoryServiceDto {
 
 	private String writerUuid;
 
+	private String nickname;
+
 	private String profileImage;
 
 	private String imageUrl;
@@ -36,12 +38,13 @@ public class HistoryServiceDto {
 	private HistoryTagDto tag;
 
 
-	public HistoryServiceDto(long id, String writerUuid, String profileImage, String imageUrl, String thumbnail,
+	public HistoryServiceDto(long id, String writerUuid, String nickname, String profileImage, String imageUrl, String thumbnail,
 		BigDecimal latitude, BigDecimal longitude, String memo, int likeCnt, int replyCnt, boolean like,
 		LocalDate photoDate, Long tagId, String tagColor,
 		String tagName) {
 		this.id = id;
 		this.writerUuid = writerUuid;
+		this.nickname = nickname;
 		this.profileImage = profileImage;
 		this.imageUrl = imageUrl;
 		this.thumbnail = thumbnail;
