@@ -259,7 +259,7 @@ public class PlanPController {
 		@PathVariable @Parameter(description = "트립 pk", example = "1", in = ParameterIn.PATH) long tripId,
 		@RequestBody PlanPInfoDto request
 	) {
-		planPService.moveLocker(tripId, request.getPlanId(), 0,
+		planPService.moveLocker(tripId, request.getPlanId(), request.getDayAfterStart(),
 			request.isLocker());
 		return ResponseEntity.ok("moved");
 	}

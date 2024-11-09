@@ -78,13 +78,14 @@ public class TripController {
 		boolean isNewMember = tripService.joinTripById(tripId, securityUser.getId(), false);
 
 		TripInfoDto response = new TripInfoDto(tripService.findTripByTripId(tripId));
-		notificationService.tripJoinNotification(tripId, securityUser.getId(), securityUser.getNickname());
 
-		if (isNewMember)
+		if (isNewMember) {
+			notificationService.tripJoinNotification(tripId, securityUser.getId(), securityUser.getNickname());
 			template.convertAndSend(
 				"/topic/api/trip/" + Character.toLowerCase(response.getType()) + "/" + response.getId(),
 				new SocketResponseBody<>("member add",
 					response.getTripMemberDtoList().get(response.getTripMemberDtoList().size() - 1)));
+		}
 
 		return ResponseEntity.ok(response);
 	}
