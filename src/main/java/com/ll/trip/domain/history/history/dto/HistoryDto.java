@@ -74,7 +74,7 @@ public class HistoryDto {
 		example = "2024-08-22")
 	private LocalDate photoDate;
 
-	private List<HistoryTagDto> tags;
+	private List<HistoryTagDto> tags = new ArrayList<>();
 
 	public HistoryDto(HistoryServiceDto serviceDto) {
 		this.id = serviceDto.getId();
@@ -90,6 +90,5 @@ public class HistoryDto {
 		this.likeCnt = serviceDto.getLikeCnt();
 		this.replyCnt = serviceDto.getReplyCnt();
 		this.photoDate = serviceDto.getPhotoDate();
-		this.tags = new ArrayList<>();
 	}
 }

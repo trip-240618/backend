@@ -22,7 +22,6 @@ import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -40,7 +39,7 @@ public class ReportController {
 	public ResponseEntity<String> createReport(
 		@RequestParam @Schema(example = "reply") String type,
 		@RequestParam @Schema(example = "1") long tripId,
-		@RequestParam(required = false) @Schema(description = "reply는 historyId도 같이 줘야댐") long historyId,
+		@RequestParam(required = false) @Schema(description = "reply는 historyId도 같이 줘야댐") Long historyId,
 		@RequestParam @Schema(example = "1") long typeId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {

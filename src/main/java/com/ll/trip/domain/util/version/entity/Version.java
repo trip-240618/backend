@@ -29,7 +29,7 @@ public class Version {
 
 	private String iosVersion;
 
-	private String forceUpdate;
+	private boolean forceUpdate;
 
 	@CreatedDate
 	private String createDate;
