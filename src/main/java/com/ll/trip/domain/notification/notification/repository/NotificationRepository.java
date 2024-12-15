@@ -42,6 +42,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 			from Notification n
 			left join n.trip t
 			where n.user.id = :userId and n.createDate >= :weekAgo
+			order by n.id desc
 		""")
 	List<NotificationListDto> findAllByUserIdAndDate(long userId, LocalDateTime weekAgo);
 
@@ -52,6 +53,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 			from Notification n
 			left join n.trip t
 			where n.user.id = :userId and n.createDate >= :weekAgo and n.title = :title
+			order by n.id desc
 		""")
 	List<NotificationListDto> findAllTypeByUserIdAndDate(long userId, String title, LocalDateTime weekAgo);
 
