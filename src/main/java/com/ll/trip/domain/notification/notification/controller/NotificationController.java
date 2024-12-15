@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -94,5 +95,19 @@ public class NotificationController {
 		notificationService.modifyNotificationConfig(securityUser.getId(), request);
 		NotificationConfigDto response = notificationService.showNotificationConfig(securityUser.getId());
 		return ResponseEntity.ok(response);
+	}
+
+	@DeleteMapping("/delete")
+	@Operation(summary = "단일 삭제")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "성공"),
+		@ApiResponse(responseCode = "404", description = "실패")
+	})
+	public ResponseEntity<?> deleteNotification(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "삭제할 알림의 id", example = "1") long notificationId
+	) {
+		notificationService.deleteNotification(notificationId, securityUser.getId());
+		return ResponseEntity.ok("ok");
 	}
 }

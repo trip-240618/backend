@@ -197,4 +197,9 @@ public class NotificationService {
 	public void modifyNotificationConfig(long userId, NotificationConfigDto request) {
 		notificationConfigRepository.updateConfig(userId, request.isActivePlan(), request.isActiveLikeReply(), request.isActiveMarketing());
 	}
+
+	@Transactional
+	public void deleteNotification(long notificationId, long userId) {
+		notificationRepository.deleteByIdAndUserId(notificationId, userId);
+	}
 }
