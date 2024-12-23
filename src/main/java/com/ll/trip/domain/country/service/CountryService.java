@@ -1,11 +1,13 @@
 package com.ll.trip.domain.country.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ll.trip.domain.country.entity.Country;
+import com.ll.trip.domain.country.repository.CountryDomainRepository;
 import com.ll.trip.domain.country.repository.CountryRepository;
 import com.ll.trip.global.handler.exception.NoSuchDataException;
 
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CountryService {
 	private final CountryRepository countryRepository;
+	private final CountryDomainRepository countryDomainRepository;
 
 	// @Value(value = "${file.country.path}") //국기 이미지 저장할 때만 사용
 	// private String filePath;
@@ -47,5 +50,13 @@ public class CountryService {
 
 	public List<String> findAllCountryNameLike(String keyword) {
 		return countryRepository.findCountryNameLike(keyword);
+	}
+
+	public String findCountryDomain(String name) {
+		Optional<String> optDomain = countryDomainRepository.findByCountryName(name);
+		if(optDomain.isEmpty()) {
+			throw new NoSuchDataException("국가명이 존재하지 않습니다. : " + name);
+		}
+		return optDomain.get();
 	}
 }

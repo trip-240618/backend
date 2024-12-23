@@ -49,7 +49,7 @@ public class FaqController {
 
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/modify/{faqId}")
-	@Operation(summary = "FAQ 생성")
+	@Operation(summary = "FAQ 수정")
 	@ApiResponse(responseCode = "200", description = "FAQ 생성", content = {
 		@Content(mediaType = "application/json", schema = @Schema(implementation = Faq.class))})
 	public ResponseEntity<?> modifyFaq(
