@@ -116,10 +116,12 @@ public class NotificationService {
 		return notificationRepository.findHistoryNotificationComponent(historyId);
 	}
 
-	public List<NotificationListDto> getListByUserIdAndTitle(long userId, String title) {
+	public List<NotificationListDto> getListByUserIdAndTitle(long userId, String title, long id) {
+		if(id == 0) id = Long.MAX_VALUE;
+
 		return title == null ?
-			notificationRepository.findAllByUserIdAndDate(userId, LocalDateTime.now().minusDays(7))
-			: notificationRepository.findAllTypeByUserIdAndDate(userId, title, LocalDateTime.now().minusDays(7));
+			notificationRepository.findAllByUserIdAndDate(userId, LocalDateTime.now().minusDays(7), id)
+			: notificationRepository.findAllTypeByUserIdAndDate(userId, title, LocalDateTime.now().minusDays(7), id);
 	}
 
 	@Transactional
