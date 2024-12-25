@@ -1,13 +1,12 @@
 package com.ll.trip.domain.notification.notification.repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import com.ll.trip.domain.notification.notification.dto.NotificationListDto;
 import com.ll.trip.domain.notification.notification.dto.NotificationComponentDto;
 import com.ll.trip.domain.notification.notification.entity.Notification;
 
@@ -35,27 +34,26 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 		""")
 	List<NotificationComponentDto> findAllTripNotificationComponentByTripId(long tripId);
 
-	@Query("""
-			select new com.ll.trip.domain.notification.notification.dto.NotificationListDto(
-			n.id, t.labelColor, n.destination, n.title, n.content, n.isRead, n.createDate
-			)
-			from Notification n
-			left join n.trip t
-			where n.user.id = :userId and n.id < :id and n.createDate >= :weekAgo
-			order by n.id desc
-		""")
-	List<NotificationListDto> findAllByUserIdAndDate(long userId, LocalDateTime weekAgo, long id);
+	@Query(value = """
+        select n.id, t.label_color as labelColor, n.destination, n.title, n.content, n.is_read as isRead, n.create_date as createDate
+        from notification n
+        left join trip t on n.trip_id = t.id
+        where n.user_id = :userId and n.id < :id
+        order by n.id desc
+        limit 20
+    """, nativeQuery = true)
+	List<Object[]> findTop20ByUserIdAndIdLessThanOrderByDateDesc(@Param("userId") long userId,
+		@Param("id") long id);
 
-	@Query("""
-			select new com.ll.trip.domain.notification.notification.dto.NotificationListDto(
-			n.id, t.labelColor, n.destination, n.title, n.content, n.isRead, n.createDate
-			)
-			from Notification n
-			left join n.trip t
-			where n.user.id = :userId and n.id < :id and n.createDate >= :weekAgo and n.title = :title 
-			order by n.id desc
-		""")
-	List<NotificationListDto> findAllTypeByUserIdAndDate(long userId, String title, LocalDateTime weekAgo, long id);
+	@Query(value = """
+        select n.id, t.label_color as labelColor, n.destination, n.title, n.content, n.is_read as isRead, n.create_date as createDate
+        from notification n
+        left join trip t on n.trip_id = t.id
+        where n.user_id = :userId and n.id < :id and title = :title
+        order by n.id desc
+        limit 20
+    """, nativeQuery = true)
+	List<Object[]> findAllTypeByUserIdAndDate(long userId, String title, long id);
 
 	@Modifying
 	@Query("""
