@@ -54,9 +54,6 @@ public class CountryService {
 
 	public String findCountryDomain(String name) {
 		Optional<String> optDomain = countryDomainRepository.findByCountryName(name);
-		if(optDomain.isEmpty()) {
-			throw new NoSuchDataException("국가명이 존재하지 않습니다. : " + name);
-		}
-		return optDomain.get();
+		return optDomain.orElse("kr");
 	}
 }
