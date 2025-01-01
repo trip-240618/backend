@@ -85,6 +85,7 @@ public class TripInfoDto {
 		this.thumbnail = trip.getThumbnail();
 		this.labelColor = trip.getLabelColor();
 		this.bookmark = false;
+		this.domain = trip.getDomain();
 		this.tripMemberDtoList = trip.getTripMembers().stream().map(TripMemberDto::new).toList();
 	}
 
