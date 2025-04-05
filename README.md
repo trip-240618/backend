@@ -7,8 +7,6 @@
 
 ## 기술 스택
 
-![e6c8c9ba-853c-4a23-b78f-470f6dcf065f](https://github.com/user-attachments/assets/956acfda-42e8-4315-9c63-0f0c11f0f9fc)
-
 - **언어:** Java 17
 - **프레임워크:** Spring Boot 3.3.0
 - **빌드 도구:** Gradle
