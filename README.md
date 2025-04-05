@@ -6,6 +6,9 @@
 이 프로젝트는 Spring Boot 3.3.0을 기반으로 한 웹 애플리케이션입니다. MySQL을 사용하여 데이터를 관리하고, JWT 기반 인증 및 OAuth2 로그인을 지원합니다. 또한, RESTful API 문서를 위해 Spring REST Docs를 활용하며, QueryDSL을 사용한 효율적인 데이터 조회를 구현합니다.
 
 ## 기술 스택
+
+![image](https://github.com/user-attachments/assets/ed99190d-8ed6-402a-9fc6-72e4bdb3ce93)
+
 - **언어:** Java 17
 - **프레임워크:** Spring Boot 3.3.0
 - **빌드 도구:** Gradle
@@ -16,7 +19,7 @@
 - **웹소켓:** Spring WebSocket
 - **클라우드 서비스:** AWS S3, Firebase Admin SDK
 - **항공 데이터 API:** Amadeus API
-- **장소 검색 API: ** Google Place API
+- **장소 검색 API:** Google Place API
  
 ## 프로젝트 설정
 ### 1. 환경 설정
@@ -53,6 +56,7 @@ plugins {
 - `firebase-admin` : Firebase Admin SDK를 통한 푸시 알림 및 인증 기능
 - `amadeus-java` : Amadeus API 연동을 위한 라이브러리
 - `google-places-api` : Google Places API를 이용한 장소 검색 및 자동완성 기능
+- `spring-web` : RestTemplate을 통한 외부 API 통신 (with RestTemplate)
 
 ## 데이터베이스 ERD
 
