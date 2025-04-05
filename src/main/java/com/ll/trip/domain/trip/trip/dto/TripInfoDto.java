@@ -27,7 +27,7 @@ public class TripInfoDto {
 
 	@Schema(
 		description = "여행방 타입",
-		example = "J or P")
+		example = "j")
 	private char type;
 
 	@Schema(
@@ -44,11 +44,6 @@ public class TripInfoDto {
 		description = "여행지",
 		example = "일본")
 	private String country;
-
-	@Schema(
-		description = "ccTLD 지역 코드",
-		example = "jp")
-	private String regionCode;
 
 	@Schema(
 		description = "여행방 썸네일",
@@ -71,6 +66,11 @@ public class TripInfoDto {
 	private boolean bookmark;
 
 	@Schema(
+		description = "국가 도메인",
+		example = "kr")
+	private String domain;
+
+	@Schema(
 		description = "참가자 리스트")
 	private List<TripMemberDto> tripMemberDtoList = new ArrayList<>();
 
@@ -85,6 +85,7 @@ public class TripInfoDto {
 		this.thumbnail = trip.getThumbnail();
 		this.labelColor = trip.getLabelColor();
 		this.bookmark = false;
+		this.domain = trip.getDomain();
 		this.tripMemberDtoList = trip.getTripMembers().stream().map(TripMemberDto::new).toList();
 	}
 
@@ -94,12 +95,12 @@ public class TripInfoDto {
 		this.type = dto.getType();
 		this.invitationCode = dto.getInvitationCode();
 		this.country = dto.getCountry();
-		this.regionCode = dto.getRegionCode();
 		this.startDate = dto.getStartDate();
 		this.endDate = dto.getEndDate();
 		this.thumbnail = dto.getThumbnail();
 		this.labelColor = dto.getLabelColor();
 		this.bookmark = dto.isBookmark();
+		this.domain = dto.getDomain();
 		this.tripMemberDtoList.add(dto.getTripMemberDto());
 	}
 }

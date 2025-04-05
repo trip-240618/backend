@@ -16,7 +16,7 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 
 	@Query("""
 		select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
-		  h.id, u.uuid, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
+		  h.id, u.uuid, u. nickname, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
 		  h.longitude, h.memo, h.likeCnt, h.replyCnt, coalesce(l.toggle, false), h.photoDate, t.id, t.tagColor, t.tagName)
 		FROM History h
 		inner JOIN h.user u on h.trip.id = :tripId
@@ -28,7 +28,7 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 
 	@Query("""
 		    select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
-		    h.id, u.uuid, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
+		    h.id, u.uuid, u.nickname, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
 		    h.longitude, h.memo, h.likeCnt, h.replyCnt, coalesce(l.toggle, false), h.photoDate, t.id, t.tagColor, t.tagName)
 		    from History h
 		    inner join UserEntity u on h.id = :historyId and h.user.id = u.id
@@ -62,7 +62,7 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 
 	@Query("""
 		select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
-		 h.id, u.uuid, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
+		 h.id, u.uuid, u.nickname, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
 		 h.longitude, h.memo, h.likeCnt, h.replyCnt, coalesce(l.toggle, false), h.photoDate, t.id, t.tagColor, t.tagName)
 		 FROM History h
 		 inner JOIN h.user u on h.trip.id = :tripId and u.uuid = :uuid
@@ -74,7 +74,7 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 
 	@Query("""
 		select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
-			 h.id, u.uuid, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
+			 h.id, u.uuid, u.nickname, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
 			 h.longitude, h.memo, h.likeCnt, h.replyCnt, coalesce(l.toggle, false), h.photoDate, t2.id, t2.tagColor, t2.tagName)
 		FROM History h
 		inner join h.historyTags t on t.trip.id = :tripId and t.tagName = :tagName and t.tagColor = :tagColor
@@ -87,7 +87,7 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 
 	@Query("""
 		select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
-		h.id, u.uuid, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
+		h.id, u.uuid, u.nickname, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
 		h.longitude, h.memo, h.likeCnt, h.replyCnt, coalesce(l.toggle, false), h.photoDate, t2.id, t2.tagColor, t2.tagName)
 		FROM History h
 		inner join h.historyTags t on t.trip.id = :tripId and t.tagName = :tagName
@@ -100,7 +100,7 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 
 	@Query("""
 		select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
-		h.id, u.uuid, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
+		h.id, u.uuid, u.nickname, u.thumbnail, h.imageUrl, h.thumbnail, h.latitude,
 		h.longitude, h.memo, h.likeCnt, h.replyCnt, coalesce(l.toggle, false), h.photoDate, t.id, t.tagColor, t.tagName)
 		FROM History h
 		inner JOIN h.user u on h.id = :historyId

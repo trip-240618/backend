@@ -64,8 +64,7 @@ public class NoticeController {
 	}
 
 	@GetMapping("/list")
-	@Operation(summary = "공지 목록")
-	@ApiResponse(responseCode = "200", description = "공지 목록 보기(파라미터가 없으면 전체 공지 반환)")
+	@Operation(summary = "공지 목록", description = "공지 목록 보기(파라미터가 없으면 전체 공지 반환)")
 	public ResponseEntity<List<NoticeListDto>> showNoticeList(
 		@RequestParam(required = false) @Parameter(description = "일반, 업데이트, 시스템", example = "업데이트") String type
 	) {

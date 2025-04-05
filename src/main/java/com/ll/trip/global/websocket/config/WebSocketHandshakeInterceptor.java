@@ -35,7 +35,6 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
 			return false;
 		}
 
-		log.info("WebSocket에 연결중 uuid: " + authentication.getName());
 		attributes.put("nickname", ((SecurityUser) authentication.getPrincipal()).getNickname());
 		return true;
 	}
@@ -46,9 +45,6 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
 		if (exception != null) {
 			// 예외가 발생했을 경우 예외 로그를 남김
 			log.error("WebSocket 핸드셰이크 중 오류 발생: ", exception);
-		} else {
-			// 핸드셰이크 성공 시 연결된 클라이언트의 정보를 로깅
-			log.info("WebSocket 연결 성공: " + request.getRemoteAddress());
 		}
 	}
 

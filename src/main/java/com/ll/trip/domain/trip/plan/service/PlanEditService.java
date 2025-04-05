@@ -1,4 +1,4 @@
-package com.ll.trip.domain.trip.planJ.service;
+package com.ll.trip.domain.trip.plan.service;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,46 +19,48 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
-public class PlanJEditService {
+public class PlanEditService {
 	private final PlanJRepository planJRepository;
 	@Getter
 	private final ConcurrentHashMap<String, String> sessionIdMap = new ConcurrentHashMap<>();
-	// SessionId, "tripId/day"
+	// sessionId, type/tripId?value
 	@Getter
 	private final ConcurrentHashMap<String, String[]> destinationMap = new ConcurrentHashMap<>();
-	// "tripId/day", {SessionId, uuid, nickname}
+	// type/tripId?value , {sessionId, uuid, nickname}
 	private final SimpMessagingTemplate template;
-	private final String TOPIC_PREFIX = "/topic/api/trip/j/";
+	private final String TOPIC_PREFIX = "/topic/api/trip/";
 
-	public int getLastOrderByTripId(long tripId) {
+	public int getLastPlanJOrder(long tripId) {
 		Integer order = planJRepository.findMaxOrder(tripId);
 		if (order == null)
 			return 0;
 		return order + 1;
 	}
 
-	public String[] getEditorByTripIdAndDay(long tripId, int day) {
-		return destinationMap.getOrDefault(tripId + "/" + day, null);
+	public String[] getEditorByDestination(char type, long tripId, int value) {
+		return destinationMap.getOrDefault(type + "/" + tripId + "?" + value, null);
 	}
 
-	public void addEditor(long tripId, int day, String sessionId, String uuid, String name) {
-		String dest = tripId + "/" + day;
-		destinationMap.put(dest, new String[] {sessionId, uuid, name});
+	public void addEditor(char type, long tripId, int value, String sessionId, String uuid, String nickname) {
+		String dest = type + "/" + tripId + "?" + value;
+		destinationMap.put(dest, new String[] {sessionId, uuid, nickname});
 		sessionIdMap.put(sessionId, dest);
 	}
 
-	public void checkIsEditor(long tripId, int day, String uuid) {
-		String[] editor = destinationMap.getOrDefault(tripId + "/" + day, null);
+	public void checkIsEditor(char type, long tripId, int value, String uuid) {
+		String dest = type + "/" + tripId + "?" + value;
+		String[] editor = destinationMap.getOrDefault(dest, null);
 		if (editor == null || !uuid.equals(editor[1])) {
-			log.info("user is not editor of trip :" + tripId + "day : " + day + "\nuuid : " + uuid);
+			log.info("user is not editor of trip :" + tripId + "value : " + value + "\nuuid : " + uuid);
 			throw new PermissionDeniedException("user is not editor of day");
 		}
 	}
 
-	public void checkHasEditor(long tripId, Integer day, String uuid) {
-		String[] editor = destinationMap.getOrDefault(tripId + "/" + day, null);
+	public void checkHasEditor(char type, long tripId, Integer value, String uuid) {
+		String dest = type + "/" + tripId + "?" + value;
+		String[] editor = destinationMap.getOrDefault(dest, null);
 		if(editor != null && !editor[1].equals(uuid)) {
-			log.info("there are editor at trip :" + tripId + "day : " + day + "\nuuid : " + uuid);
+			log.info("there are editor at trip :" + tripId + "day : " + value + "\nuuid : " + uuid);
 			throw new PermissionDeniedException("there are editor at destination already");
 		}
 	}
@@ -69,15 +71,13 @@ public class PlanJEditService {
 			return;
 		destinationMap.remove(dest);
 		sessionIdMap.remove(sessionId);
-		String[] dests = dest.split("/");
-		long tripId = Long.parseLong(dests[0]);
-		int day = Integer.parseInt(dests[1]);
-
-		template.convertAndSend(TOPIC_PREFIX + tripId, new SocketResponseBody<>("edit finish", day));
+		String[] dests = dest.split("\\?");
+		int value = Integer.parseInt(dests[1]);
+		template.convertAndSend(TOPIC_PREFIX + dests[0], new SocketResponseBody<>("edit finish", value));
 	}
 
-	public void removeEditorByDestination(long tripId, int day, String uuid) {
-		String dest = tripId + "/" + day;
+	public void removeEditorByDestination(char type, long tripId, int value, String uuid) {
+		String dest = type + "/" + tripId + "?" + value;
 		String[] editor = destinationMap.getOrDefault(dest, null);
 		if (editor == null || !editor[1].equals(uuid))
 			return;
@@ -85,8 +85,8 @@ public class PlanJEditService {
 		destinationMap.remove(dest);
 		sessionIdMap.remove(sessionId);
 
-		template.convertAndSend("/topic/api/trip/j/" + tripId,
-			new SocketResponseBody<>("edit finish", new PlanJEditorRegisterDto(day, uuid, editor[2]))
+		template.convertAndSend(TOPIC_PREFIX + type + "/" + tripId,
+			new SocketResponseBody<>("edit finish", new PlanJEditorRegisterDto(value, uuid, editor[2]))
 		);
 	}
 }

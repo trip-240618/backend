@@ -9,9 +9,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class HistoryDto {
 	@Schema(
 		description = "history의 pk",
@@ -22,6 +24,11 @@ public class HistoryDto {
 		description = "작성자 uuid",
 		example = "c9f30d9e-0bac-4a81-b005-6a79ba4fbef4")
 	private String writerUuid;
+
+	@Schema(
+		description = "작성자 닉네임",
+		example = "최순자")
+	private String nickname;
 
 	@Schema(
 		description = "프로필 축소버전",
@@ -69,11 +76,12 @@ public class HistoryDto {
 		example = "2024-08-22")
 	private LocalDate photoDate;
 
-	private List<HistoryTagDto> tags;
+	private List<HistoryTagDto> tags = new ArrayList<>();
 
 	public HistoryDto(HistoryServiceDto serviceDto) {
 		this.id = serviceDto.getId();
 		this.writerUuid = serviceDto.getWriterUuid();
+		this.nickname = serviceDto.getNickname();
 		this.profileImage = serviceDto.getProfileImage();
 		this.imageUrl = serviceDto.getImageUrl();
 		this.thumbnail = serviceDto.getThumbnail();
@@ -84,6 +92,5 @@ public class HistoryDto {
 		this.likeCnt = serviceDto.getLikeCnt();
 		this.replyCnt = serviceDto.getReplyCnt();
 		this.photoDate = serviceDto.getPhotoDate();
-		this.tags = new ArrayList<>();
 	}
 }

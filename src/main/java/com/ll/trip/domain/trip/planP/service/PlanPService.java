@@ -151,15 +151,12 @@ public class PlanPService {
 		Map<Integer, List<PlanPInfoDto>> dayMap = new HashMap<>(); //response
 
 		for (PlanPDayDto<PlanPInfoDto> dayDto : dayList) {
-			PlanPDayDto<PlanPInfoDto> responseDay = new PlanPDayDto<>(dayDto.getDay());
-			response.getDayList().add(responseDay); //새로운 day 생성
-			dayMap.put(dayDto.getDay(), responseDay.getPlanList()); //db의 데이터에 기반해서 day생성
 			for (PlanPInfoDto dto : dayDto.getPlanList())
 				idMap.put(dto.getPlanId(), dto);
 		}
 
 		for (PlanPDayDto<PlanPOrderDto> dayDto : request.getDayList()) {
-			List<PlanPInfoDto> list = dayMap.getOrDefault(dayDto.getDay(), new ArrayList<>()); //접근을 빠르게 하기 위해 선언
+			List<PlanPInfoDto> list = dayMap.computeIfAbsent(dayDto.getDay(), k -> new ArrayList<>()); //접근을 빠르게 하기 위해 선언
 			for (PlanPOrderDto dto : dayDto.getPlanList()) {
 				if (!idMap.containsKey(dto.getId())) { //db에는 없는 plan일 경우 응답에 포함하지 않고 넘어감
 					continue;
@@ -172,10 +169,10 @@ public class PlanPService {
 		}
 
 		for (PlanPInfoDto dto : idMap.values()) { //요청에는 없지만 db에는 있는 plan
-			List<PlanPInfoDto> sortedList = dayMap.get(dto.getDayAfterStart());
+			List<PlanPInfoDto> sortedList = dayMap.computeIfAbsent(dto.getDayAfterStart(), k -> new ArrayList<>());
 			int index = Collections.binarySearch(sortedList, dto,
 				((o1, o2) -> {
-					if (o1.getOrderByDate() == null)
+					if (o1.getOrderByDate() == -1)
 						return -1;
 					return o1.getOrderByDate() - o2.getOrderByDate();
 				}));
@@ -189,28 +186,34 @@ public class PlanPService {
 				continue;
 			List<PlanPInfoDto> updateList = new ArrayList<>();
 			PlanPInfoDto firstDto = list.get(0);
+			int day = firstDto.getDayAfterStart();
 			Integer pre = firstDto.getOrderByDate();
-			if (pre == null) {
+			if (pre == -1) {
 				firstDto.setOrderByDate(0);
 				updateList.add(firstDto);
 				pre = 0;
 			}
+			if(list.size() == 1) {
+				bulkUpdateOrder(updateList);
+				response.getDayList().add(new PlanPDayDto<>(day, list));
+				continue;
+			}
 
-			Queue<PlanPInfoDto> nullQue = new LinkedList<>();
+			Queue<PlanPInfoDto> movedQue = new LinkedList<>();
 			for (PlanPInfoDto dto : list) {
-				if (dto.getOrderByDate() == null) {
-					nullQue.add(dto);
+				if (dto.getOrderByDate() == -1) {
+					movedQue.add(dto);
 					continue;
 				}
 				int last = dto.getOrderByDate();
-				if (last - pre <= nullQue.size()) {
-					pre = -1;
+				if (last - pre <= movedQue.size()) {
+					pre = null;
 					break;
 				}
 
-				int gap = (last - pre) / (nullQue.size() + 1);
-				while (!nullQue.isEmpty()) {
-					PlanPInfoDto plan = nullQue.poll();
+				int gap = (last - pre) / (movedQue.size() + 1);
+				while (!movedQue.isEmpty()) {
+					PlanPInfoDto plan = movedQue.poll();
 					pre += gap;
 					plan.setOrderByDate(pre);
 					updateList.add(plan);
@@ -218,34 +221,36 @@ public class PlanPService {
 				pre = last;
 			}
 
-			if (pre == -1) {
+			if (pre == null) {
 				bulkResetOrder(list);
+				response.getDayList().add(new PlanPDayDto<>(day, list));
 				continue;
 			}
 
-			while (!nullQue.isEmpty()) {
+			while (!movedQue.isEmpty()) {
 				int gap = 1_048_576;
-				PlanPInfoDto plan = nullQue.poll();
+				PlanPInfoDto plan = movedQue.poll();
 				pre += gap;
 				plan.setOrderByDate(pre);
 				updateList.add(plan);
 			}
 			bulkUpdateOrder(updateList);
-		}
 
+			response.getDayList().add(new PlanPDayDto<>(day, list));
+		}
 		return response;
 	}
 
 	@Transactional
-	public int updateOrder(long planId, Integer order) {
-		return planPRepository.updateOrderByPlanId(planId, order);
+	public int updateOrder(long planId, Integer day, Integer order) {
+		return planPRepository.updateOrderByPlanId(planId, day, order);
 	}
 
 	@Transactional
 	public void bulkUpdateOrder(List<PlanPInfoDto> list) {
 		int updateCnt = 0;
 		for (PlanPInfoDto dto : list) {
-			updateCnt += updateOrder(dto.getPlanId(), dto.getOrderByDate());
+			updateCnt += updateOrder(dto.getPlanId(), dto.getDayAfterStart(), dto.getOrderByDate());
 		}
 		if (updateCnt != list.size())
 			throw new PermissionDeniedException("순서 변경 실패: " + (list.size() - updateCnt));
@@ -257,7 +262,7 @@ public class PlanPService {
 		int updateCnt = 0;
 		for (PlanPInfoDto dto : list) {
 			dto.setOrderByDate(order);
-			updateCnt += updateOrder(dto.getPlanId(), order);
+			updateCnt += updateOrder(dto.getPlanId(), dto.getDayAfterStart(), order);
 			order += 1_048_576;
 		}
 		if (updateCnt != list.size())

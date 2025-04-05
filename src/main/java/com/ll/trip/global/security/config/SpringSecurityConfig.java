@@ -46,6 +46,7 @@ public class SpringSecurityConfig {
 					"*.html",
 					"/api-docs/**",
 					"/api-docs.yaml",
+					"/version/**",
 					"/policy/**"
 				).permitAll()
 				.anyRequest().authenticated()

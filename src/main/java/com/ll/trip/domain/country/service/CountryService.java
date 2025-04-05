@@ -1,6 +1,7 @@
 package com.ll.trip.domain.country.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,5 +48,10 @@ public class CountryService {
 
 	public List<String> findAllCountryNameLike(String keyword) {
 		return countryRepository.findCountryNameLike(keyword);
+	}
+
+	public String findCountryDomain(String name) {
+		Optional<String> optDomain = countryRepository.findDomainByCountryName(name);
+		return optDomain.orElse("kr");
 	}
 }

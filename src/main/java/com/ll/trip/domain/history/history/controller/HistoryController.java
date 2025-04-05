@@ -1,5 +1,6 @@
 package com.ll.trip.domain.history.history.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -56,7 +57,6 @@ public class HistoryController {
 
 	@GetMapping("/{tripId}/history/list")
 	@Operation(summary = "History 리스트")
-	@ApiResponse(responseCode = "200", description = "History 리스트")
 	public ResponseEntity<List<HistoryDayDto>> showHistoryList(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser
@@ -68,7 +68,6 @@ public class HistoryController {
 
 	@GetMapping("/{tripId}/history/{historyId}")
 	@Operation(summary = "History 단일 상세")
-	@ApiResponse(responseCode = "200", description = "History 단일 상세")
 	public ResponseEntity<HistoryDto> showHistoryList(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@PathVariable @Parameter(description = "기록 id", example = "1", in = ParameterIn.PATH) long historyId,
@@ -81,7 +80,6 @@ public class HistoryController {
 
 	@PostMapping("/{tripId}/history/create/many")
 	@Operation(summary = "History 일괄 생성")
-	@ApiResponse(responseCode = "200", description = "History 생성")
 	public ResponseEntity<List<HistoryDayDto>> createManyHistories(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@AuthenticationPrincipal SecurityUser securityUser,
@@ -97,7 +95,6 @@ public class HistoryController {
 
 	@PutMapping("/{tripId}/history/modify/{historyId}")
 	@Operation(summary = "History 수정")
-	@ApiResponse(responseCode = "200", description = "History 수정")
 	public ResponseEntity<List<HistoryDayDto>> modifyHistory(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@PathVariable @Parameter(description = "히스토리 id", example = "1", in = ParameterIn.PATH) long historyId,
@@ -286,8 +283,7 @@ public class HistoryController {
 	}
 
 	@GetMapping("/{tripId}/history/search")
-	@Operation(summary = "History 검색")
-	@ApiResponse(responseCode = "200", description = "주어진 파라미터로 검색 (uuid가 있으면 uuid만 검색)")
+	@Operation(summary = "History 검색", description = "주어진 파라미터로 검색 (uuid가 있으면 uuid만 검색)")
 	public ResponseEntity<List<HistoryDto>> searchHistory(
 		@AuthenticationPrincipal SecurityUser securityUser,
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
@@ -295,7 +291,7 @@ public class HistoryController {
 		@RequestParam(required = false) @Parameter(description = "태그명", example = "긴자") String tagName,
 		@RequestParam(required = false) @Parameter(description = "태그 컬러", example = "FFEFF3") String tagColor
 	) {
-		List<HistoryDto> response = null;
+		List<HistoryDto> response = new ArrayList<>();
 		if (uuid != null) {
 			response = historyService.searchHistoryByUuid(tripId, securityUser.getId(), uuid);
 		} else if (tagName != null) {

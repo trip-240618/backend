@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReportService {
 	private final ReportRepository reportRepository;
+	private final ObjectMapper objectMapper;
 
 	@Transactional
 	public void createHistoryReport(String type, long typeId, long tripId, long userId, HistoryDto historyDto) {
@@ -45,12 +46,11 @@ public class ReportService {
 	}
 
 	private String parseToString(Object data) {
-		ObjectMapper objectMapper = new ObjectMapper();
 		String jsonString = null;
 		try {
 			jsonString = objectMapper.writeValueAsString(data);
 		} catch (JsonProcessingException e) {
-			throw new ServerException("object parsing 실패");
+			throw new ServerException(e.getMessage());
 		}
 
 		return jsonString;

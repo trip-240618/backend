@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,7 +14,6 @@ import com.ll.trip.domain.trip.location.dto.AutoCompleteRequestDto;
 import com.ll.trip.domain.trip.location.dto.AutoCompleteResponseDto;
 import com.ll.trip.domain.trip.location.dto.PlaceDetailResponse;
 import com.ll.trip.domain.trip.location.service.LocationService;
-import com.ll.trip.domain.trip.planP.dto.PlanPInfoDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -33,11 +33,11 @@ public class LocationController {
 
 	private final LocationService locationService;
 
-	@GetMapping("/autocomplete")
+	@PostMapping("/autocomplete")
 	@Operation(summary = "주소 자동완성")
 	@ApiResponse(responseCode = "200", description = "주소 자동완성", content = {
 		@Content(mediaType = "application/json",
-			array = @ArraySchema(schema = @Schema(implementation = PlanPInfoDto.class)))})
+			array = @ArraySchema(schema = @Schema(implementation = AutoCompleteResponseDto.class)))})
 	public ResponseEntity<?> showAutocomplete(
 		@RequestBody AutoCompleteRequestDto requestDto
 	){

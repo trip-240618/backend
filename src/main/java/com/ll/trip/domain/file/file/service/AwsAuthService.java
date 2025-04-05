@@ -51,14 +51,14 @@ public class AwsAuthService {
 		return new PreSignedUrlResponseDto(preSignedUrls);
 	}
 
-	public List<String> extractUrlFromPresignedUrl(List<String> presignedUrls) {
+	public List<String> extractUrlFromPreSignedUrl(List<String> preSignedUrls) {
 		List<String> abstractedUrls = new ArrayList<>();
 
 		StringTokenizer st;
 
-		for (String url : presignedUrls) {
+		for (String url : preSignedUrls) {
 			st = new StringTokenizer(url, "?");
-			abstractedUrls.add(st.nextToken());
+			addIfNotBlank(abstractedUrls, st.nextToken());
 		}
 
 		return abstractedUrls;
@@ -68,15 +68,20 @@ public class AwsAuthService {
 		List<TripImageDeleteDto> dtos = tripRepository.findTripAndHistoryByTripId(tripId);
 
 		if (dtos != null && !dtos.isEmpty()) {
-			urls.add(dtos.get(0).getTripThumbnail());
-
+			addIfNotBlank(urls, dtos.get(0).getTripThumbnail());
 			for (TripImageDeleteDto dto : dtos) {
-				urls.add(dto.getHistoryThumbnail());
-				urls.add(dto.getHistoryImage());
+				addIfNotBlank(urls, dto.getHistoryThumbnail());
+				addIfNotBlank(urls, dto.getHistoryImage());
 			}
 		}
 
 		return urls;
+	}
+
+	private void addIfNotBlank(List<String> urls, String value) {
+		if (value != null && !value.isBlank()) {
+			urls.add(value);
+		}
 	}
 
 	public List<String> extractKeyFromUrl(List<String> urls) {
@@ -91,31 +96,33 @@ public class AwsAuthService {
 		return extractedKeys;
 	}
 
-	public List<String> getUrlFromScrapImagesByTripId(List<String> urls, long tripId) {
-		urls.addAll(scrapImageRepository.findAllImageKeyByTripId(tripId));
-		return urls;
-	}
-
 	public void deleteUrls(List<String> urls) {
 		deleteObjectByKey(extractKeyFromUrl(urls));
 	}
 
 	public void deleteImagesByScrapId(long scrapId) {
-		deleteObjectByKey(getKeyFromScrapImagesByScrapId(scrapId));
+		List<String> urls = new ArrayList<>();
+		addToListFromList(urls, getKeyFromScrapImagesByScrapId(scrapId));
+		deleteUrls(urls);
 	}
 
 	public void deleteImagesByUserId(long userId) {
 		List<String> urls = new ArrayList<>();
 		addToListFromDeleteImageDto(urls, historyRepository.findHistoryImagesByUserId(userId));
-		urls.addAll(scrapImageRepository.findScrapImagesByUserId(userId));
-		deleteObjectByKey(extractKeyFromUrl(urls));
+		addToListFromList(urls, scrapImageRepository.findScrapImagesByUserId(userId));
+		deleteUrls(urls);
+	}
+
+	private void addToListFromList(List<String> urls, List<String> imageList) {
+		for (String url : imageList) {
+			addIfNotBlank(urls, url);
+		}
 	}
 
 	private void addToListFromDeleteImageDto(List<String> urls, List<DeleteImageDto> dtos) {
 		for (DeleteImageDto dto : dtos) {
-			urls.add(dto.getImageUrl());
-			if (!(dto.getThumbnail() == null))
-				urls.add(dto.getThumbnail());
+			addIfNotBlank(urls, dto.getImageUrl());
+			addIfNotBlank(urls, dto.getThumbnail());
 		}
 	}
 
@@ -162,14 +169,15 @@ public class AwsAuthService {
 	}
 
 	public void deleteImagesByTripId(long tripId) {
-		List<String> urls = findImageByTripId(new ArrayList<>(), tripId);
-		getUrlFromScrapImagesByTripId(urls, tripId);
-		deleteObjectByKey(extractKeyFromUrl(urls));
+		List<String> urls = new ArrayList<>();
+		addToListFromList(urls, findImageByTripId(new ArrayList<>(), tripId));
+		addToListFromList(urls, scrapImageRepository.findAllImageKeyByTripId(tripId));
+		deleteUrls(urls);
 	}
 
 	public void deleteImageByHistoryId(long historyId) {
-		DeleteImageDto dto = historyRepository.findHistoryImages(historyId);
-		List<String> urls = List.of(dto.getImageUrl(), dto.getThumbnail());
-		deleteObjectByKey(extractKeyFromUrl(urls));
+		List<String> urls = new ArrayList<>();
+		addToListFromDeleteImageDto(urls, List.of(historyRepository.findHistoryImages(historyId)));
+		deleteUrls(urls);
 	}
 }

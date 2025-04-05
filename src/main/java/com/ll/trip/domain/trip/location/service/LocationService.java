@@ -52,11 +52,16 @@ public class LocationService {
 
 		if (responseEntity.getBody() != null && responseEntity.getBody().getSuggestions() != null) {
 			response = responseEntity.getBody().getSuggestions().stream()
-				.map(suggestion -> new AutoCompleteResponseDto(
-					suggestion.getPlacePrediction().getPlaceId(),
-					suggestion.getPlacePrediction().getText().getText(),
-					suggestion.getPlacePrediction().getStructuredFormat().getSecondaryText().getText()
-				))
+				.map(suggestion -> {
+					String placeId = suggestion.getPlacePrediction().getPlaceId();
+					String text = suggestion.getPlacePrediction().getText().getText();
+					AutocompleteResponse.SecondaryText sText = suggestion.getPlacePrediction()
+						.getStructuredFormat()
+						.getSecondaryText();
+					String secondaryText = sText != null ? sText.getText() : null;
+
+					return new AutoCompleteResponseDto(placeId, text, secondaryText);
+				})
 				.collect(Collectors.toList());
 		}
 
@@ -89,7 +94,7 @@ public class LocationService {
 
 		LocationDto location = null;
 
-		if(responseEntity.getBody() != null && responseEntity.getBody().getPlaces().length > 0) {
+		if (responseEntity.getBody() != null && responseEntity.getBody().getPlaces().length > 0) {
 			location = responseEntity.getBody().getPlaces()[0].getLocation();
 		}
 

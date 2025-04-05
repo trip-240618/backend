@@ -6,6 +6,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -35,6 +36,7 @@ public class Report {
 	private long userId; //유저가 지워져도 유지해야함
 
 	@NotBlank
+	@Column(columnDefinition = "TEXT")
 	private String jsonData; //신고내용 dto
 
 	@NotBlank

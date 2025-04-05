@@ -67,6 +67,9 @@ public class Trip extends BaseEntity {
 	@Column(length = 2)
 	private String regionCode;
 
+	@Column(length = 2)
+	private String domain;
+
 	@Setter
 	private String thumbnail;
 
