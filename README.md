@@ -52,7 +52,14 @@ plugins {
 - `firebase-admin` : Firebase Admin SDK를 통한 푸시 알림 및 인증 기능
 - `amadeus-java` : Amadeus API 연동을 위한 라이브러리
 
+## 데이터베이스 ERD
+
+![trip_prod](https://github.com/user-attachments/assets/9e98ab42-e449-4724-a9a7-33d6cfbb2143)
+
 ## 배포
+
+![Frame 1 (1)](https://github.com/user-attachments/assets/7786fc01-161b-4c73-a7c3-39ef1099d165)
+
 이 프로젝트는 GitHub Actions를 사용하여 CI/CD를 수행하며, AWS EC2 환경에서 실행됩니다.
 
 ### 무중단 배포 (Blue-Green Deployment)
