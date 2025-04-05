@@ -16,7 +16,8 @@
 - **웹소켓:** Spring WebSocket
 - **클라우드 서비스:** AWS S3, Firebase Admin SDK
 - **항공 데이터 API:** Amadeus API
-
+- **장소 검색 API: ** Google Place API
+ 
 ## 프로젝트 설정
 ### 1. 환경 설정
 프로젝트를 실행하기 위해 Java 17 및 Gradle이 필요합니다.
@@ -51,6 +52,7 @@ plugins {
 - `aws-java-sdk-s3` : AWS S3 파일 업로드 및 관리
 - `firebase-admin` : Firebase Admin SDK를 통한 푸시 알림 및 인증 기능
 - `amadeus-java` : Amadeus API 연동을 위한 라이브러리
+- `google-places-api` : Google Places API를 이용한 장소 검색 및 자동완성 기능
 
 ## 데이터베이스 ERD
 
