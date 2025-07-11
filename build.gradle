@@ -82,7 +82,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-admin:9.3.0'
 
     //aws-sdk
-    implementation 'com.amazonaws:aws-java-sdk-s3:1.11.238'
+    //implementation 'com.amazonaws:aws-java-sdk-s3:1.12.787'
+    implementation 'software.amazon.awssdk:s3:2.31.77'
 
     //amadeus
     implementation 'com.amadeus:amadeus-java:7.0.0'
@@ -92,6 +93,11 @@ dependencies {
     annotationProcessor "com.querydsl:querydsl-apt:5.1.0:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    //Bouncy Castle
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    //aws cloudfront sdk
+    implementation 'com.amazonaws:aws-java-sdk-cloudfront:1.12.787'
 }
 
 tasks.named('test') {

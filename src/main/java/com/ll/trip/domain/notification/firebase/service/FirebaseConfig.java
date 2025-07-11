@@ -16,7 +16,7 @@ import jakarta.annotation.PostConstruct;
 @Configuration
 public class FirebaseConfig {
 
-	@Value("${firebase.secret-path}")
+	@Value("${cloud.google.firebase.secret-path}")
 	private String secretPath;
 
 	@PostConstruct

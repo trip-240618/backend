@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  DEPLOY_URL: https://tripstory.shop
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,6 +25,7 @@ jobs:
 
       - name: Build with Gradle
         run: |
+          echo "${{ secrets.CLOUDFRONT_PRIVATE_KEY_BASE64 }}" | base64 -d > src/main/resources/cloudfront/private_key.der
           echo ${{secrets.APPLICATION_SECRET_PROD_YML}} | base64 --decode > ./src/main/resources/application-secret_prod.yml
           echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 --decode > $GITHUB_WORKSPACE/src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
           chmod +x ./gradlew
@@ -44,10 +48,10 @@ jobs:
     steps:
       - name: Set target IP
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "https://trip-story.site/env")
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "${{ env.DEPLOY_URL }}/env")
           echo $STATUS
           if [ $STATUS = 200 ]; then
-            CURRENT_UPSTREAM=$(curl -s "https://trip-story.site/env")
+            CURRENT_UPSTREAM=$(curl -s "${{ env.DEPLOY_URL }}/env")
           else
             CURRENT_UPSTREAM=green
           fi
@@ -97,7 +101,7 @@ jobs:
       - name: Check deploy server URL
         uses: jtalk/url-health-check-action@v3
         with:
-          url: https://trip-story.site:${{env.STOPPED_PORT}}/env
+          url: ${{ env.DEPLOY_URL }}:${{env.STOPPED_PORT}}/env
           max-attempts: 5
           retry-delay: 10s
 
