@@ -100,31 +100,35 @@ jobs:
         run: sleep 40
 
       - name: Check deploy server URL
-        run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-            STOPPED_PORT=${{ env.STOPPED_PORT }}
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          envs: STOPPED_PORT
+          script: |
             MAX_RETRIES=10
             DELAY=5
 
-            echo "🔁 http://localhost:\$STOPPED_PORT/env 확인 (최대 \$MAX_RETRIES회, \$DELAY초 간격)"
+            echo "🔁 http://localhost:$STOPPED_PORT/env 확인 (최대 $MAX_RETRIES회, $DELAY초 간격)"
 
             ATTEMPT=0
-            while [ \$ATTEMPT -lt \$MAX_RETRIES ]; do
-              RESPONSE=\$(curl -s --max-time 3 http://localhost:\$STOPPED_PORT/env || echo "")
+            while [ $ATTEMPT -lt $MAX_RETRIES ]; do
+              RESPONSE=$(curl -s --max-time 3 http://localhost:$STOPPED_PORT/env || echo "")
 
-              if [ "\$RESPONSE" = "blue" ] || [ "\$RESPONSE" = "green" ]; then
-                echo "✅ 서버 응답 확인됨 (\$RESPONSE) → 성공"
+              if [ "$RESPONSE" = "blue" ] || [ "$RESPONSE" = "green" ]; then
+                echo "✅ 서버 응답 확인됨 ($RESPONSE) → 성공"
                 exit 0
               fi
 
-              echo "❌ 응답 없음 또는 이상 (\$RESPONSE), 시도 \$((ATTEMPT+1))/\$MAX_RETRIES"
-              ATTEMPT=\$((ATTEMPT+1))
-              sleep \$DELAY
+              echo "❌ 응답 없음 또는 이상 ($RESPONSE), 시도 $((ATTEMPT+1))/$MAX_RETRIES"
+              ATTEMPT=$((ATTEMPT+1))
+              sleep $DELAY
             done
 
-            echo "❌ \$MAX_RETRIES회 시도 후에도 서버 응답 없음 → 실패"
+            echo "❌ $MAX_RETRIES회 시도 후에도 서버 응답 없음 → 실패"
             exit 1
-          EOF
 
       - name: Change nginx upstream
         uses: appleboy/ssh-action@master
