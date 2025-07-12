@@ -113,7 +113,7 @@ jobs:
 
             ATTEMPT=0
             while [ $ATTEMPT -lt $MAX_RETRIES ]; do
-              RESPONSE=$(curl -s --max-time 3 https://localhost:$STOPPED_PORT/env || echo "")
+              RESPONSE=$(curl -sk --max-time 3 https://localhost:$STOPPED_PORT/env || echo "")
 
               if [ "$RESPONSE" = "blue" ] || [ "$RESPONSE" = "green" ]; then
                 echo "✅ 서버 응답 확인됨 ($RESPONSE) → 성공"
