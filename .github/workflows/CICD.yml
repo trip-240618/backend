@@ -58,13 +58,13 @@ jobs:
           fi
           echo CURRENT_UPSTREAM=$CURRENT_UPSTREAM >> $GITHUB_ENV
           if [ $CURRENT_UPSTREAM = blue ]; then
-            echo "CURRENT_PORT=blue" >> $GITHUB_ENV
-            echo "STOPPED_PORT=green" >> $GITHUB_ENV
+            echo "CURRENT_PORT=8080" >> $GITHUB_ENV
+            echo "STOPPED_PORT=8081" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=green" >> $GITHUB_ENV
           else
-            echo "CURRENT_PORT=green" >> $GITHUB_ENV
-            echo "STOPPED_PORT=blue" >> $GITHUB_ENV
-            echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
+            echo "CURRENT_PORT=blue" >> $GITHUB_ENV
+            echo "STOPPED_PORT=8081" >> $GITHUB_ENV
+            echo "TARGET_UPSTREAM=8080" >> $GITHUB_ENV
           fi
 
       - name: Stop current server
@@ -101,39 +101,30 @@ jobs:
 
       - name: Check deploy server URL
         run: |
-          echo "🔁 1. /env 연결 시도 (최대 5회, 10초 간격)"
-          ATTEMPT=0
-          MAX_ATTEMPTS=5
-          RESPONSE=""
-          
-          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-            RESPONSE=$(curl -s --max-time 3 "${{ env.DEPLOY_URL }}/env")
-            if [ -n "$RESPONSE" ]; then
-              echo "✅ 연결 성공 (응답: $RESPONSE)"
-              break
-            fi
-            echo "❌ 응답 없음 (시도 $((ATTEMPT + 1))/${MAX_ATTEMPTS}), 10초 후 재시도"
-            sleep 10
-            ATTEMPT=$((ATTEMPT + 1))
-          done
-          
-          if [ -z "$RESPONSE" ]; then
-            echo "❌ 5회 시도 후에도 /env 응답이 없습니다. 종료합니다."
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            STOPPED_PORT=${{ env.STOPPED_PORT }}
+            MAX_RETRIES=10
+            DELAY=5
+
+            echo "🔁 http://localhost:\$STOPPED_PORT/env 확인 (최대 \$MAX_RETRIES회, \$DELAY초 간격)"
+
+            ATTEMPT=0
+            while [ \$ATTEMPT -lt \$MAX_RETRIES ]; do
+              RESPONSE=\$(curl -s --max-time 3 http://localhost:\$STOPPED_PORT/env || echo "")
+
+              if [ "\$RESPONSE" = "blue" ] || [ "\$RESPONSE" = "green" ]; then
+                echo "✅ 서버 응답 확인됨 (\$RESPONSE) → 성공"
+                exit 0
+              fi
+
+              echo "❌ 응답 없음 또는 이상 (\$RESPONSE), 시도 \$((ATTEMPT+1))/\$MAX_RETRIES"
+              ATTEMPT=\$((ATTEMPT+1))
+              sleep \$DELAY
+            done
+
+            echo "❌ \$MAX_RETRIES회 시도 후에도 서버 응답 없음 → 실패"
             exit 1
-          fi
-          
-          echo ""
-          echo "🔍 2. 응답된 CURRENT_UPSTREAM과 STOPPED_PORT 비교"
-          echo "🔹 CURRENT_UPSTREAM: $RESPONSE"
-          echo "🔹 STOPPED_PORT:     ${{ env.STOPPED_PORT }}"
-          
-          if [ "$RESPONSE" = "${{ env.STOPPED_PORT }}" ]; then
-            echo "✅ 3. 일치함 → 성공"
-            exit 0
-          else
-            echo "❌ 3. 불일치 → 실패"
-            exit 1
-          fi
+          EOF
 
       - name: Change nginx upstream
         uses: appleboy/ssh-action@master
