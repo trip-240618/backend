@@ -109,7 +109,7 @@ jobs:
             MAX_RETRIES=10
             DELAY=5
 
-            echo "🔁 http://localhost:$STOPPED_PORT/env 확인 (최대 $MAX_RETRIES회, $DELAY초 간격)"
+            echo "🔁 https://localhost:$STOPPED_PORT/env 확인 (최대 $MAX_RETRIES회, $DELAY초 간격)"
 
             ATTEMPT=0
             while [ $ATTEMPT -lt $MAX_RETRIES ]; do
