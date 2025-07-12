@@ -22,7 +22,6 @@ import com.ll.trip.global.security.userDetail.SecurityUser;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -37,11 +36,10 @@ public class ReportController {
 
 	@PostMapping("/create")
 	@Operation(summary = "신고 생성")
-	@ApiResponse(responseCode = "200", description = "신고 생성")
 	public ResponseEntity<String> createReport(
 		@RequestParam @Schema(example = "reply") String type,
 		@RequestParam @Schema(example = "1") long tripId,
-		@RequestParam(required = false) @Schema(description = "reply는 historyId도 같이 줘야댐") long historyId,
+		@RequestParam(required = false) @Schema(description = "reply는 historyId도 같이 줘야댐") Long historyId,
 		@RequestParam @Schema(example = "1") long typeId,
 		@AuthenticationPrincipal SecurityUser securityUser
 	) {
@@ -68,7 +66,6 @@ public class ReportController {
 	@GetMapping("/list")
 	@PreAuthorize("hasRole('ADMIN')")
 	@Operation(summary = "신고 목록")
-	@ApiResponse(responseCode = "200", description = "신고 목록")
 	public ResponseEntity<Page<Report>> showReportList(
 		@RequestParam int page,
 		@RequestParam int size
@@ -80,7 +77,6 @@ public class ReportController {
 	@PutMapping("/complete")
 	@PreAuthorize("hasRole('ADMIN')")
 	@Operation(summary = "신고 목록")
-	@ApiResponse(responseCode = "200", description = "신고 목록")
 	public ResponseEntity<String> showReportList(
 		@RequestParam long reportId,
 		@RequestParam @Schema(description = "변경 후 상태") boolean complete

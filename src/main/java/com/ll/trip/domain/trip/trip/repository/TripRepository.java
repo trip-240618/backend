@@ -30,7 +30,7 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
 
 	@Query("""
 		    SELECT new com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto(t.id, t.name, t.type, t.startDate, t.endDate, t.country,
-		    t.regionCode, t.thumbnail, t.invitationCode, t.labelColor, COALESCE(b.toggle, false), u.uuid, u.nickname, u.thumbnail, tm2.isLeader)
+		    t.thumbnail, t.invitationCode, t.labelColor, COALESCE(b.toggle, false), t.domain, u.uuid, u.nickname, u.thumbnail, tm2.isLeader)
 		    FROM TripMember tm
 		    inner join tm.trip t on tm.user.id = :userId and t.endDate >= :date
 		    left join t.bookmarks b on b.user.id = :userId
@@ -41,7 +41,7 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
 
 	@Query("""
 		    SELECT new com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto(t.id, t.name, t.type, t.startDate, t.endDate, t.country,
-		    t.regionCode, t.thumbnail, t.invitationCode, t.labelColor, COALESCE(b.toggle, false), u.uuid, u.nickname, u.thumbnail, tm2.isLeader)
+		    t.thumbnail, t.invitationCode, t.labelColor, COALESCE(b.toggle, false), t.domain, u.uuid, u.nickname, u.thumbnail, tm2.isLeader)
 		    FROM TripMember tm
 		    inner join tm.trip t on tm.user.id = :userId and t.endDate < :date
 		    left join t.bookmarks b on b.user.id = :userId
@@ -52,7 +52,7 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
 
 	@Query("""
 			SELECT new com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto(t.id, t.name, t.type, t.startDate, t.endDate, t.country,
-			t.regionCode, t.thumbnail, t.invitationCode, t.labelColor, b.toggle, u.uuid, u.nickname, u.thumbnail, tm.isLeader)
+			t.thumbnail, t.invitationCode, t.labelColor, b.toggle, t.domain, u.uuid, u.nickname, u.thumbnail, tm.isLeader)
 			FROM Bookmark b
 			inner join b.trip t on b.user.id = :userId and b.toggle = true
 			left join t.tripMembers tm
@@ -77,8 +77,7 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
 	@Query("""
 		 select new com.ll.trip.domain.user.user.dto.VisitedCountryDto(t.country, count(t.id))
 		 from TripMember tm
-		 left join tm.trip t on t.startDate <= :date
-		 where tm.user.id = :userId
+		 inner join tm.trip t on tm.user.id = :userId and t.startDate <= :date
 		 group by t.country
 		""")
 	List<VisitedCountryDto> findVisitedCountry(long userId, LocalDate date);

@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  DEPLOY_URL: https://tripstory.shop
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,6 +25,8 @@ jobs:
 
       - name: Build with Gradle
         run: |
+          mkdir -p src/main/resources/cloudfront
+          echo "${{ secrets.CLOUDFRONT_PRIVATE_KEY_BASE64 }}" | base64 -d > src/main/resources/cloudfront/private_key.der
           echo ${{secrets.APPLICATION_SECRET_PROD_YML}} | base64 --decode > ./src/main/resources/application-secret_prod.yml
           echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 --decode > $GITHUB_WORKSPACE/src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
           chmod +x ./gradlew
@@ -44,10 +49,10 @@ jobs:
     steps:
       - name: Set target IP
         run: |
-          STATUS=$(curl -o /dev/null -w "%{http_code}" "https://trip-story.site/env")
+          STATUS=$(curl -o /dev/null -w "%{http_code}" "${{ env.DEPLOY_URL }}/env")
           echo $STATUS
           if [ $STATUS = 200 ]; then
-            CURRENT_UPSTREAM=$(curl -s "https://trip-story.site/env")
+            CURRENT_UPSTREAM=$(curl -s "${{ env.DEPLOY_URL }}/env")
           else
             CURRENT_UPSTREAM=green
           fi
@@ -57,18 +62,17 @@ jobs:
             echo "STOPPED_PORT=8081" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=green" >> $GITHUB_ENV
           else
-            echo "CURRENT_PORT=8081" >> $GITHUB_ENV
-            echo "STOPPED_PORT=8080" >> $GITHUB_ENV
+            echo "CURRENT_PORT=8080" >> $GITHUB_ENV
+            echo "STOPPED_PORT=8081" >> $GITHUB_ENV
             echo "TARGET_UPSTREAM=blue" >> $GITHUB_ENV
           fi
 
       - name: Stop current server
         uses: appleboy/ssh-action@master
         with:
-          username: ubuntu
+          username: ec2-user
           host: ${{ secrets.TRIP_PROD_IP }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: false
           script: |
             set -x
             CURRENT_UPSTREAM=${{env.CURRENT_UPSTREAM}}
@@ -84,27 +88,50 @@ jobs:
       - name: Docker compose up
         uses: appleboy/ssh-action@master
         with:
-          username: ubuntu
+          username: ec2-user
           host: ${{ secrets.TRIP_PROD_IP }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/trip_prod:latest
-            sudo docker-compose -f docker-compose-${{env.TARGET_UPSTREAM}}.yml up -d
+            sudo docker compose -f docker-compose-${{env.TARGET_UPSTREAM}}.yml up -d
 
-      - name: Wait for 20 seconds for application started
-        run: sleep 20
+      - name: Wait for 40 seconds for application started
+        run: sleep 40
 
       - name: Check deploy server URL
-        uses: jtalk/url-health-check-action@v3
+        uses: appleboy/ssh-action@master
         with:
-          url: https://trip-story.site:${{env.STOPPED_PORT}}/env
-          max-attempts: 5
-          retry-delay: 10s
+          host: ${{ secrets.TRIP_PROD_IP }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: STOPPED_PORT
+          script: |
+            MAX_RETRIES=10
+            DELAY=5
+
+            echo "🔁 https://localhost:$STOPPED_PORT/env 확인 (최대 $MAX_RETRIES회, $DELAY초 간격)"
+
+            ATTEMPT=0
+            while [ $ATTEMPT -lt $MAX_RETRIES ]; do
+              RESPONSE=$(curl -sk --max-time 3 https://localhost:$STOPPED_PORT/env || echo "")
+
+              if [ "$RESPONSE" = "blue" ] || [ "$RESPONSE" = "green" ]; then
+                echo "✅ 서버 응답 확인됨 ($RESPONSE) → 성공"
+                exit 0
+              fi
+
+              echo "❌ 응답 없음 또는 이상 ($RESPONSE), 시도 $((ATTEMPT+1))/$MAX_RETRIES"
+              ATTEMPT=$((ATTEMPT+1))
+              sleep $DELAY
+            done
+
+            echo "❌ $MAX_RETRIES회 시도 후에도 서버 응답 없음 → 실패"
+            exit 1
 
       - name: Change nginx upstream
         uses: appleboy/ssh-action@master
         with:
-          username: ubuntu
+          username: ec2-user
           host: ${{ secrets.TRIP_PROD_IP }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
@@ -114,7 +141,7 @@ jobs:
       - name: Clean up Docker unused resources
         uses: appleboy/ssh-action@master
         with:
-          username: ubuntu
+          username: ec2-user
           host: ${{ secrets.TRIP_PROD_IP }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true

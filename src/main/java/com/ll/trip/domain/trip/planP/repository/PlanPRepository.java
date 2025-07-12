@@ -61,10 +61,11 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 	@Modifying
 	@Query("""
 		update PlanP p
-		set p.orderByDate = :order
+		set p.orderByDate = :order,
+		p.dayAfterStart = :day
 		where p.id = :planId
 		""")
-	int updateOrderByPlanId(long planId, int order);
+	int updateOrderByPlanId(long planId, int day, int order);
 
 	@Modifying
 	@Query("""
@@ -76,6 +77,7 @@ public interface PlanPRepository extends JpaRepository<PlanP, Long> {
 		""")
 	int updatePlanPDayAndLockerByPlanId(long planId, Integer dayTo, int order, boolean locker);
 
+	@Modifying
 	void deleteByIdAndDayAfterStart(long planId, int day);
 
 	@Modifying

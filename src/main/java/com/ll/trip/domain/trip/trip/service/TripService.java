@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ll.trip.domain.country.service.CountryService;
 import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
 import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
@@ -42,6 +43,7 @@ public class TripService {
 	private final TripMemberRepository tripMemberRepository;
 	private final InvitationCodeGenerator invitationCodeGenerator;
 	private final EntityManager entityManager;
+	private final CountryService countryService;
 
 	//bookmark
 	private final BookmarkRepository bookmarkRepository;
@@ -49,16 +51,18 @@ public class TripService {
 
 	@Transactional
 	public Trip createTrip(TripCreateDto tripCreateDto, String invitationCode) {
+		String country = tripCreateDto.getCountry();
+
 		Trip trip = Trip.builder()
 			.invitationCode(invitationCode)
 			.name(tripCreateDto.getName())
 			.type(tripCreateDto.getType())
 			.startDate(tripCreateDto.getStartDate())
 			.endDate(tripCreateDto.getEndDate())
-			.country(tripCreateDto.getCountry())
-			.regionCode(tripCreateDto.getRegionCode())
+			.country(country)
 			.thumbnail(tripCreateDto.getThumbnail())
 			.labelColor(tripCreateDto.getLabelColor())
+			.domain(countryService.findCountryDomain(country))
 			.build();
 
 		return tripRepository.save(trip);

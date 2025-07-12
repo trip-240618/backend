@@ -1,175 +1,187 @@
 package com.ll.trip.domain.file.file.service;
 
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.Headers;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.ll.trip.domain.file.file.dto.DeleteImageDto;
 import com.ll.trip.domain.file.file.dto.PreSignedUrlResponseDto;
 import com.ll.trip.domain.history.history.repository.HistoryRepository;
 import com.ll.trip.domain.trip.scrap.repository.ScrapImageRepository;
 import com.ll.trip.domain.trip.trip.dto.TripImageDeleteDto;
 import com.ll.trip.domain.trip.trip.repository.TripRepository;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+
+import java.time.Duration;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AwsAuthService {
-	@Value("${cloud.aws.s3.bucket}")
-	private String bucket;
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
-	private final AmazonS3 amazonS3;
+    private final S3Client s3Client;
+    private final S3Presigner presigner;
+    private final HistoryRepository historyRepository;
+    private final ScrapImageRepository scrapImageRepository;
+    private final TripRepository tripRepository;
 
-	private final HistoryRepository historyRepository;
-	private final ScrapImageRepository scrapImageRepository;
-	private final TripRepository tripRepository;
+    public String createPresignedPutUrl(String fileName) {
+        PutObjectRequest objectRequest = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(fileName)
+                .build();
 
-	public PreSignedUrlResponseDto getPreSignedUrl(String prefix, int photoCnt) {
-		List<String> preSignedUrls = new ArrayList<>();
+        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(10))  // The URL will expire in 10 minutes.
+                .putObjectRequest(objectRequest)
+                .build();
 
-		for (int i = 0; i < photoCnt; i++) {
-			String fileName = createPath(prefix, null);
-			GeneratePresignedUrlRequest generatePresignedUrlRequest = getGeneratePreSignedUrlRequest(bucket, fileName);
-			URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-			preSignedUrls.add(url.toString());
-		}
+        PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
 
-		return new PreSignedUrlResponseDto(preSignedUrls);
-	}
+        return presignedRequest.url().toExternalForm();
+    }
 
-	public List<String> extractUrlFromPresignedUrl(List<String> presignedUrls) {
-		List<String> abstractedUrls = new ArrayList<>();
+    public PreSignedUrlResponseDto getPreSignedUrl(String prefix, int photoCnt) {
+        List<String> preSignedUrls = new ArrayList<>();
 
-		StringTokenizer st;
+        for (int i = 0; i < photoCnt; i++) {
+            String fileName = createPath(prefix, null);
+            preSignedUrls.add(createPresignedPutUrl(fileName));
+        }
 
-		for (String url : presignedUrls) {
-			st = new StringTokenizer(url, "?");
-			abstractedUrls.add(st.nextToken());
-		}
+        return new PreSignedUrlResponseDto(preSignedUrls);
+    }
 
-		return abstractedUrls;
-	}
+    public List<String> extractUrlFromPreSignedUrl(List<String> preSignedUrls) {
+        List<String> abstractedUrls = new ArrayList<>();
 
-	public List<String> findImageByTripId(List<String> urls, long tripId) {
-		List<TripImageDeleteDto> dtos = tripRepository.findTripAndHistoryByTripId(tripId);
+        StringTokenizer st;
 
-		if (dtos != null && !dtos.isEmpty()) {
-			urls.add(dtos.get(0).getTripThumbnail());
+        for (String url : preSignedUrls) {
+            st = new StringTokenizer(url, "?");
+            addIfNotBlank(abstractedUrls, st.nextToken());
+        }
 
-			for (TripImageDeleteDto dto : dtos) {
-				urls.add(dto.getHistoryThumbnail());
-				urls.add(dto.getHistoryImage());
-			}
-		}
+        return abstractedUrls;
+    }
 
-		return urls;
-	}
+    public List<String> findImageByTripId(List<String> urls, long tripId) {
+        List<TripImageDeleteDto> dtos = tripRepository.findTripAndHistoryByTripId(tripId);
 
-	public List<String> extractKeyFromUrl(List<String> urls) {
-		List<String> extractedKeys = new ArrayList<>();
+        if (dtos != null && !dtos.isEmpty()) {
+            addIfNotBlank(urls, dtos.get(0).getTripThumbnail());
+            for (TripImageDeleteDto dto : dtos) {
+                addIfNotBlank(urls, dto.getHistoryThumbnail());
+                addIfNotBlank(urls, dto.getHistoryImage());
+            }
+        }
 
-		String postRemoveString = "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/";
+        return urls;
+    }
 
-		for (String url : urls) {
-			extractedKeys.add(url.replace(postRemoveString, ""));
-		}
+    private void addIfNotBlank(List<String> urls, String value) {
+        if (value != null && !value.isBlank()) {
+            urls.add(value);
+        }
+    }
 
-		return extractedKeys;
-	}
+    public List<String> extractKeyFromUrl(List<String> urls) {
+        List<String> extractedKeys = new ArrayList<>();
 
-	public List<String> getUrlFromScrapImagesByTripId(List<String> urls, long tripId) {
-		urls.addAll(scrapImageRepository.findAllImageKeyByTripId(tripId));
-		return urls;
-	}
+        String postRemoveString = "https://" + bucket + ".s3.ap-northeast-2.amazonaws.com/";
 
-	public void deleteUrls(List<String> urls) {
-		deleteObjectByKey(extractKeyFromUrl(urls));
-	}
+        for (String url : urls) {
+            extractedKeys.add(url.replace(postRemoveString, ""));
+        }
 
-	public void deleteImagesByScrapId(long scrapId) {
-		deleteObjectByKey(getKeyFromScrapImagesByScrapId(scrapId));
-	}
+        return extractedKeys;
+    }
 
-	public void deleteImagesByUserId(long userId) {
-		List<String> urls = new ArrayList<>();
-		addToListFromDeleteImageDto(urls, historyRepository.findHistoryImagesByUserId(userId));
-		urls.addAll(scrapImageRepository.findScrapImagesByUserId(userId));
-		deleteObjectByKey(extractKeyFromUrl(urls));
-	}
+    public void deleteUrls(List<String> urls) {
+        deleteObjectByKey(extractKeyFromUrl(urls));
+    }
 
-	private void addToListFromDeleteImageDto(List<String> urls, List<DeleteImageDto> dtos) {
-		for (DeleteImageDto dto : dtos) {
-			urls.add(dto.getImageUrl());
-			if (!(dto.getThumbnail() == null))
-				urls.add(dto.getThumbnail());
-		}
-	}
+    public void deleteImagesByScrapId(long scrapId) {
+        List<String> urls = new ArrayList<>();
+        addToListFromList(urls, getKeyFromScrapImagesByScrapId(scrapId));
+        deleteUrls(urls);
+    }
 
-	private List<String> getKeyFromScrapImagesByScrapId(long scrapId) {
-		return scrapImageRepository.findAllImageKeyByScrapId(scrapId);
-	}
+    public void deleteImagesByUserId(long userId) {
+        List<String> urls = new ArrayList<>();
+        addToListFromDeleteImageDto(urls, historyRepository.findHistoryImagesByUserId(userId));
+        addToListFromList(urls, scrapImageRepository.findScrapImagesByUserId(userId));
+        deleteUrls(urls);
+    }
 
-	@Transactional // 트랜잭션 처리
-	public void deleteObjectByKey(List<String> keys) {
-		for (String key : keys) {
-			// 버킷에서 URL을 기반으로 오브젝트 삭제
-			amazonS3.deleteObject(bucket, key);
-		}
-	}
+    private void addToListFromList(List<String> urls, List<String> imageList) {
+        for (String url : imageList) {
+            addIfNotBlank(urls, url);
+        }
+    }
 
-	private GeneratePresignedUrlRequest getGeneratePreSignedUrlRequest(String bucket, String fileName) {
-		GeneratePresignedUrlRequest generatePresignedUrlRequest =
-			new GeneratePresignedUrlRequest(bucket, fileName)
-				.withMethod(HttpMethod.PUT)
-				.withExpiration(getPreSignedUrlExpiration());
-		generatePresignedUrlRequest.addRequestParameter(
-			Headers.S3_CANNED_ACL,
-			CannedAccessControlList.PublicRead.toString());
-		return generatePresignedUrlRequest;
-	}
+    private void addToListFromDeleteImageDto(List<String> urls, List<DeleteImageDto> dtos) {
+        for (DeleteImageDto dto : dtos) {
+            addIfNotBlank(urls, dto.getImageUrl());
+            addIfNotBlank(urls, dto.getThumbnail());
+        }
+    }
 
-	private Date getPreSignedUrlExpiration() {
-		Date expiration = new Date();
-		long expTimeMillis = expiration.getTime();
-		expTimeMillis += 1000 * 60 * 5;
-		expiration.setTime(expTimeMillis);
-		return expiration;
-	}
+    private List<String> getKeyFromScrapImagesByScrapId(long scrapId) {
+        return scrapImageRepository.findAllImageKeyByScrapId(scrapId);
+    }
 
-	private String createFileId() {
-		return UUID.randomUUID().toString();
-	}
+    @Transactional // 트랜잭션 처리
+    public void deleteObjectByKey(List<String> keys) {
+        // 삭제할 객체들의 키 목록을 ObjectIdentifier로 변환
+        List<ObjectIdentifier> toDelete = keys.stream()
+                .map(key -> ObjectIdentifier.builder().key(key).build())
+                .collect(Collectors.toList());
 
-	private String createPath(String prefix, String fileName) {
-		String fileId = createFileId();
-		if (fileName == null)
-			return String.format("%s/%s", prefix, fileId);
-		return String.format("%s/%s", prefix, fileId + fileName);
-	}
+        // Delete 객체 생성
+        Delete delete = Delete.builder()
+                .objects(toDelete)
+                .build();
 
-	public void deleteImagesByTripId(long tripId) {
-		List<String> urls = findImageByTripId(new ArrayList<>(), tripId);
-		getUrlFromScrapImagesByTripId(urls, tripId);
-		deleteObjectByKey(extractKeyFromUrl(urls));
-	}
+        // 삭제 요청 생성
+        DeleteObjectsRequest deleteRequest = DeleteObjectsRequest.builder()
+                .bucket(bucket)
+                .delete(delete)
+                .build();
 
-	public void deleteImageByHistoryId(long historyId) {
-		DeleteImageDto dto = historyRepository.findHistoryImages(historyId);
-		List<String> urls = List.of(dto.getImageUrl(), dto.getThumbnail());
-		deleteObjectByKey(extractKeyFromUrl(urls));
-	}
+        // 요청 실행
+        DeleteObjectsResponse response = s3Client.deleteObjects(deleteRequest);
+    }
+
+    private String createFileId() {
+        return UUID.randomUUID().toString();
+    }
+
+    private String createPath(String prefix, String fileName) {
+        String fileId = createFileId();
+        if (fileName == null)
+            return String.format("%s/%s", prefix, fileId);
+        return String.format("%s/%s", prefix, fileId + fileName);
+    }
+
+    public void deleteImagesByTripId(long tripId) {
+        List<String> urls = new ArrayList<>();
+        addToListFromList(urls, findImageByTripId(new ArrayList<>(), tripId));
+        addToListFromList(urls, scrapImageRepository.findAllImageKeyByTripId(tripId));
+        deleteUrls(urls);
+    }
+
+    public void deleteImageByHistoryId(long historyId) {
+        List<String> urls = new ArrayList<>();
+        addToListFromDeleteImageDto(urls, List.of(historyRepository.findHistoryImages(historyId)));
+        deleteUrls(urls);
+    }
 }

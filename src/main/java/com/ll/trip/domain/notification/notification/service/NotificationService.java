@@ -1,6 +1,6 @@
 package com.ll.trip.domain.notification.notification.service;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -116,10 +116,32 @@ public class NotificationService {
 		return notificationRepository.findHistoryNotificationComponent(historyId);
 	}
 
-	public List<NotificationListDto> getListByUserIdAndTitle(long userId, String title) {
-		return title == null ?
-			notificationRepository.findAllByUserIdAndDate(userId, LocalDateTime.now().minusDays(7))
-			: notificationRepository.findAllTypeByUserIdAndDate(userId, title, LocalDateTime.now().minusDays(7));
+	public List<NotificationListDto> getListByUserIdAndTitle(long userId, String title, long id) {
+		if (id == 0)
+			id = Long.MAX_VALUE;
+
+		List<Object[]> results = title == null ?
+			notificationRepository.findTop20ByUserIdAndIdLessThanOrderByDateDesc(userId, id)
+			: notificationRepository.findAllTypeByUserIdAndDate(userId, title, id);
+
+		return mapToDto(results);
+	}
+
+	private List<NotificationListDto> mapToDto(List<Object[]> results) {
+		List<NotificationListDto> list = new ArrayList<>();
+		for (Object[] result : results) {
+			list.add(new NotificationListDto(
+					((Number)result[0]).longValue(),          // id
+					(String)result[1],                        // labelColor
+					(String)result[2],                        // destination
+					(String)result[3],                        // title
+					(String)result[4],                        // content
+					(Boolean)result[5],                       // isRead
+					((Timestamp)result[6]).toLocalDateTime()  // createDate
+				)
+			);
+		}
+		return list;
 	}
 
 	@Transactional
@@ -195,6 +217,12 @@ public class NotificationService {
 
 	@Transactional
 	public void modifyNotificationConfig(long userId, NotificationConfigDto request) {
-		notificationConfigRepository.updateConfig(userId, request.isActivePlan(), request.isActiveLikeReply(), request.isActiveMarketing());
+		notificationConfigRepository.updateConfig(userId, request.isActivePlan(), request.isActiveLikeReply(),
+			request.isActiveMarketing());
+	}
+
+	@Transactional
+	public void deleteNotification(long notificationId, long userId) {
+		notificationRepository.deleteByIdAndUserId(notificationId, userId);
 	}
 }

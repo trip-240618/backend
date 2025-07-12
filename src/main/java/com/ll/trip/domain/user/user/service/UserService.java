@@ -1,26 +1,25 @@
 package com.ll.trip.domain.user.user.service;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.ll.trip.domain.notification.notification.repository.NotificationConfigRepository;
 import com.ll.trip.domain.user.user.entity.DeletedUser;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.DeletedUserRepository;
 import com.ll.trip.domain.user.user.repository.UserRepository;
+import com.ll.trip.global.aws.cloudfront.CloudFrontSignedCookieService;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
 import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
 import com.ll.trip.global.security.userDetail.SecurityUser;
-
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 	private final UserRepository userRepository;
 	private final JwtTokenUtil jwtTokenUtil;
+	private final CloudFrontSignedCookieService signedCookieService; // 쿠키 담는 과정 만들어야함
 	private final NotificationConfigRepository notificationConfigRepository;
 	private final DeletedUserRepository deletedUserRepository;
 

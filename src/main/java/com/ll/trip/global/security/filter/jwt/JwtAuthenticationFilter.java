@@ -1,15 +1,7 @@
 package com.ll.trip.global.security.filter.jwt;
 
-import java.io.IOException;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.filter.OncePerRequestFilter;
-
+import com.ll.trip.global.aws.cloudfront.CloudFrontSignedCookieService;
 import com.ll.trip.global.security.filter.jwt.dto.ExtractedClaims;
-
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,6 +9,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -26,6 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private String tokenSecret;
 
 	private final JwtTokenUtil jwtTokenUtil;
+	private final CloudFrontSignedCookieService signedCookieService; // 쿠키 담는 과정 만들어야함
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

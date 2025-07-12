@@ -21,7 +21,7 @@ public class TripCreateDto {
 
 	@Schema(
 		description = "여행방 타입",
-		example = "J or P")
+		example = "j")
 	private char type;
 
 	@Schema(
@@ -41,11 +41,6 @@ public class TripCreateDto {
 		example = "일본")
 	@NotBlank
 	private String country;
-
-	@Schema(
-		description = "ccTLD 지역 코드",
-		example = "jp")
-	private String regionCode;
 
 	@Schema(
 		description = "여행방 썸네일(화질 축소해서)",

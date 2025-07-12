@@ -1,9 +1,9 @@
 package com.ll.trip.global.security.config;
 
-import static org.springframework.security.config.Customizer.*;
-
-import java.util.List;
-
+import com.ll.trip.global.aws.cloudfront.CloudFrontSignedCookieService;
+import com.ll.trip.global.security.filter.jwt.JwtAuthenticationFilter;
+import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -18,10 +18,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.ll.trip.global.security.filter.jwt.JwtAuthenticationFilter;
-import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
+import java.util.List;
 
-import lombok.RequiredArgsConstructor;
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @RequiredArgsConstructor
@@ -29,10 +28,11 @@ import lombok.RequiredArgsConstructor;
 public class SpringSecurityConfig {
 
 	private final JwtTokenUtil jwtTokenUtil;
+	private final CloudFrontSignedCookieService signedCookieService;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenUtil);
+		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenUtil, signedCookieService);
 
 		return http
 			.cors(withDefaults())
@@ -46,6 +46,7 @@ public class SpringSecurityConfig {
 					"*.html",
 					"/api-docs/**",
 					"/api-docs.yaml",
+					"/version/**",
 					"/policy/**"
 				).permitAll()
 				.anyRequest().authenticated()

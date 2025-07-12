@@ -19,10 +19,19 @@ public interface CountryRepository extends JpaRepository<Country, Long> {
 
 	Optional<Country> findByCountryName(String countryName);
 
+
+
 	@Query("""
 			select c.countryName
 			from Country c
 			where c.countryName like %:keyword%
 		""")
 	List<String> findCountryNameLike(String keyword);
+
+	@Query("""
+		select c.countryCode
+		from Country c
+		where c.countryName = :name
+		""")
+	Optional<String> findDomainByCountryName(String name);
 }

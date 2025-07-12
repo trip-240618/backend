@@ -7,9 +7,11 @@ import com.ll.trip.domain.notification.notice.entity.Notice;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class NoticeDetailDto {
 	@Schema(description = "공지 id", example = "1")
 	private long id;

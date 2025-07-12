@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,9 +35,10 @@ public class NotificationController {
 	@Operation(summary = "알림 목록")
 	public ResponseEntity<List<NotificationListDto>> showNotification(
 		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "마지막(최소) id (0은 예외로 최신 알림 받기)") long id,
 		@RequestParam(required = false) @Parameter(description = "알림 종류 (여행 일정, 여행 기록, 트립스토리)", example = "여행 일정") String title
 	) {
-		List<NotificationListDto> response = notificationService.getListByUserIdAndTitle(securityUser.getId(), title);
+		List<NotificationListDto> response = notificationService.getListByUserIdAndTitle(securityUser.getId(), title, id);
 		return ResponseEntity.ok(response);
 	}
 
@@ -94,5 +96,19 @@ public class NotificationController {
 		notificationService.modifyNotificationConfig(securityUser.getId(), request);
 		NotificationConfigDto response = notificationService.showNotificationConfig(securityUser.getId());
 		return ResponseEntity.ok(response);
+	}
+
+	@DeleteMapping("/delete")
+	@Operation(summary = "단일 삭제")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "성공"),
+		@ApiResponse(responseCode = "404", description = "실패")
+	})
+	public ResponseEntity<?> deleteNotification(
+		@AuthenticationPrincipal SecurityUser securityUser,
+		@RequestParam @Parameter(description = "삭제할 알림의 id", example = "1") long notificationId
+	) {
+		notificationService.deleteNotification(notificationId, securityUser.getId());
+		return ResponseEntity.ok("ok");
 	}
 }

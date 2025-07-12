@@ -27,7 +27,7 @@ import com.ll.trip.domain.trip.planJ.dto.PlanJInfoDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJListDto;
 import com.ll.trip.domain.trip.planJ.dto.PlanJSwapRequestDto;
 import com.ll.trip.domain.trip.planJ.entity.PlanJ;
-import com.ll.trip.domain.trip.planJ.service.PlanJEditService;
+import com.ll.trip.domain.trip.plan.service.PlanEditService;
 import com.ll.trip.domain.trip.planJ.service.PlanJService;
 import com.ll.trip.domain.trip.trip.service.TripService;
 import com.ll.trip.domain.trip.websoket.response.SocketResponseBody;
@@ -52,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "Plan J", description = "J타입 플랜 API")
 public class PlanJController {
 	private final PlanJService planJService;
-	private final PlanJEditService planJEditService;
+	private final PlanEditService planEditService;
 	private final TripService tripService;
 	private final SimpMessagingTemplate template;
 	private final NotificationService notificationService;
@@ -71,7 +71,7 @@ public class PlanJController {
 		@RequestBody PlanJCreateRequestDto requestDto
 	) {
 		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
-		int order = planJEditService.getLastOrderByTripId(tripId);
+		int order = planEditService.getLastPlanJOrder(tripId);
 
 		PlanJ plan = planJService.createPlan(tripId, requestDto, order, securityUser.getUuid());
 		PlanJInfoDto response = planJService.convertPlanJToDto(plan);
@@ -129,13 +129,7 @@ public class PlanJController {
 		int dayTo = requestBody.getDayAfterStart();
 
 		if (!plan.getStartTime().equals(requestBody.getStartTime()) || dayFrom != dayTo) {
-			if (!requestBody.isLocker()) {
-				planJEditService.checkHasEditor(tripId, dayFrom, securityUser.getUuid());
-				if (dayFrom != dayTo) {
-					planJEditService.checkHasEditor(tripId, dayTo, securityUser.getUuid());
-				}
-			}
-			order = planJEditService.getLastOrderByTripId(tripId);
+			order = planEditService.getLastPlanJOrder(tripId);
 			notificationService.createPlanMoveNotification(tripId);
 		}
 
@@ -174,7 +168,7 @@ public class PlanJController {
 		tripService.checkTripMemberByTripIdAndUserId(tripId, securityUser.getId());
 		int day = requestBody.getDayAfterStart();
 
-		planJEditService.checkIsEditor(tripId, day, securityUser.getUuid());
+		planEditService.checkIsEditor('j', tripId, day, securityUser.getUuid());
 		List<PlanJListDto> response = planJService.bulkUpdatePlanJOrder(tripId, requestBody.getDayAfterStart(),
 			requestBody.getOrderDtos());
 
@@ -225,7 +219,7 @@ public class PlanJController {
 
 		log.info("sessionId: " + sessionId);
 		log.info("nickname: " + nickname);
-		String[] editor = planJEditService.getEditorByTripIdAndDay(tripId, day);
+		String[] editor = planEditService.getEditorByDestination('j', tripId, day);
 		if (editor != null) {
 			template.convertAndSend("/topic/api/trip/j/" + tripId,
 				new SocketResponseBody<>("wait", new PlanJEditorRegisterDto(day, editor[1], editor[2]))
@@ -233,7 +227,7 @@ public class PlanJController {
 			return;
 		}
 
-		planJEditService.addEditor(tripId, day, sessionId, uuid, nickname);
+		planEditService.addEditor('j', tripId, day, sessionId, uuid, nickname);
 
 		template.convertAndSend("/topic/api/trip/j/" + tripId,
 			new SocketResponseBody<>("edit start", new PlanJEditorRegisterDto(day, uuid, nickname))
@@ -271,14 +265,7 @@ public class PlanJController {
 		String uuid = securityUser.getUuid();
 		log.info("uuid : " + uuid);
 
-		planJEditService.removeEditorByDestination(tripId, day, uuid);
-	}
-
-	@GetMapping("/show/editors")
-	@Operation(summary = "플랜j editor권한 목록")
-	@ApiResponse(responseCode = "200", description = "플랜j editor권한 목록")
-	public ResponseEntity<?> showEditors() {
-		return ResponseEntity.ok(planJEditService.getSessionIdMap());
+		planEditService.removeEditorByDestination('j', tripId, day, uuid);
 	}
 
 }

@@ -1,21 +1,12 @@
 package com.ll.trip.domain.mypage.faq.entity;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import com.ll.trip.global.base.entity.BaseEntity;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Getter
@@ -26,10 +17,12 @@ import lombok.experimental.SuperBuilder;
 public class Faq extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Schema(description = "FAQ ID", example = "1")
 	private Long id;
 
 	@NotBlank
 	@Setter
+	@Schema(description = "FAQ ID", example = "1")
 	private String type;
 
 	@NotBlank

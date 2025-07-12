@@ -3,9 +3,11 @@ package com.ll.trip.domain.user.user.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class VisitedCountryDto {
 	@Schema(
 		description = "나라이름",
