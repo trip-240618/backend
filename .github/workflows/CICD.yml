@@ -73,7 +73,6 @@ jobs:
           username: ec2-user
           host: ${{ secrets.TRIP_PROD_IP }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: false
           script: |
             set -x
             CURRENT_UPSTREAM=${{env.CURRENT_UPSTREAM}}
@@ -102,10 +101,9 @@ jobs:
       - name: Check deploy server URL
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ secrets.TRIP_PROD_IP }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
           envs: STOPPED_PORT
           script: |
             MAX_RETRIES=10
