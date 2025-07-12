@@ -1,22 +1,9 @@
 package com.ll.trip.domain.mypage.faq.controller;
 
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.ll.trip.domain.mypage.faq.dto.FaqCreateDto;
 import com.ll.trip.domain.mypage.faq.dto.FaqListDto;
 import com.ll.trip.domain.mypage.faq.entity.Faq;
 import com.ll.trip.domain.mypage.faq.service.FaqService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -27,6 +14,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -64,7 +56,7 @@ public class FaqController {
 	@PostMapping("/delete/{faqId}")
 	@Operation(summary = "FAQ 삭제")
 	@ApiResponse(responseCode = "200", description = "FAQ 생성", content = {
-		@Content(mediaType = "application/json", schema = @Schema(implementation = String.class))})
+		@Content(mediaType = "application/json", schema = @Schema(implementation = FaqCreateDto.class))})
 	public ResponseEntity<?> deleteFaq(
 		@PathVariable @Parameter(description = "Faq id", example = "1", in = ParameterIn.PATH) long faqId,
 		@RequestBody FaqCreateDto faqCreateDto
