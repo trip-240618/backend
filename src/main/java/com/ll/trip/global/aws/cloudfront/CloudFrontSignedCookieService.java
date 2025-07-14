@@ -2,7 +2,6 @@ package com.ll.trip.global.aws.cloudfront;
 
 import com.amazonaws.services.cloudfront.CloudFrontCookieSigner;
 import com.amazonaws.services.cloudfront.util.SignerUtils;
-import com.ll.trip.global.aws.cloudfront.dto.BookContentResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,7 +33,7 @@ public class CloudFrontSignedCookieService {
     @Value("${cloud.aws.cloudfront.public-key-id}")
     private String publicKeyId;
 
-    public BookContentResponse getBookContentResponse(
+    public void setCookie(
             HttpServletRequest req,
             HttpServletResponse res,
             String bookContentId
@@ -59,18 +58,10 @@ public class CloudFrontSignedCookieService {
                 null  // 허용 IP (null이면 모두 허용)
         );
 
-        // 리소스 경로 URL 생성
-        String url = SignerUtils.generateResourcePath(SignerUtils.Protocol.https, cloudFrontDomain, resourcePath);
-
         // 쿠키 응답에 추가
         res.addCookie(makeSignedCookie(cookies.getPolicy().getKey(), cookies.getPolicy().getValue()));
         res.addCookie(makeSignedCookie(cookies.getSignature().getKey(), cookies.getSignature().getValue()));
         res.addCookie(makeSignedCookie(cookies.getKeyPairId().getKey(), cookies.getKeyPairId().getValue()));
-
-        // URL 마지막의 "/*" 제거
-        String baseUrl = url.replaceAll("/\\*$", "");
-
-        return new BookContentResponse(baseUrl);
     }
 
     private Cookie makeSignedCookie(String key, String value) {
@@ -83,9 +74,9 @@ public class CloudFrontSignedCookieService {
     }
 
     private String getRootDomain(String domain) {
-        String[] parts = domain.split("\\.");
-        if (parts.length >= 2) {
-            return parts[parts.length - 2] + "." + parts[parts.length - 1];
+        String[] parts = domain.split("/");
+        if (parts.length >= 3) {
+            return parts[2];
         }
         return domain;
     }
