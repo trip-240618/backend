@@ -89,9 +89,12 @@ jobs:
           username: ec2-user
           host: ${{ secrets.TRIP_PROD_IP }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          timeout: 120
           script: |
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/trip_prod:latest
+            echo "✅ Pulled image."
             sudo docker compose -f docker-compose-${{env.TARGET_UPSTREAM}}.yml up -d
+            echo "✅ Compose complete."
 
       - name: Wait for 40 seconds for application started
         run: sleep 40
