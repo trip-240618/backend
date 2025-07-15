@@ -81,7 +81,7 @@ public class CloudFrontSignedCookieUtil {
 
     private Cookie makeSignedCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setDomain(getRootDomain(cloudFrontDomain));
+        cookie.setDomain(getRootDomain(cloudFrontDomain)); //없어도 됨
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
@@ -91,7 +91,7 @@ public class CloudFrontSignedCookieUtil {
     private String getRootDomain(String domain) {
         int dotIndex = domain.indexOf(".");
         if (dotIndex != -1) {
-            return domain.substring(dotIndex + 1);
+            return domain.substring(dotIndex);
         }
         return domain;
     }
