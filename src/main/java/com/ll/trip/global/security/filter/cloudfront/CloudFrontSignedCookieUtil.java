@@ -89,9 +89,9 @@ public class CloudFrontSignedCookieUtil {
     }
 
     private String getRootDomain(String domain) {
-        String[] parts = domain.split("/");
-        if (parts.length >= 3) {
-            return parts[2];
+        int dotIndex = domain.indexOf(".");
+        if (dotIndex != -1) {
+            return domain.substring(dotIndex + 1);
         }
         return domain;
     }
