@@ -10,10 +10,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.rmi.ServerException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,13 +46,13 @@ public class CloudFrontSignedCookieUtil {
         expireCalendar.add(Calendar.MINUTE, 60);
         Date expireTime = expireCalendar.getTime();
 
-        File privateKeyFile = new ClassPathResource(privateKeyLocation).getFile();
+        PrivateKey privateKey = getPrivateKey();
 
         // 서명된 쿠키 생성
         CloudFrontCookieSigner.CookiesForCustomPolicy cookies = getCookiesForCustomPolicy(
                 SignerUtils.Protocol.https,
                 cloudFrontDomain,
-                privateKeyFile,
+                privateKey,
                 "/*",
                 publicKeyId,
                 expireTime,
@@ -61,7 +66,20 @@ public class CloudFrontSignedCookieUtil {
         res.addCookie(makeSignedCookie(cookies.getKeyPairId().getKey(), cookies.getKeyPairId().getValue()));
     }
 
-    public Cookie makeSignedCookie(String key, String value) {
+    private PrivateKey getPrivateKey() throws InvalidKeySpecException, IOException {
+        PrivateKey privateKey = null;
+        try (InputStream inputStream = new ClassPathResource(privateKeyLocation).getInputStream()) {
+            byte[] keyBytes = inputStream.readAllBytes();
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            privateKey = keyFactory.generatePrivate(spec);
+        } catch (NoSuchAlgorithmException e) {
+            throw new ServerException("", e);
+        }
+        return privateKey;
+    }
+
+    private Cookie makeSignedCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
         cookie.setDomain(getRootDomain(cloudFrontDomain));
         cookie.setPath("/");
@@ -70,7 +88,7 @@ public class CloudFrontSignedCookieUtil {
         return cookie;
     }
 
-    public String getRootDomain(String domain) {
+    private String getRootDomain(String domain) {
         String[] parts = domain.split("/");
         if (parts.length >= 3) {
             return parts[2];
@@ -100,7 +118,7 @@ public class CloudFrontSignedCookieUtil {
         }
     }
 
-    public long extractEpochTime(String json) {
+    private long extractEpochTime(String json) {
         Pattern pattern = Pattern.compile("\"DateLessThan\"\\s*:\\s*\\{[^}]*\"AWS:EpochTime\"\\s*:\\s*(\\d+)");
         Matcher matcher = pattern.matcher(json);
         if (matcher.find()) {
