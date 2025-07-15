@@ -89,7 +89,7 @@ jobs:
           username: ec2-user
           host: ${{ secrets.TRIP_PROD_IP }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          timeout: 120
+          timeout: 120s
           script: |
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/trip_prod:latest
             echo "✅ Pulled image."
