@@ -3,8 +3,6 @@ name: CICD
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 permissions:
   contents: read
@@ -26,7 +24,7 @@ jobs:
       - name: Build with Gradle
         run: |
           mkdir -p src/main/resources/cloudfront
-          echo "${{ secrets.CLOUDFRONT_PRIVATE_KEY_BASE64 }}" | base64 -d > src/main/resources/cloudfront/private_key.der
+          echo "${{ secrets.CLOUDFRONT_PRIVATE_KEY_BASE64 }}" | base64 -d > $GITHUB_WORKSPACE/src/main/resources/cloudfront/private_key.der
           echo ${{secrets.APPLICATION_SECRET_PROD_YML}} | base64 --decode > ./src/main/resources/application-secret_prod.yml
           echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 --decode > $GITHUB_WORKSPACE/src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
           chmod +x ./gradlew
