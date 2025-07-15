@@ -1,6 +1,7 @@
 package com.ll.trip.global.security.config;
 
-import com.ll.trip.global.aws.cloudfront.CloudFrontSignedCookieService;
+import com.ll.trip.global.security.filter.cloudfront.CloudFrontCookieFilter;
+import com.ll.trip.global.security.filter.cloudfront.CloudFrontSignedCookieUtil;
 import com.ll.trip.global.security.filter.jwt.JwtAuthenticationFilter;
 import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +29,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SpringSecurityConfig {
 
 	private final JwtTokenUtil jwtTokenUtil;
-	private final CloudFrontSignedCookieService signedCookieService;
+	private final CloudFrontSignedCookieUtil cloudFrontCookieUtil;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenUtil, signedCookieService);
+		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenUtil);
+		CloudFrontCookieFilter cloudFrontCookieFilter = new CloudFrontCookieFilter(cloudFrontCookieUtil);
 
 		return http
 			.cors(withDefaults())
@@ -52,6 +54,7 @@ public class SpringSecurityConfig {
 				.anyRequest().authenticated()
 			)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+				.addFilterAfter(cloudFrontCookieFilter, JwtAuthenticationFilter.class)
 			.build();
 	}
 
