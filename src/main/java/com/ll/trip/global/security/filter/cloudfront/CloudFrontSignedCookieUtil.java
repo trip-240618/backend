@@ -1,29 +1,29 @@
-package com.ll.trip.global.aws.cloudfront;
+package com.ll.trip.global.security.filter.cloudfront;
 
 import com.amazonaws.services.cloudfront.CloudFrontCookieSigner;
 import com.amazonaws.services.cloudfront.util.SignerUtils;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.amazonaws.services.cloudfront.CloudFrontCookieSigner.getCookiesForCustomPolicy;
 
-@Configuration
-@ConfigurationProperties(prefix = "cloudfront")
-@Getter
-@Setter
-public class CloudFrontSignedCookieService {
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class CloudFrontSignedCookieUtil {
     @Value("${cloud.aws.cloudfront.domain}")
     private String cloudFrontDomain;
 
@@ -34,24 +34,21 @@ public class CloudFrontSignedCookieService {
     private String publicKeyId;
 
     public void setCookie(
-            HttpServletRequest req,
-            HttpServletResponse res,
-            String bookContentId
+            HttpServletResponse res
     ) throws InvalidKeySpecException, IOException {
         // 쿠키 만료 시간 설정 (60분 뒤)
         Calendar expireCalendar = Calendar.getInstance();
         expireCalendar.add(Calendar.MINUTE, 60);
         Date expireTime = expireCalendar.getTime();
 
-        String resourcePath = bookContentId + "/*";
-        File privateKeyFile = new File(privateKeyLocation);
+        File privateKeyFile = new ClassPathResource(privateKeyLocation).getFile();
 
         // 서명된 쿠키 생성
         CloudFrontCookieSigner.CookiesForCustomPolicy cookies = getCookiesForCustomPolicy(
                 SignerUtils.Protocol.https,
                 cloudFrontDomain,
                 privateKeyFile,
-                resourcePath,
+                "/*",
                 publicKeyId,
                 expireTime,
                 null, // 시작 시간 (null이면 즉시 사용 가능)
@@ -64,7 +61,7 @@ public class CloudFrontSignedCookieService {
         res.addCookie(makeSignedCookie(cookies.getKeyPairId().getKey(), cookies.getKeyPairId().getValue()));
     }
 
-    private Cookie makeSignedCookie(String key, String value) {
+    public Cookie makeSignedCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
         cookie.setDomain(getRootDomain(cloudFrontDomain));
         cookie.setPath("/");
@@ -73,7 +70,7 @@ public class CloudFrontSignedCookieService {
         return cookie;
     }
 
-    private String getRootDomain(String domain) {
+    public String getRootDomain(String domain) {
         String[] parts = domain.split("/");
         if (parts.length >= 3) {
             return parts[2];
@@ -81,4 +78,34 @@ public class CloudFrontSignedCookieService {
         return domain;
     }
 
+    public Map<String, String> extractCloudFrontCookies(Cookie[] cookies) {
+        Map<String, String> map = new HashMap<>();
+        if (cookies == null) return map;
+        for (Cookie c : cookies) {
+            if (c.getName().contains("CloudFront-")) {
+                map.put(c.getName(), c.getValue());
+            }
+        }
+        return map;
+    }
+
+    public boolean isCookieExpired(String policyBase64) {
+        try {
+            String decoded = new String(Base64.getDecoder().decode(policyBase64), StandardCharsets.UTF_8);
+            // JSON 형태의 policy에서 "DateLessThan" > "AWS:EpochTime" 추출
+            long expireTime = extractEpochTime(decoded);
+            return System.currentTimeMillis() / 1000 > expireTime;
+        } catch (Exception e) {
+            return true; // 파싱 실패 시 만료된 것으로 간주
+        }
+    }
+
+    public long extractEpochTime(String json) {
+        Pattern pattern = Pattern.compile("\"DateLessThan\"\\s*:\\s*\\{[^}]*\"AWS:EpochTime\"\\s*:\\s*(\\d+)");
+        Matcher matcher = pattern.matcher(json);
+        if (matcher.find()) {
+            return Long.parseLong(matcher.group(1));
+        }
+        throw new IllegalArgumentException("Invalid policy format");
+    }
 }

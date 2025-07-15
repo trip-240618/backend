@@ -1,6 +1,5 @@
 package com.ll.trip.global.security.filter.jwt;
 
-import com.ll.trip.global.aws.cloudfront.CloudFrontSignedCookieService;
 import com.ll.trip.global.security.filter.jwt.dto.ExtractedClaims;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -25,7 +24,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private String tokenSecret;
 
 	private final JwtTokenUtil jwtTokenUtil;
-	private final CloudFrontSignedCookieService signedCookieService; // 쿠키 담는 과정 만들어야함
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
