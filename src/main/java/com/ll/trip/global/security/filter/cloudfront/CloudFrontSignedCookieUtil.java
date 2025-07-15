@@ -89,11 +89,8 @@ public class CloudFrontSignedCookieUtil {
     }
 
     private String getRootDomain(String domain) {
-        String[] parts = domain.split("/");
-        if (parts.length >= 3) {
-            return parts[2];
-        }
-        return domain;
+        int dotIndex = domain.lastIndexOf('.');
+        return domain.substring(dotIndex + 1);
     }
 
     public Map<String, String> extractCloudFrontCookies(Cookie[] cookies) {
