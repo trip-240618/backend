@@ -41,6 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			if (jwtTokenUtil.validateToken(refreshToken)) {
 				claims = jwtTokenUtil.getClaims(refreshToken);
 			} else {
+				log.info("유효하지 않은 리프레시토큰: " + refreshToken);
 				return;
 			}
 		} else {
