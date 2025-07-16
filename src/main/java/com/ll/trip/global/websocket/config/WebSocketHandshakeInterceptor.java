@@ -1,7 +1,8 @@
 package com.ll.trip.global.websocket.config;
 
-import java.util.Map;
-
+import com.ll.trip.global.security.userDetail.SecurityUser;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.security.core.Authentication;
@@ -10,10 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-import com.ll.trip.global.security.userDetail.SecurityUser;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -35,7 +33,18 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
 			return false;
 		}
 
-		attributes.put("nickname", ((SecurityUser) authentication.getPrincipal()).getNickname());
+		if (authentication.getPrincipal() instanceof SecurityUser securityUser) {
+			String nickname = securityUser.getNickname();
+			if (nickname != null) {
+				attributes.put("nickname", nickname);
+			} else {
+				log.warn("WebSocket 핸드셰이크 중 닉네임이 null입니다.");
+				return false;
+			}
+		} else {
+			log.warn("WebSocket 핸드셰이크에서 예상치 못한 Principal 타입");
+			return false;
+		}
 		return true;
 	}
 
