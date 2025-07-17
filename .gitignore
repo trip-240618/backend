@@ -41,3 +41,4 @@ out/
 /src/main/resources/tripstory-14935-firebase-adminsdk-ok9v8-08d7a1b7f6.json
 /src/main/resources/cloudfront/private_key.der
 /src/main/resources/keystore.p12
+/src/main/resources/cloudfront/private_key.pem
