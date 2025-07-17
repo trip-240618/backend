@@ -21,9 +21,9 @@ spring:
       ddl-auto: update
 
 server:
-  port: 8080
-  serverAddress: localhost:8080
-  url: http://localhost:8080
+  port: 8443
+  serverAddress: localhost:8443
+  url: https://localhost:8443
 
 serverName: local_server
 
