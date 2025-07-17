@@ -1,6 +1,9 @@
 package com.ll.trip.global.websocket.config;
 
+import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
+import com.ll.trip.global.security.filter.jwt.dto.ExtractedClaims;
 import com.ll.trip.global.security.userDetail.SecurityUser;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
@@ -17,6 +20,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
+	private final JwtTokenUtil jwtTokenUtil;
 
 	@Override
 	public boolean beforeHandshake(
@@ -25,17 +29,44 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
 		WebSocketHandler wsHandler,
 		Map<String, Object> attributes) throws Exception {
 
-		// SecurityContext에서 인증 정보 가져오기
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String accessToken = jwtTokenUtil.resolveWebSocketToken(request, "accessToken");
+		String refreshToken = jwtTokenUtil.resolveWebSocketToken(request, "refreshToken");
+		Claims claims = null;
 
-		if (authentication == null || !authentication.isAuthenticated()) {
+		boolean accessTokenVaild = accessToken != null && jwtTokenUtil.validateToken(accessToken);
+		if (accessTokenVaild) {
+			claims = jwtTokenUtil.getClaims(accessToken);
+		} else if (refreshToken != null) {
+			log.info("유효하지 않은 액세스토큰: " + accessToken);
+			if (jwtTokenUtil.validateToken(refreshToken)) {
+				claims = jwtTokenUtil.getClaims(refreshToken);
+			} else {
+				log.info("유효하지 않은 리프레시토큰: " + refreshToken);
+				return false;
+			}
+		} else {
+			log.info("유효하지 않은 액세스토큰: " + accessToken);
+			log.info("유효하지 않은 리프레시토큰: " + refreshToken);
+			return false;
+		}
+
+		ExtractedClaims exClaims = new ExtractedClaims(claims);
+
+		Authentication auth = jwtTokenUtil.buildAuthentication(exClaims.getUserId(), exClaims.getUuid(),
+				exClaims.getNickname(), exClaims.getAuthorities());
+
+		SecurityContextHolder.getContext().setAuthentication(auth);
+		log.info("유저 인증 성공 : " + exClaims.getUserId());
+
+		if (auth == null || !auth.isAuthenticated()) {
 			log.warn("WebSocket 핸드셰이크에서 인증 정보를 찾을 수 없음");
 			return false;
 		}
 
-		if (authentication.getPrincipal() instanceof SecurityUser securityUser) {
+		if (auth.getPrincipal() instanceof SecurityUser securityUser) {
 			String nickname = securityUser.getNickname();
 			if (nickname != null) {
+				log.info("유저 웹소켓 연결 성공 : " + nickname);
 				attributes.put("nickname", nickname);
 			} else {
 				log.warn("WebSocket 핸드셰이크 중 닉네임이 null입니다.");

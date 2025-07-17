@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -60,15 +59,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (!accessTokenVaild) {
             String newAccessToken = jwtTokenUtil.createAccessToken(exClaims.getUserId(), exClaims.getUuid(),
                     exClaims.getNickname(), exClaims.getAuthorities());
-            ResponseCookie newAccessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)
-                    .httpOnly(true)
-                    .path("/")
-                    .secure(true)
-                    .sameSite("none")
-                    .build();
-            response.addHeader("Set-Cookie", newAccessTokenCookie.toString());
+            jwtTokenUtil.setTokenInCookie("accessToken", newAccessToken, response);
         }
-        log.info("유저 인증 성공 : " + exClaims.getUserId());
+        //log.info("유저 인증 성공 : " + exClaims.getUserId());
         filterChain.doFilter(request, response);
     }
 }
