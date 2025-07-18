@@ -27,7 +27,7 @@ import java.util.UUID;
 public class UserService {
 	private final UserRepository userRepository;
 	private final JwtTokenUtil jwtTokenUtil;
-	private final CloudFrontSignedCookieUtil signedCookieService; // 쿠키 담는 과정 만들어야함
+	private final CloudFrontSignedCookieUtil signedCookieService;
 	private final NotificationConfigRepository notificationConfigRepository;
 	private final DeletedUserRepository deletedUserRepository;
 
