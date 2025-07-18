@@ -89,7 +89,7 @@ public class CloudFrontSignedCookieUtil {
                     SignerUtils.Protocol.https,
                     cloudFrontDomain,
                     privateKey,
-                    "/*", // CloudFront 리소스 경로 (모든 경로 허용)
+                    "*", // CloudFront 리소스 경로 (모든 경로 허용)
                     publicKeyId,
                     expireTime,
                     null, // 시작 시간 (null이면 즉시 사용 가능)
