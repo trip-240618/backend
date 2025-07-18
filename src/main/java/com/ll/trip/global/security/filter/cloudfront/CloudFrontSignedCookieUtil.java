@@ -39,6 +39,8 @@ public class CloudFrontSignedCookieUtil {
 
     private static PrivateKey cachedPrivateKey;
 
+    private static final Pattern EPOCH_TIME_PATTERN = Pattern.compile("\"AWS:EpochTime\"\\s*:\\s*(\\d+)");
+
     @PostConstruct
     public void initializePrivateKey() throws ServerException {
         if (cachedPrivateKey == null) { // 이미 로드되지 않은 경우에만 로드
@@ -141,24 +143,25 @@ public class CloudFrontSignedCookieUtil {
         return map;
     }
 
-    public boolean isCookieExpired(String policyBase64) {
-        try {
-            String decoded = new String(Base64.getDecoder().decode(policyBase64), StandardCharsets.UTF_8);
-            // JSON 형태의 policy에서 "DateLessThan" > "AWS:EpochTime" 추출
-            long expireTime = extractEpochTime(decoded);
-            return System.currentTimeMillis() / 1000 > expireTime;
-        } catch (Exception e) {
-            log.warn("CloudFront Policy 만료 확인 중 오류 발생 (정책 파싱 실패): {}", e.getMessage(), e);
-            return true; // 파싱 실패 시 만료된 것으로 간주
+    public static boolean isCookieExpired(String policyJson) {
+        if (policyJson == null || policyJson.isEmpty()) {
+            return true;
         }
+
+        Matcher matcher = EPOCH_TIME_PATTERN.matcher(policyJson);
+        if (matcher.find()) {
+            try {
+                long expireEpochSeconds = Long.parseLong(matcher.group(1));
+                long currentEpochSeconds = System.currentTimeMillis() / 1000;
+                return currentEpochSeconds > expireEpochSeconds;
+            } catch (NumberFormatException e) {
+                // 숫자 파싱 오류 시 방어적으로 만료 처리
+                return true;
+            }
+        }
+
+        // 만료시간이 아예 없으면 방어적으로 만료된 것으로 간주
+        return true;
     }
 
-    private long extractEpochTime(String json) {
-        Pattern pattern = Pattern.compile("\"DateLessThan\"\\s*:\\s*\\{[^}]*\"AWS:EpochTime\"\\s*:\\s*(\\d+)");
-        Matcher matcher = pattern.matcher(json);
-        if (matcher.find()) {
-            return Long.parseLong(matcher.group(1));
-        }
-        throw new IllegalArgumentException("Invalid policy format");
-    }
 }
