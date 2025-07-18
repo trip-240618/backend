@@ -44,9 +44,11 @@ public class CloudFrontSignedCookieUtil {
         if (cachedPrivateKey == null) { // 이미 로드되지 않은 경우에만 로드
             try (InputStream inputStream = new ClassPathResource(privateKeyLocation).getInputStream()) {
                 // 1. PEM 파일 내용을 String으로 읽어옴
-                String privateKeyContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                String cleanedKeyContent = privateKeyContent.replaceAll("\\s", "");
-                byte[] decodedKey = Base64.getDecoder().decode(cleanedKeyContent);
+                String privateKeyContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8)
+                        .replaceAll("-----BEGIN PRIVATE KEY-----", "")
+                        .replaceAll("-----END PRIVATE KEY-----", "")
+                        .replaceAll("\\s", "");
+                byte[] decodedKey = Base64.getDecoder().decode(privateKeyContent);
                 // 4. PKCS8EncodedKeySpec 생성 및 PrivateKey 로드
                 PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(decodedKey);
                 KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -54,19 +56,15 @@ public class CloudFrontSignedCookieUtil {
                 log.info("CloudFront Private Key loaded and cached successfully from: {}", privateKeyLocation);
 
             } catch (NoSuchAlgorithmException e) {
-                // RSA 알고리즘을 찾을 수 없는 경우 (거의 발생하지 않음)
                 log.error("RSA 알고리즘을 찾을 수 없습니다: {}", e.getMessage(), e);
                 throw new ServerException("[CloudFront 쿠키 발급 실패] 암호화 알고리즘 오류", e);
             } catch (InvalidKeySpecException e) {
-                // 키 스펙 오류 (주로 PEM 형식 문제, 즉 "algid parse error" 발생 지점)
                 log.error("프라이빗 키 스펙 오류: {}", e.getMessage(), e);
                 throw new ServerException("[CloudFront 쿠키 발급 실패] 키 스펙 오류: " + e.getMessage(), e);
             } catch (IOException e) {
-                // 키 파일을 찾거나 읽을 수 없는 경우
                 log.error("프라이빗 키 파일을 읽는 중 오류 발생 (경로: {}): {}", privateKeyLocation, e.getMessage(), e);
                 throw new ServerException("[CloudFront 쿠키 발급 실패] 키 파일 읽기 오류", e);
             } catch (IllegalArgumentException e) {
-                // Base64 디코딩 실패 등 유효하지 않은 인자
                 log.error("프라이빗 키 내용이 유효하지 않습니다 (Base64 디코딩 또는 형식 오류): {}", e.getMessage(), e);
                 throw new ServerException("[CloudFront 쿠키 발급 실패] 키 내용 형식 오류", e);
             }
@@ -150,7 +148,7 @@ public class CloudFrontSignedCookieUtil {
             long expireTime = extractEpochTime(decoded);
             return System.currentTimeMillis() / 1000 > expireTime;
         } catch (Exception e) {
-            log.warn("CloudFront Policy 만료 확인 중 오류 발생 (정책 파싱 실패): {}", e.getMessage());
+            log.warn("CloudFront Policy 만료 확인 중 오류 발생 (정책 파싱 실패): {}", e.getMessage(), e);
             return true; // 파싱 실패 시 만료된 것으로 간주
         }
     }
