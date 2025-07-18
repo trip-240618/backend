@@ -102,7 +102,7 @@ public class CloudFrontSignedCookieUtil {
             res.addCookie(makeSignedCookie(cookies.getKeyPairId().getKey(), cookies.getKeyPairId().getValue()));
         } catch (Exception e) { // getPrivateKey()에서 던질 수 있는 IllegalStateException 및 기타 SignerUtils 오류
             log.error("CloudFront 쿠키 발급 중 예외 발생: {}", e.getMessage(), e);
-            throw new ServerException("[CloudFront 쿠키 발급 실패] " + e.getMessage(), e);
+            throw new ServerException("[CloudFront 쿠키 발급 실패] ");
         }
     }
 
@@ -143,7 +143,7 @@ public class CloudFrontSignedCookieUtil {
         return map;
     }
 
-    public static boolean isCookieExpired(String policyJson) {
+    public static boolean isCookieExpired(String policyJson) throws ServerException{
         if (policyJson == null || policyJson.isEmpty()) {
             return true;
         }
@@ -155,8 +155,8 @@ public class CloudFrontSignedCookieUtil {
                 long currentEpochSeconds = System.currentTimeMillis() / 1000;
                 return currentEpochSeconds > expireEpochSeconds;
             } catch (NumberFormatException e) {
-                // 숫자 파싱 오류 시 방어적으로 만료 처리
-                return true;
+                log.error("isCookieExpired 중 예외 발생", e);
+                throw new ServerException("서버 쿠키 관련 문제 발생");
             }
         }
 
