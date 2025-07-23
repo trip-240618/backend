@@ -170,7 +170,8 @@ public class NotificationService {
                 + "\"";
         String destination = "/trip/history?tripId=" + tripId + "&historyId=" + historyId;
 
-        if (!componentDto.getFcmToken().isBlank())
+        String fcmToken = componentDto.getFcmToken();
+        if (fcmToken != null && !fcmToken.isBlank())
             fcmMessageUtil.sendMessage(List.of(componentDto.getFcmToken()), title, content,
                     Map.of("destination", destination));
 
