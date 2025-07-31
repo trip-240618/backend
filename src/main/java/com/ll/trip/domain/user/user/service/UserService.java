@@ -5,8 +5,9 @@ import com.ll.trip.domain.user.user.entity.DeletedUser;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.DeletedUserRepository;
 import com.ll.trip.domain.user.user.repository.UserRepository;
-import com.ll.trip.global.security.filter.cloudfront.CloudFrontSignedCookieUtil;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
+import com.ll.trip.global.handler.exception.ServerException;
+import com.ll.trip.global.security.filter.cloudfront.CloudFrontSignedCookieUtil;
 import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +28,7 @@ import java.util.UUID;
 public class UserService {
 	private final UserRepository userRepository;
 	private final JwtTokenUtil jwtTokenUtil;
-	private final CloudFrontSignedCookieUtil signedCookieService;
+	private final CloudFrontSignedCookieUtil cloudCookieUtil;
 	private final NotificationConfigRepository notificationConfigRepository;
 	private final DeletedUserRepository deletedUserRepository;
 
@@ -46,6 +47,11 @@ public class UserService {
 		String newAccessToken = jwtTokenUtil.createAccessToken(userId, uuid, nickname,
 			authorities);
 		setTokenInCookie(newAccessToken, refreshToken, response);
+		try {
+			cloudCookieUtil.setCookie(response);
+		} catch (Exception e) {
+			throw new ServerException(e.getMessage());
+		}
 	}
 
 	public void setTokenInCookie(String accessToken, String refreshToken, HttpServletResponse response) {

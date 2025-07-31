@@ -1,18 +1,16 @@
 package com.ll.trip.domain.user.oauth.service;
 
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
 import com.ll.trip.domain.user.user.service.UserService;
-
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +44,7 @@ public class OAuth2Service {
 		}
 
 		userService.createAndSetTokens(user.getId(), uuid, user.getNickname(), user.getAuthorities(), response);
+
 
 		return userInfoDto;
 	}
