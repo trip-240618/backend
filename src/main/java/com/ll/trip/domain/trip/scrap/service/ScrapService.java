@@ -1,13 +1,5 @@
 package com.ll.trip.domain.trip.scrap.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.ll.trip.domain.file.file.service.AwsAuthService;
 import com.ll.trip.domain.trip.scrap.dto.ScrapDetailDto;
 import com.ll.trip.domain.trip.scrap.dto.ScrapDetailServiceDto;
@@ -23,10 +15,16 @@ import com.ll.trip.domain.trip.trip.entity.Trip;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.global.handler.exception.NoSuchDataException;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
-
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -147,6 +145,7 @@ public class ScrapService {
 	}
 
 	public void checkIsWriterOfScrap(long scrapId, long userId) {
+		//TODO scrap이 없을 때, scrap이 있는데 userID가 다를 때 로 나눠서
 		if (!scrapRepository.existsByIdAndUser_Id(scrapId, userId)) {
 			log.info("user: " + userId + " is not writer of scrap: " + scrapId);
 			throw new PermissionDeniedException("user is not writer of scrap");

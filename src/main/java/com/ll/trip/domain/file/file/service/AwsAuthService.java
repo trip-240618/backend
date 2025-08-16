@@ -106,7 +106,7 @@ public class AwsAuthService {
     }
 
     public void deleteUrls(List<String> urls) {
-        deleteObjectByKey(extractKeyFromUrl(urls));
+        if(urls != null && !urls.isEmpty()) deleteObjectByKey(urls);
     }
 
     public void deleteImagesByScrapId(long scrapId) {
