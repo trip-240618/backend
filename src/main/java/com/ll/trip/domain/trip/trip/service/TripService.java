@@ -1,26 +1,9 @@
 package com.ll.trip.domain.trip.trip.service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.ll.trip.domain.country.service.CountryService;
 import com.ll.trip.domain.file.file.service.AwsAuthService;
-import com.ll.trip.domain.trip.trip.dto.TripCreateDto;
-import com.ll.trip.domain.trip.trip.dto.TripInfoDto;
-import com.ll.trip.domain.trip.trip.dto.TripInfoServiceDto;
-import com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto;
-import com.ll.trip.domain.trip.trip.dto.TripModifyDto;
-import com.ll.trip.domain.trip.trip.entity.Bookmark;
-import com.ll.trip.domain.trip.trip.entity.BookmarkId;
-import com.ll.trip.domain.trip.trip.entity.Trip;
-import com.ll.trip.domain.trip.trip.entity.TripMember;
-import com.ll.trip.domain.trip.trip.entity.TripMemberId;
+import com.ll.trip.domain.trip.trip.dto.*;
+import com.ll.trip.domain.trip.trip.entity.*;
 import com.ll.trip.domain.trip.trip.repository.BookmarkRepository;
 import com.ll.trip.domain.trip.trip.repository.TripMemberRepository;
 import com.ll.trip.domain.trip.trip.repository.TripRepository;
@@ -28,10 +11,18 @@ import com.ll.trip.domain.user.user.dto.VisitedCountryDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.global.handler.exception.NoSuchDataException;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
-
+import com.ll.trip.global.handler.exception.ServerException;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -223,6 +214,10 @@ public class TripService {
 
 	@Transactional
 	public void deleteTripMemberByUuid(long tripId, String uuid) {
-		tripMemberRepository.deleteByTripIdAndUuid(tripId, uuid);
+		try{
+		tripMemberRepository.deleteByTripIdAndUuid(tripId, uuid);}
+		catch (Exception e){
+			throw new ServerException(e.getCause());
+		}
 	}
 }

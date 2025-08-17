@@ -56,6 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 exClaims.getNickname(), exClaims.getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(auth);
+
         if (!accessTokenVaild) {
             String newAccessToken = jwtTokenUtil.createAccessToken(exClaims.getUserId(), exClaims.getUuid(),
                     exClaims.getNickname(), exClaims.getAuthorities());

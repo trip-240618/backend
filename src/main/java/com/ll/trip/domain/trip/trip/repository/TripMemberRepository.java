@@ -1,16 +1,14 @@
 package com.ll.trip.domain.trip.trip.repository;
 
-import java.util.List;
-
+import com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto;
+import com.ll.trip.domain.trip.trip.entity.TripMember;
+import com.ll.trip.domain.trip.trip.entity.TripMemberId;
+import lombok.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import com.ll.trip.domain.trip.trip.dto.TripMemberDeleteDto;
-import com.ll.trip.domain.trip.trip.entity.TripMember;
-import com.ll.trip.domain.trip.trip.entity.TripMemberId;
-
-import lombok.NonNull;
+import java.util.List;
 
 public interface TripMemberRepository extends JpaRepository<TripMember, TripMemberId> {
 	boolean existsById(@NonNull TripMemberId tripMemberId);
@@ -27,8 +25,8 @@ public interface TripMemberRepository extends JpaRepository<TripMember, TripMemb
 
 	@Modifying
 	@Query("""
-		from TripMember tm
-		left join tm.user u on tm.trip.id = :tripId and u.uuid = :uuid
+		delete from TripMember tm
+		where tm.trip.id = :tripId and tm.user.uuid = :uuid
 		""")
 	void deleteByTripIdAndUuid(long tripId, String uuid);
 
