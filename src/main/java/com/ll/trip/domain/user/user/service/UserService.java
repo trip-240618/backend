@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -31,10 +30,6 @@ public class UserService {
 	private final CloudFrontSignedCookieUtil cloudCookieUtil;
 	private final NotificationConfigRepository notificationConfigRepository;
 	private final DeletedUserRepository deletedUserRepository;
-
-	public Optional<UserEntity> findUserByUuid(String uuid) {
-		return userRepository.findByUuid(uuid);
-	}
 
 	public String generateUUID() {
 		return UUID.randomUUID().toString();

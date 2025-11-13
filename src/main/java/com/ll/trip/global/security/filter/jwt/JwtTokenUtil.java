@@ -75,7 +75,6 @@ public class JwtTokenUtil {
                 .sameSite("None")
                 .build();
 
-
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
     }
 
