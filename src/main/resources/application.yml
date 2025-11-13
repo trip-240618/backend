@@ -89,7 +89,10 @@ spring:
             scope:
               - profile_nickname
               - profile_image
-
+          google:
+            scope: # 사용자 정보 권한 범위
+              - email
+              - profile
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize

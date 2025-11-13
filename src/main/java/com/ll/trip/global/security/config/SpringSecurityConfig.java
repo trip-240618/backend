@@ -1,5 +1,7 @@
 package com.ll.trip.global.security.config;
 
+import com.ll.trip.domain.oauth2.handler.OAuth2LoginSuccessHandler;
+import com.ll.trip.domain.oauth2.service.CustomOAuth2UserService;
 import com.ll.trip.global.security.filter.cloudfront.CloudFrontCookieFilter;
 import com.ll.trip.global.security.filter.cloudfront.CloudFrontSignedCookieUtil;
 import com.ll.trip.global.security.filter.jwt.JwtAuthenticationFilter;
@@ -30,18 +32,21 @@ public class SpringSecurityConfig {
 
     private final JwtTokenUtil jwtTokenUtil;
     private final CloudFrontSignedCookieUtil cloudFrontCookieUtil;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenUtil);
         CloudFrontCookieFilter cloudFrontCookieFilter = new CloudFrontCookieFilter(cloudFrontCookieUtil);
 
-        return http
+        http
                 .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(
+
                                 "/user/oauth2/**",
                                 "/env",
                                 "/swagger-ui/**",
@@ -54,9 +59,23 @@ public class SpringSecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
+
+                .oauth2Login(oauth2 -> oauth2
+                        // 1. 사용자 정보 로딩 서비스 지정
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        // 2. 로그인 성공 시 JWT 생성 및 앱으로 리다이렉트 처리기 지정
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureUrl("/loginFailure")
+                )
+
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(cloudFrontCookieFilter, JwtAuthenticationFilter.class)
-                .build();
+                .addFilterAfter(cloudFrontCookieFilter, JwtAuthenticationFilter.class);
+
+
+
+        return http.build();
     }
 
     @Bean
