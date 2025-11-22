@@ -1,7 +1,7 @@
 package com.ll.trip.domain.user.oauth.service;
 
 import com.ll.trip.domain.notification.notification.service.NotificationService;
-import com.ll.trip.domain.oauth2.OAuthAttributes;
+import com.ll.trip.domain.user.oauth.dto.SocialUserInfo;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.UserRepository;
@@ -15,15 +15,16 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class OAuth2Service {
+public class OAuthService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final NotificationService notificationService;
+    private final OAuthTokenParser oAuthTokenParser;
 
     @Transactional
-    public UserInfoDto whenLogin(String oauthId, String name, String email, String profileImg, String provider,
-                                 String fcmToken, HttpServletResponse response) {
-        UserEntity user = whenLogin(oauthId, name, email, profileImg, provider, fcmToken);
+    public UserInfoDto whenLoginKakao(String oauthId, String name, String email, String profileImg, String provider,
+                                      String fcmToken, HttpServletResponse response) {
+        UserEntity user = getUserEntity(oauthId, name, email, profileImg, provider, fcmToken);
 
         userService.createAndSetTokens(user.getId(), user.getUuid(), user.getNickname(), user.getAuthorities(), response);
 
@@ -31,8 +32,25 @@ public class OAuth2Service {
     }
 
     @Transactional
-    public UserEntity whenLogin(String oauthId, String name, String email, String profileImg, String provider,
-                                 String fcmToken) {
+    public UserInfoDto whenLoginSocial(String provider, String token, HttpServletResponse response) {
+        SocialUserInfo socialUserInfo = oAuthTokenParser.getUserInfo(provider, token);
+
+        UserEntity user = getUserEntity(socialUserInfo.socialId(),
+                socialUserInfo.name(),
+                socialUserInfo.email(),
+                socialUserInfo.profileImageUrl(),
+                provider,
+                null);
+
+        userService.createAndSetTokens(user.getId(), user.getUuid(), user.getNickname(), user.getAuthorities(), response);
+
+        return new UserInfoDto(user);
+
+    }
+
+    @Transactional
+    public UserEntity getUserEntity(String oauthId, String name, String email, String profileImg, String provider,
+                                    String fcmToken) {
         String providerId = provider + oauthId;
         Optional<UserEntity> optUser = userRepository.findByProviderId(providerId);
         UserEntity user;
@@ -48,17 +66,6 @@ public class OAuth2Service {
         }
 
         return user;
-    }
-
-    @Transactional
-    public UserEntity whenLogin(OAuthAttributes attributes, String provider) {
-        return this.whenLogin(attributes.getOauthId()
-                , attributes.getName()
-                , attributes.getEmail()
-                , attributes.getPicture()
-                , provider
-                , null
-                );
     }
 
 
