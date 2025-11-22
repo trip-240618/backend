@@ -17,6 +17,6 @@ public class AppleTokenVerifier extends AbstractTokenVerifier {
     @Override
     protected String getClientId() {
         //apple client Id
-        return "(자신의 Client Id 값)";
+        return "com.tripStorys.tripstorys";
     }
 }

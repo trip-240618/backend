@@ -98,7 +98,6 @@ public class UserService {
 	public UserEntity validateUser(SecurityUser securityUser) {
 		UserEntity user = userRepository.findById(securityUser.getId()).orElseThrow(NullPointerException::new);
 		if (securityUser.getUuid().equals(user.getUuid())
-			&& securityUser.getNickname().equals(user.getNickname())
 			&& new HashSet<>(securityUser.getAuthorities()).equals(new HashSet<>(user.getAuthorities())))
 			return user;
 		else
