@@ -14,6 +14,6 @@ public class GoogleTokenVerifier extends AbstractTokenVerifier{
     @Override
     protected String getClientId() {
         //google clientId 프론트와 동일해야함
-        return "726664801128-b1tei1nn8smaatd88s9g0clhpr8if9fa.apps.googleusercontent.com";
+        return "959079453967-3e4sk20p2sbn2oum98bp53ed7m1f8o4t.apps.googleusercontent.com";
     }
 }
