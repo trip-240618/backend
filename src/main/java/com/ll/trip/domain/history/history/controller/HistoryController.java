@@ -1,29 +1,6 @@
 package com.ll.trip.domain.history.history.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.ll.trip.domain.history.history.dto.HistoriesCreateRequestDto;
-import com.ll.trip.domain.history.history.dto.HistoryDto;
-import com.ll.trip.domain.history.history.dto.HistoryDayDto;
-import com.ll.trip.domain.history.history.dto.HistoryModifyDto;
-import com.ll.trip.domain.history.history.dto.HistoryReplyCreateRequestDto;
-import com.ll.trip.domain.history.history.dto.HistoryReplyDto;
-import com.ll.trip.domain.history.history.dto.HistoryReplyModifyDto;
-import com.ll.trip.domain.history.history.dto.HistoryTagDto;
+import com.ll.trip.domain.history.history.dto.*;
 import com.ll.trip.domain.history.history.entity.History;
 import com.ll.trip.domain.history.history.entity.HistoryLike;
 import com.ll.trip.domain.history.history.service.HistoryService;
@@ -31,7 +8,6 @@ import com.ll.trip.domain.notification.notification.service.NotificationService;
 import com.ll.trip.domain.trip.trip.service.TripService;
 import com.ll.trip.global.handler.dto.ErrorResponseDto;
 import com.ll.trip.global.security.userDetail.SecurityUser;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -43,6 +19,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -89,13 +72,13 @@ public class HistoryController {
 		historyService.checkHistoryCount(tripId, requestDto.getHistoryCreateRequestDtos().size());
 		List<HistoryDayDto> response = historyService.createManyHistories(requestDto.getHistoryCreateRequestDtos(),
 			tripId, securityUser.getId());
-
+		//TODO 생성 후에 어떤 화면인지에 따라 응답 값 수정
 		return ResponseEntity.ok(response);
 	}
 
 	@PutMapping("/{tripId}/history/modify/{historyId}")
 	@Operation(summary = "History 수정")
-	public ResponseEntity<List<HistoryDayDto>> modifyHistory(
+	public ResponseEntity<HistoryDto> modifyHistory(
 		@PathVariable @Parameter(description = "트립 id", example = "1", in = ParameterIn.PATH) long tripId,
 		@PathVariable @Parameter(description = "히스토리 id", example = "1", in = ParameterIn.PATH) long historyId,
 		@AuthenticationPrincipal SecurityUser securityUser,
@@ -106,7 +89,7 @@ public class HistoryController {
 		History history = historyService.findById(historyId);
 
 		historyService.modifyHistory(tripId, history, requestDto);
-		List<HistoryDayDto> response = historyService.showHistoryDetail(historyId, securityUser.getId());
+		HistoryDto response = historyService.showHistoryDetail(historyId, securityUser.getId());
 
 		return ResponseEntity.ok(response);
 	}
