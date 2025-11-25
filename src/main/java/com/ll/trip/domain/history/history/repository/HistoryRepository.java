@@ -1,14 +1,14 @@
 package com.ll.trip.domain.history.history.repository;
 
-import java.util.List;
-
+import com.ll.trip.domain.file.file.dto.DeleteImageDto;
+import com.ll.trip.domain.history.history.dto.HistoryListDto;
+import com.ll.trip.domain.history.history.dto.HistoryServiceDto;
+import com.ll.trip.domain.history.history.entity.History;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import com.ll.trip.domain.file.file.dto.DeleteImageDto;
-import com.ll.trip.domain.history.history.dto.HistoryServiceDto;
-import com.ll.trip.domain.history.history.entity.History;
+import java.util.List;
 
 public interface HistoryRepository extends JpaRepository<History, Long> {
 
@@ -25,6 +25,17 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 		ORDER BY h.photoDate ASC, h.id DESC
 		""")
 	List<HistoryServiceDto> findAllByTripId(long tripId, long userId);
+
+	//TODO where절을 사용하는 것과 on 절을 사용하는 것의 속도 차이 분석하기
+	@Query("""
+		    select new com.ll.trip.domain.history.history.dto.HistoryListDto(
+		    h.id, u.thumbnail, h.thumbnail, h.latitude,
+		    h.longitude, coalesce(l.toggle, false), h.likeCnt, h.replyCnt, h.photoDate)
+		    from History h
+		    inner join UserEntity u on h.trip.id = :tripId and h.user.id = u.id
+			left join h.historyLikes l on l.user.id = :userId
+		""")
+	List<HistoryListDto> findListByTripId(long tripId, long userId);
 
 	@Query("""
 		    select new com.ll.trip.domain.history.history.dto.HistoryServiceDto(
