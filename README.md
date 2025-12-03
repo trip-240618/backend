@@ -15,7 +15,7 @@
 - **API 문서:** Spring REST Docs, Swagger
 - **비동기 처리:** Reactor Core, WebFlux
 - **웹소켓:** Spring WebSocket
-- **클라우드 서비스:** AWS S3, Firebase Admin SDK
+- **클라우드 서비스:** AWS S3, AWS CloudFront, Firebase Admin SDK
 - **항공 데이터 API:** Amadeus API
 - **장소 검색 API:** Google Place API
  
@@ -66,7 +66,7 @@ plugins {
 이 프로젝트는 GitHub Actions를 사용하여 CI/CD를 수행하며, AWS EC2 환경에서 실행됩니다.
 
 ### 무중단 배포 (Blue-Green Deployment)
-이 프로젝트는 Docker를 활용하여 무중단 배포(Blue-Green Deployment)를 수행합니다.
+이 프로젝트는 Docker를 활용하여 무중단 배포(Blue-Green Deployment)를 수행합니다. (현재 간헐적인 프리티어 ec2 메모리 부족으로 무중단 배포를 중지함) 
 
 1. **Nginx Reverse Proxy 컨테이너**: 클라이언트 요청을 현재 활성화된 컨테이너(Blue 또는 Green)로 전달합니다.
 2. **Blue, Green 컨테이너**: 두 개의 Spring Boot 컨테이너 중 하나가 활성화 상태로 서비스됩니다.
@@ -74,6 +74,14 @@ plugins {
    - 새로운 버전의 애플리케이션을 기존과 다른 컨테이너(예: 현재 Blue가 실행 중이라면 Green 컨테이너)에서 실행합니다.
    - 배포가 완료되면 Nginx 설정을 변경하여 새로운 컨테이너로 트래픽을 전환합니다.
    - 이전 버전의 컨테이너는 종료하여 리소스를 절약합니다.
+  
+### 이미지 저장 및 로딩 구조
+1. **이미지 업로드**: 클라이언트는 이미지를 S3 Bucket에 직접 업로드합니다.
+2. **Key 저장**: 업로드가 완료되면 클라이언트는 이미지의 S3 Object Key를 서버로 전달합니다.
+3. **이미지 요청**: 클라이언트는 이미지가 필요할 때 서버에 key 값을 요청합니다.
+4. **CloudFront & 캐싱**: 클라이언트는 반환받은 key 를 기반으로 CloudFront URL을 구성하여 이미지를 요청합니다.
+CloudFront는 캐시에 해당 이미지가 없으면 S3에서 원본을 가져와 캐싱한 뒤 클라이언트로 전달합니다.
+이후 동일한 요청은 캐시된 이미지로 더 빠르게 응답합니다.
 
 ## 문의
 프로젝트 관련 문의는 [이메일](xogns2134@gmail.com)로 주세요.
