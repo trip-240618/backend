@@ -61,8 +61,7 @@ plugins {
 ![trip_prod](https://github.com/user-attachments/assets/9e98ab42-e449-4724-a9a7-33d6cfbb2143)
 
 ## 배포
-
-![Frame 1 (1)](https://github.com/user-attachments/assets/7786fc01-161b-4c73-a7c3-39ef1099d165)
+<img width="683" height="435" alt="Frame 1" src="https://github.com/user-attachments/assets/c7aa4ef9-689e-45f7-95d3-4dc906453d78" />
 
 이 프로젝트는 GitHub Actions를 사용하여 CI/CD를 수행하며, AWS EC2 환경에서 실행됩니다.
 
