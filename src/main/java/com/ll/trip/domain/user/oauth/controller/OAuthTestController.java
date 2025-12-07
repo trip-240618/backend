@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ll.trip.domain.user.oauth.dto.KakaoPropertiesDto;
 import com.ll.trip.domain.user.oauth.service.KakaoOAuth2Service;
-import com.ll.trip.domain.user.oauth.service.OAuth2Service;
+import com.ll.trip.domain.user.oauth.service.OAuthService;
 import com.ll.trip.domain.user.user.dto.UserInfoDto;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,7 +32,7 @@ public class OAuthTestController {
 	private String kakaoRedirectUri; // 리다이렉트 URI
 
 	private final KakaoOAuth2Service kakaoOAuth2Service;
-	private final OAuth2Service oAuth2Service;
+	private final OAuthService oAuthService;
 
 	@GetMapping("/login/kakao")
 	public String kakaoLogin() {
@@ -61,7 +61,7 @@ public class OAuthTestController {
 				String name = properties.getNickname();
 				String profileImageUrl = properties.getProfile_image();
 
-				UserInfoDto userInfoDto = oAuth2Service.whenLogin(oauthId, name, null, profileImageUrl, "KAKAO", null, response);
+				UserInfoDto userInfoDto = oAuthService.whenLoginKakao(oauthId, name, null, profileImageUrl, "KAKAO", null, response);
 				log.info("name : {}", properties.getNickname());
 				log.info("oauthId : {}", oauthId);
 				log.info("profileImageUrl : {}", profileImageUrl);

@@ -5,8 +5,9 @@ import com.ll.trip.domain.user.user.entity.DeletedUser;
 import com.ll.trip.domain.user.user.entity.UserEntity;
 import com.ll.trip.domain.user.user.repository.DeletedUserRepository;
 import com.ll.trip.domain.user.user.repository.UserRepository;
-import com.ll.trip.global.security.filter.cloudfront.CloudFrontSignedCookieUtil;
 import com.ll.trip.global.handler.exception.PermissionDeniedException;
+import com.ll.trip.global.handler.exception.ServerException;
+import com.ll.trip.global.security.filter.cloudfront.CloudFrontSignedCookieUtil;
 import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
 import com.ll.trip.global.security.userDetail.SecurityUser;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -27,13 +27,9 @@ import java.util.UUID;
 public class UserService {
 	private final UserRepository userRepository;
 	private final JwtTokenUtil jwtTokenUtil;
-	private final CloudFrontSignedCookieUtil signedCookieService; // 쿠키 담는 과정 만들어야함
+	private final CloudFrontSignedCookieUtil cloudCookieUtil;
 	private final NotificationConfigRepository notificationConfigRepository;
 	private final DeletedUserRepository deletedUserRepository;
-
-	public Optional<UserEntity> findUserByUuid(String uuid) {
-		return userRepository.findByUuid(uuid);
-	}
 
 	public String generateUUID() {
 		return UUID.randomUUID().toString();
@@ -46,6 +42,11 @@ public class UserService {
 		String newAccessToken = jwtTokenUtil.createAccessToken(userId, uuid, nickname,
 			authorities);
 		setTokenInCookie(newAccessToken, refreshToken, response);
+		try {
+			cloudCookieUtil.setCookie(response);
+		} catch (Exception e) {
+			throw new ServerException(e.getMessage());
+		}
 	}
 
 	public void setTokenInCookie(String accessToken, String refreshToken, HttpServletResponse response) {
@@ -97,7 +98,6 @@ public class UserService {
 	public UserEntity validateUser(SecurityUser securityUser) {
 		UserEntity user = userRepository.findById(securityUser.getId()).orElseThrow(NullPointerException::new);
 		if (securityUser.getUuid().equals(user.getUuid())
-			&& securityUser.getNickname().equals(user.getNickname())
 			&& new HashSet<>(securityUser.getAuthorities()).equals(new HashSet<>(user.getAuthorities())))
 			return user;
 		else

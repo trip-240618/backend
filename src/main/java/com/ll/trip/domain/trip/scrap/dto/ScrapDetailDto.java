@@ -1,15 +1,15 @@
 package com.ll.trip.domain.trip.scrap.dto;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -64,19 +64,6 @@ public class ScrapDetailDto {
 	private LocalDateTime createDate;
 
 	private List<ScrapImageDto> imageDtos = new ArrayList<>();
-
-	public ScrapDetailDto(long id, String writerUuid, String nickname, String title, String content, boolean hasImage, String color,
-		boolean bookmark, LocalDateTime createDate) {
-		this.id = id;
-		this.writerUuid = writerUuid;
-		this.nickname = nickname;
-		this.title = title;
-		this.content = content;
-		this.hasImage = hasImage;
-		this.color = color;
-		this.bookmark = bookmark;
-		this.createDate = createDate;
-	}
 
 	public ScrapDetailDto(ScrapDetailServiceDto dto) {
 		this.id = dto.getId();

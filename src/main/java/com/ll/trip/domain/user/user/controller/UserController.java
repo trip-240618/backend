@@ -111,6 +111,7 @@ public class UserController {
 		return ResponseEntity.ok(updated);
 	}
 
+	//TODO 클라우드 프론트 쿠키도 제거
 	@DeleteMapping("/delete/account")
 	@Operation(summary = "회원 탈퇴")
 	@ApiResponse(responseCode = "200", description = "회원 탈퇴, 토큰을 삭제해야함", content = {

@@ -9,7 +9,7 @@ import com.ll.trip.domain.history.history.service.HistoryService;
 import com.ll.trip.domain.trip.trip.repository.TripMemberRepository;
 import com.ll.trip.domain.trip.trip.repository.TripRepository;
 import com.ll.trip.domain.trip.trip.service.TripService;
-import com.ll.trip.domain.user.oauth.service.OAuth2Service;
+import com.ll.trip.domain.user.oauth.service.OAuthService;
 import com.ll.trip.domain.user.user.repository.UserRepository;
 import com.ll.trip.domain.user.user.service.UserService;
 
@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class DevInit {
 	private final UserService userService;
-	private final OAuth2Service oAuth2Service;
+	private final OAuthService oAuthService;
 	private final UserRepository userRepository;
 	private final TripService tripService;
 	private final TripRepository tripRepository;

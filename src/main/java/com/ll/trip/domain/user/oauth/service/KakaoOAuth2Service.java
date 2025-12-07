@@ -1,25 +1,17 @@
 package com.ll.trip.domain.user.oauth.service;
 
+import com.ll.trip.domain.user.oauth.dto.KakaoTokenResponseDto;
+import com.ll.trip.domain.user.oauth.dto.KakaoUserInfoDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import com.ll.trip.global.security.filter.jwt.JwtTokenUtil;
-import com.ll.trip.domain.user.oauth.dto.KakaoTokenResponseDto;
-import com.ll.trip.domain.user.oauth.dto.KakaoUserInfoDto;
-import com.ll.trip.domain.user.user.repository.UserRepository;
-import com.ll.trip.domain.user.user.service.UserService;
-
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
 public class KakaoOAuth2Service {
 
-	private final UserService userService;
-	private final UserRepository userRepository;
-	private final JwtTokenUtil jwtTokenUtil;
 	private final WebClient webClient;
 	private static final String TOKEN_URI = "https://kauth.kakao.com/oauth/token";
 	private static final String USER_INFO_URI = "https://kapi.kakao.com/v2/user/me";

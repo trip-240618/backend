@@ -1,13 +1,13 @@
 package com.ll.trip.domain.history.history.dto;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -18,7 +18,7 @@ public class HistoryDayDto {
 		example = "2024-08-22")
 	private LocalDate photoDate;
 
-	private List<HistoryDto> historyList;
+	private List<HistoryListDto> historyList;
 
 	public HistoryDayDto(LocalDate photoDate) {
 		this.photoDate = photoDate;
