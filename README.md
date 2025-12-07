@@ -42,7 +42,6 @@ plugins {
 - `spring-boot-starter-security` : 보안 및 인증 기능 제공
 - `spring-boot-starter-validation` : 입력값 검증
 - `mysql-connector-j` : MySQL 데이터베이스 연결
-- `querydsl-jpa` : QueryDSL을 이용한 동적 쿼리 작성
 - `spring-boot-starter-webflux` : WebFlux를 이용한 비동기 처리
 - `spring-boot-starter-websocket` : WebSocket 지원
 
